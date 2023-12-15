@@ -34,8 +34,7 @@ class ThankYouType:
 
 @dataclass
 class ThankYouReceiver:
-    receiver_slack_user_id: Optional[Slack_User_ID_Type] = None
-    receiver_slack_user_name: Optional[str] = None
+    slack_user_id: Slack_User_ID_Type
 
 
 @dataclass
@@ -45,7 +44,6 @@ class ThankYouMessage:
 
     type: Optional[ThankYouType] = None
 
-    published: bool = False
     deleted: bool = False
 
     author_slack_user_id: Optional[Slack_User_ID_Type] = None
@@ -57,3 +55,9 @@ class ThankYouMessage:
     created_at: datetime = field(default_factory=datetime.utcnow)
 
 
+@dataclass
+class ThankYouStats:
+    type: ThankYouType
+    leader_slack_user_id: Slack_User_ID_Type
+    leader_slack_messages_num: int
+    total_messages_num: int

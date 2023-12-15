@@ -47,8 +47,6 @@ def test_thank_you_message_insertion(existing_company):
     assert thank_you_message.uuid not in [su.uuid for su in dao.read_thank_you_messages(
         company_uuid=existing_company.uuid)]
     assert thank_you_message.uuid not in [su.uuid for su in dao.read_thank_you_messages(
-        company_uuid=existing_company.uuid, published=True)]
+        company_uuid=existing_company.uuid)]
     assert thank_you_message.uuid in [su.uuid for su in dao.read_thank_you_messages(
-        company_uuid=existing_company.uuid, published=None)]
-    assert thank_you_message.uuid in [su.uuid for su in dao.read_thank_you_messages(
-        company_uuid=existing_company.uuid, published=False)]
+        company_uuid=existing_company.uuid)]

@@ -10,19 +10,19 @@ from thankyou.slackbot.blocks.thank_you import thank_you_message_blocks
 def home_page_actions_block(selected: str = "my_updates", show_configuration: bool = False) -> ActionsBlock:
     elements = [
         ButtonElement(
-            text="Share a status update",
+            text="Say Thank you!",
             style="danger",
-            action_id="share_status_update_button_clicked"
+            action_id="home_page_say_thank_you_button_clicked"
         ),
         ButtonElement(
-            text="My Updates",
-            style="primary" if selected == "my_updates" else None,
-            action_id="home_page_my_updates_button_clicked"
+            text="Company Thank yous",
+            style="primary" if selected == "company_thank_yous" else None,
+            action_id="home_page_company_thank_you_button_clicked"
         ),
         ButtonElement(
-            text="Company Updates",
-            style="primary" if selected == "company_updates" else None,
-            action_id="home_page_company_updates_button_clicked"
+            text="Your Thank yous",
+            style="primary" if selected == "my_thank_yous" else None,
+            action_id="home_page_my_thank_you_button_clicked"
         ),
     ]
     if show_configuration:
@@ -35,7 +35,7 @@ def home_page_actions_block(selected: str = "my_updates", show_configuration: bo
     return ActionsBlock(elements=elements)
 
 
-def thank_you_list_blocks(thank_you_messages: List[ThankYouMessage],
+def thank_you_list_blocks(thank_you_messages: List[ThankYouMessage], current_user_slack_id: str = None,
                           accessory_action_id: str = None) -> List[SectionBlock]:
     result = []
     last_date: Optional[date] = None

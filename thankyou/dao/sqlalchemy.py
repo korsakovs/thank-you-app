@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
+from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
 from typing import List, Optional, Generator
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Enum, Text, DateTime, or_, true, \
-    false, desc, and_
+    false, desc, and_, func
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
-from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver
+from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, ThankYouStats
 from thankyou.dao.interface import Dao
 
 
@@ -47,7 +48,6 @@ class SQLAlchemyDao(Dao, ABC):
             self._metadata_obj,
             Column("uuid", String(256), primary_key=True, nullable=False),
             Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"), nullable=False),
-            Column("published", Boolean, nullable=False),
             Column("deleted", Boolean, nullable=False),
             Column("text", Text, nullable=False),
             Column("author_slack_user_id", String(256), nullable=True),
@@ -61,8 +61,7 @@ class SQLAlchemyDao(Dao, ABC):
             self._metadata_obj,
             Column("thank_you_message_uuid", String(256), ForeignKey(f"{self._THANK_YOU_MESSAGES_TABLE}.uuid"),
                    primary_key=True, nullable=False),
-            Column("receiver_slack_user_id", String(256), primary_key=True, nullable=False),
-            Column("receiver_slack_user_name", String(256), nullable=False),
+            Column("slack_user_id", String(256), primary_key=True, nullable=False),
         )
 
         self._mapper_registry.map_imperatively(Company, self._companies_table)
@@ -108,16 +107,6 @@ class SQLAlchemyDao(Dao, ABC):
     def create_thank_you_message(self, thank_you_message: ThankYouMessage):
         self._set_obj(thank_you_message)
 
-    def publish_thank_you_message(self, company_uuid: str, thank_you_message_uuid: str) -> bool:
-        thank_you_message = self.read_thank_you_message(company_uuid=company_uuid,
-                                                        thank_you_message_uuid=thank_you_message_uuid)
-        if thank_you_message:
-            thank_you_message.published = True
-            self._set_obj(thank_you_message)
-            return True
-        else:
-            return False
-
     def read_thank_you_message(self, company_uuid: str, thank_you_message_uuid: str) -> Optional[ThankYouMessage]:
         thank_you_message: ThankYouMessage = self._get_obj(ThankYouMessage, thank_you_message_uuid)
         if thank_you_message and thank_you_message.company.uuid == company_uuid:
@@ -125,8 +114,8 @@ class SQLAlchemyDao(Dao, ABC):
 
     def read_thank_you_messages(self, company_uuid: str, created_after: datetime = None,
                                 created_before: datetime = None, with_types: List[str] = None,
-                                published: Optional[bool] = True, deleted: Optional[bool] = False,
-                                author_slack_user_id: str = None, last_n: int = None) -> List[ThankYouMessage]:
+                                deleted: Optional[bool] = False, author_slack_user_id: str = None, last_n: int = None
+                                ) -> List[ThankYouMessage]:
         with self._get_session() as session:
             result = session.query(ThankYouMessage).join(Company)
             result = result.filter(Company.uuid == company_uuid)
@@ -142,9 +131,6 @@ class SQLAlchemyDao(Dao, ABC):
 
             if deleted is not None:
                 result = result.filter(ThankYouMessage.deleted == (true() if deleted else false()))
-
-            if published is not None:
-                result = result.filter(ThankYouMessage.published == (true() if published else false()))
 
             if author_slack_user_id is not None:
                 result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
@@ -205,3 +191,21 @@ class SQLAlchemyDao(Dao, ABC):
                 ThankYouType.deleted: True
             }, synchronize_session=False)
 
+    def get_thank_you_stats(self, company_uuid: str, created_after: datetime = None, created_before: datetime = None
+                            ) -> List[ThankYouStats]:
+        with self._get_session() as session:
+            result = session.query(ThankYouType, ThankYouMessage.author_slack_user_id, func.count()).join(ThankYouMessage)
+
+            if created_after:
+                result = result.filter(ThankYouMessage.created_at >= created_after)
+
+            if created_before:
+                result = result.filter(ThankYouMessage.created_at <= created_before)
+
+            result = result.group_by(ThankYouType, ThankYouMessage.author_slack_user_id)
+
+            total_messages_num = 0
+            types_messages_num = Counter()
+            for (thank_you_type, author_slack_user_id, count) in result.all():
+                total_messages_num += count
+                types_messages_num[thank_you_type.uuid] += count
