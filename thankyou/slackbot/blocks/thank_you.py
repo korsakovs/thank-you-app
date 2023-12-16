@@ -16,7 +16,8 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
 
     title += "Thank you, " + ", ".join(f"<@{receiver.slack_user_id}>" for receiver in thank_you_message.receivers) + "!"
 
-    text = es(thank_you_message.text)
+    text = thank_you_message.text
+    # text = es(thank_you_message.text)
 
     if title:
         result.append(SectionBlock(
@@ -29,12 +30,19 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
 
     if not thank_you_message.images:
         result.append(SectionBlock(
-            text=PlainTextObject(text=text),
+            text=TextObject(
+                type="mrkdwn",
+                text=text,
+                # emoji=True
+            )
         ))
     else:
         images = sorted(thank_you_message.images, key=lambda i: i.ordering_key)
         result.append(SectionBlock(
-            text=text + "\n---\n" + "\n".join([f"<{image.url}|{image.filename}>" for image in images]),
+            text=TextObject(
+                type="mrkdwn",
+                text=text + "\n---\n" + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
+            ),
             accessory=ImageElement(
                 image_url=images[0].url,
                 alt_text=images[0].filename
