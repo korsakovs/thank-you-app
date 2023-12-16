@@ -1,7 +1,7 @@
 from typing import List
 
 from slack_sdk.models.blocks import SectionBlock, TextObject, PlainTextObject, ContextBlock, Option, \
-    StaticSelectElement, InputBlock, PlainTextInputElement, UserMultiSelectElement
+    StaticSelectElement, InputBlock, PlainTextInputElement, UserMultiSelectElement, ImageElement
 
 from thankyou.core.models import ThankYouMessage, ThankYouType
 from thankyou.slackbot.utils.string import es
@@ -27,9 +27,19 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
             )
         ))
 
-    result.append(SectionBlock(
-        text=PlainTextObject(text=text),
-    ))
+    if not thank_you_message.images:
+        result.append(SectionBlock(
+            text=PlainTextObject(text=text),
+        ))
+    else:
+        images = sorted(thank_you_message.images, key=lambda i: i.ordering_key)
+        result.append(SectionBlock(
+            text=text + "\n---\n" + "\n".join([f"<{image.url}|{image.filename}>" for image in images]),
+            accessory=ImageElement(
+                image_url=images[0].url,
+                alt_text=images[0].filename
+            )
+        ))
 
     published_by_text = ""
     if thank_you_message.author_slack_user_id:

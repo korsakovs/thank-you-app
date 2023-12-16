@@ -16,7 +16,8 @@ class Dao(ABC):
     @abstractmethod
     def read_thank_you_messages(self, company_uuid: str, created_after: datetime = None,
                                 created_before: datetime = None, with_types: List[str] = None,
-                                deleted: Optional[bool] = False, author_slack_user_id: str = None, last_n: int = None
+                                deleted: Optional[bool] = False, author_slack_user_id: str = None,
+                                receiver_slack_user_id: str = None, last_n: int = None
                                 ) -> List[ThankYouMessage]: ...
 
     @abstractmethod

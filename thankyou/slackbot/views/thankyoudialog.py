@@ -1,5 +1,7 @@
 from typing import List
 
+from slack_sdk.models.blocks import InputBlock
+from slack_sdk.models.blocks.block_elements import FileInputElement
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouType, ThankYouMessage
@@ -7,7 +9,25 @@ from thankyou.slackbot.blocks.thank_you import thank_you_type_block, thank_you_t
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 
 
-def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None) -> View:
+def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None, max_images_num: int = 10
+                          ) -> View:
+    extra_blocks = []
+
+    if max_images_num > 0:
+        extra_blocks.append(
+            InputBlock(
+                label="Attach an image" + ("" if max_images_num == 1 else "(s)"),
+                block_id="thank_you_dialog_attached_files_block",
+                dispatch_action=True,
+                element=FileInputElement(
+                    action_id="thank_you_dialog_attached_files_action_id",
+                    filetypes=["jpg", "jpeg", "png", "gif"],
+                    max_files=max_images_num,
+                ),
+                optional=True,
+            ),
+        )
+
     return View(
         type="modal",
         callback_id="thank_you_dialog_save_button_clicked",
@@ -28,5 +48,6 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             thank_you_text_block(initial_value=None if state is None else state.text,
                                  block_id="thank_you_dialog_text_block",
                                  action_id="thank_you_dialog_text_action_id"),
+            *extra_blocks
         ]
     )

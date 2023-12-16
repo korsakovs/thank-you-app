@@ -133,8 +133,6 @@ def thank_you_dialog_save_button_clicked_action_handler(ack, body, logger):
     ack()
     logger.info(body)
     thank_you_message = retrieve_thank_you_message_from_body(body)
-    # DELETEME!
-    thank_you_message.author_slack_user_id = "FAKE" + thank_you_message.author_slack_user_id
     dao.create_thank_you_message(thank_you_message)
 
 

@@ -1,6 +1,6 @@
 import json
 
-from thankyou.core.models import ThankYouMessage, ThankYouReceiver
+from thankyou.core.models import ThankYouMessage, ThankYouReceiver, ThankYouMessageImage
 from thankyou.dao import dao
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 
@@ -65,12 +65,17 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
                  for receiver_slack_id in values["thank_you_dialog_receivers_block"][
                      "thank_you_dialog_receivers_action_id"]["selected_users"]]
 
+    images = [ThankYouMessageImage(url=image["url_private"], filename=image["name"], ordering_key=ordering_key)
+              for ordering_key, image in enumerate(values["thank_you_dialog_attached_files_block"][
+                                                       "thank_you_dialog_attached_files_action_id"]["files"])]
+
     return ThankYouMessage(
         type=selected_type,
         text=values["thank_you_dialog_text_block"]["thank_you_dialog_text_action_id"]["value"],
         author_slack_user_id=user_id,
         author_slack_user_name=user_name,
         receivers=receivers,
+        images=images,
         company=company,
         **kwargs
     )

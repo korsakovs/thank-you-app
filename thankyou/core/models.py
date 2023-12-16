@@ -38,6 +38,14 @@ class ThankYouReceiver:
 
 
 @dataclass
+class ThankYouMessageImage:
+    url: str
+    filename: str
+    ordering_key: int
+    uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
+
+
+@dataclass
 class ThankYouMessage:
     text: str
     company: Company
@@ -50,6 +58,7 @@ class ThankYouMessage:
     author_slack_user_name: Optional[str] = None
 
     receivers: List[ThankYouReceiver] = field(default_factory=list)
+    images: List[ThankYouMessageImage] = field(default_factory=list)
 
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = field(default_factory=datetime.utcnow)

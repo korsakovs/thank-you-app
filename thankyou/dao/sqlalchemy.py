@@ -5,10 +5,11 @@ from datetime import datetime
 from typing import List, Optional, Generator
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Enum, Text, DateTime, or_, true, \
-    false, desc, and_, func
+    false, desc, and_, func, Integer
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
-from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, ThankYouStats
+from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, ThankYouStats, \
+    ThankYouMessageImage
 from thankyou.dao.interface import Dao
 
 
@@ -17,6 +18,7 @@ class SQLAlchemyDao(Dao, ABC):
     _THANK_YOU_MESSAGES_TABLE = "thank_you_messages"
     _THANK_YOU_TYPES_TABLE = "thank_you_types"
     _THANK_YOU_RECEIVERS_TABLE = "thank_you_receivers"
+    _THANK_YOU_MESSAGE_IMAGES = "thank_you_message_images"
 
     @abstractmethod
     def _create_engine(self) -> Engine: ...
@@ -47,13 +49,15 @@ class SQLAlchemyDao(Dao, ABC):
             self._THANK_YOU_MESSAGES_TABLE,
             self._metadata_obj,
             Column("uuid", String(256), primary_key=True, nullable=False),
-            Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"), nullable=False),
+            Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"),
+                   nullable=False, index=True),
             Column("deleted", Boolean, nullable=False),
             Column("text", Text, nullable=False),
-            Column("author_slack_user_id", String(256), nullable=True),
+            Column("author_slack_user_id", String(256), nullable=False, index=True),
             Column("author_slack_user_name", String(256), nullable=True),
-            Column("created_at", DateTime, nullable=False),
-            Column("thank_you_type_uuid", String(256), ForeignKey(f"{self._THANK_YOU_TYPES_TABLE}.uuid")),
+            Column("created_at", DateTime, nullable=False, index=True),
+            Column("thank_you_type_uuid", String(256), ForeignKey(f"{self._THANK_YOU_TYPES_TABLE}.uuid"),
+                   nullable=False, index=True),
         )
 
         self._thank_you_receivers_table = Table(
@@ -61,7 +65,18 @@ class SQLAlchemyDao(Dao, ABC):
             self._metadata_obj,
             Column("thank_you_message_uuid", String(256), ForeignKey(f"{self._THANK_YOU_MESSAGES_TABLE}.uuid"),
                    primary_key=True, nullable=False),
-            Column("slack_user_id", String(256), primary_key=True, nullable=False),
+            Column("slack_user_id", String(256), primary_key=True, nullable=False, index=True),
+        )
+
+        self._thank_you_message_images_table = Table(
+            self._THANK_YOU_MESSAGE_IMAGES,
+            self._metadata_obj,
+            Column("uuid", String(256), primary_key=True, nullable=False),
+            Column("thank_you_message_uuid", String(256), ForeignKey(f"{self._THANK_YOU_MESSAGES_TABLE}.uuid"),
+                   nullable=False, index=True),
+            Column("url", String(1024), nullable=False),
+            Column("filename", String(1024), nullable=False),
+            Column("ordering_key", Integer, nullable=False),
         )
 
         self._mapper_registry.map_imperatively(Company, self._companies_table)
@@ -76,10 +91,12 @@ class SQLAlchemyDao(Dao, ABC):
                 "company": relationship(Company),
                 "type": relationship(ThankYouType),
                 "receivers": relationship(ThankYouReceiver),
+                "images": relationship(ThankYouMessageImage),
             }
         )
 
         self._mapper_registry.map_imperatively(ThankYouReceiver, self._thank_you_receivers_table)
+        self._mapper_registry.map_imperatively(ThankYouMessageImage, self._thank_you_message_images_table)
 
         self._engine = self._create_engine()
         self._metadata_obj.create_all(bind=self._engine, checkfirst=True)
@@ -114,10 +131,15 @@ class SQLAlchemyDao(Dao, ABC):
 
     def read_thank_you_messages(self, company_uuid: str, created_after: datetime = None,
                                 created_before: datetime = None, with_types: List[str] = None,
-                                deleted: Optional[bool] = False, author_slack_user_id: str = None, last_n: int = None
+                                deleted: Optional[bool] = False, author_slack_user_id: str = None,
+                                receiver_slack_user_id: str = None, last_n: int = None
                                 ) -> List[ThankYouMessage]:
         with self._get_session() as session:
             result = session.query(ThankYouMessage).join(Company)
+            if receiver_slack_user_id:
+                result = result.join(ThankYouReceiver)
+                result = result.filter(ThankYouReceiver.slack_user_id == receiver_slack_user_id)
+
             result = result.filter(Company.uuid == company_uuid)
 
             if created_after:
@@ -141,7 +163,7 @@ class SQLAlchemyDao(Dao, ABC):
             if last_n is not None:
                 result = result.limit(last_n)
 
-            return result.all()
+            return result.distinct().all()
 
     def delete_thank_you_message(self, company_uuid: str, thank_you_message_uuid: str):
         with self._get_session() as session:
