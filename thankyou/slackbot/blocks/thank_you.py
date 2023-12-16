@@ -1,6 +1,6 @@
 from typing import List
 
-from slack_sdk.models.blocks import SectionBlock, TextObject, PlainTextObject, ContextBlock, Option, \
+from slack_sdk.models.blocks import SectionBlock, TextObject, ContextBlock, Option, \
     StaticSelectElement, InputBlock, PlainTextInputElement, UserMultiSelectElement, ImageElement
 
 from thankyou.core.models import ThankYouMessage, ThankYouType
@@ -16,7 +16,6 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
 
     title += "Thank you, " + ", ".join(f"<@{receiver.slack_user_id}>" for receiver in thank_you_message.receivers) + "!"
 
-    text = thank_you_message.text
     # text = es(thank_you_message.text)
 
     if title:
@@ -32,7 +31,7 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
         result.append(SectionBlock(
             text=TextObject(
                 type="mrkdwn",
-                text=text,
+                text=thank_you_message.text,
                 # emoji=True
             )
         ))
@@ -41,7 +40,8 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
         result.append(SectionBlock(
             text=TextObject(
                 type="mrkdwn",
-                text=text + "\n---\n" + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
+                text=thank_you_message.text + "\n---\n"
+                     + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
             ),
             accessory=ImageElement(
                 image_url=images[0].url,

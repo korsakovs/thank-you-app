@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
-from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, Tuple
 
-from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Enum, Text, DateTime, or_, true, \
+from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, true, \
     false, desc, and_, func, Integer
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
-from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, ThankYouStats, \
-    ThankYouMessageImage
+from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
+    ThankYouMessageImage, Slack_User_ID_Type
 from thankyou.dao.interface import Dao
 
 
@@ -213,10 +212,12 @@ class SQLAlchemyDao(Dao, ABC):
                 ThankYouType.deleted: True
             }, synchronize_session=False)
 
-    def get_thank_you_stats(self, company_uuid: str, created_after: datetime = None, created_before: datetime = None
-                            ) -> List[ThankYouStats]:
+    def get_thank_you_sender_leaders(self, company_uuid: str, created_after: datetime = None,
+                                     created_before: datetime = None, thank_you_type: ThankYouType = None,
+                                     leaders_num: int = 3) -> Tuple[Slack_User_ID_Type, int]:
         with self._get_session() as session:
-            result = session.query(ThankYouType, ThankYouMessage.author_slack_user_id, func.count()).join(ThankYouMessage)
+            result = session.query(ThankYouMessage.author_slack_user_id, func.count())
+            result = result.join(Company).filter(Company.uuid == company_uuid)
 
             if created_after:
                 result = result.filter(ThankYouMessage.created_at >= created_after)
@@ -224,10 +225,33 @@ class SQLAlchemyDao(Dao, ABC):
             if created_before:
                 result = result.filter(ThankYouMessage.created_at <= created_before)
 
-            result = result.group_by(ThankYouType, ThankYouMessage.author_slack_user_id)
+            if thank_you_type:
+                result = result.filter(ThankYouMessage.type == thank_you_type)
 
-            total_messages_num = 0
-            types_messages_num = Counter()
-            for (thank_you_type, author_slack_user_id, count) in result.all():
-                total_messages_num += count
-                types_messages_num[thank_you_type.uuid] += count
+            result = result.group_by(ThankYouMessage.author_slack_user_id)
+            result = result.order_by(func.count().desc())
+            result = result.limit(leaders_num)
+
+            return result.all()
+
+    def get_thank_you_receiver_leaders(self, company_uuid: str, created_after: datetime = None,
+                                       created_before: datetime = None, thank_you_type: ThankYouType = None,
+                                       leaders_num: int = 3) -> Tuple[Slack_User_ID_Type, int]:
+        with self._get_session() as session:
+            result = session.query(ThankYouReceiver.slack_user_id, func.count()).join(ThankYouMessage)
+            result = result.join(Company).filter(Company.uuid == company_uuid)
+
+            if created_after:
+                result = result.filter(ThankYouMessage.created_at >= created_after)
+
+            if created_before:
+                result = result.filter(ThankYouMessage.created_at <= created_before)
+
+            if thank_you_type:
+                result = result.filter(ThankYouMessage.type == thank_you_type)
+
+            result = result.group_by(ThankYouReceiver.slack_user_id)
+            result = result.order_by(func.count().desc())
+            result = result.limit(leaders_num)
+
+            return result.all()

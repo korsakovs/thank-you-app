@@ -84,8 +84,6 @@ def home_page_company_thank_you_button_clicked_action_handler(ack, body, logger)
     user_info = get_user_info(user_id)
     company = get_or_create_company_by_body(body)
 
-    a = dao.get_thank_you_stats(company_uuid=company.uuid)
-
     app.client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
