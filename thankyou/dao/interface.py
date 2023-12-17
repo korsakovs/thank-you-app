@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
-from thankyou.core.models import Company, ThankYouMessage, ThankYouType, ThankYouStats
+from thankyou.core.models import Company, ThankYouMessage, ThankYouType, ThankYouStats, Slack_User_ID_Type
 
 
 class Dao(ABC):
@@ -45,5 +45,11 @@ class Dao(ABC):
     def delete_thank_you_type(self, company_uuid: str, thank_you_type_uuid: str): ...
 
     @abstractmethod
-    def get_thank_you_stats(self, company_uuid: str, created_after: datetime = None, created_before: datetime = None
-                            ) -> List[ThankYouStats]: ...
+    def get_thank_you_sender_leaders(self, company_uuid: str, created_after: datetime = None,
+                                     created_before: datetime = None, thank_you_type: ThankYouType = None,
+                                     leaders_num: int = 3) -> Tuple[Slack_User_ID_Type, int]: ...
+
+    @abstractmethod
+    def get_thank_you_receiver_leaders(self, company_uuid: str, created_after: datetime = None,
+                                       created_before: datetime = None, thank_you_type: ThankYouType = None,
+                                       leaders_num: int = 3) -> Tuple[Slack_User_ID_Type, int]: ...
