@@ -193,7 +193,7 @@ class SQLAlchemyDao(Dao, ABC):
 
     def read_thank_you_type(self, company_uuid: str, thank_you_type_uuid: str) -> Optional[ThankYouType]:
         thank_you_type: ThankYouType = self._get_obj(ThankYouType, thank_you_type_uuid)
-        if thank_you_type and thank_you_type.company.uuid == company_uuid:
+        if thank_you_type and thank_you_type.company_uuid == company_uuid:
             return thank_you_type
 
     def read_thank_you_types(self, company_uuid: str, name: str = None) -> List[ThankYouType]:
@@ -214,7 +214,7 @@ class SQLAlchemyDao(Dao, ABC):
 
     def get_thank_you_sender_leaders(self, company_uuid: str, created_after: datetime = None,
                                      created_before: datetime = None, thank_you_type: ThankYouType = None,
-                                     leaders_num: int = 3) -> Tuple[Slack_User_ID_Type, int]:
+                                     leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]:
         with self._get_session() as session:
             result = session.query(ThankYouMessage.author_slack_user_id, func.count())
             result = result.join(Company).filter(Company.uuid == company_uuid)
@@ -236,7 +236,7 @@ class SQLAlchemyDao(Dao, ABC):
 
     def get_thank_you_receiver_leaders(self, company_uuid: str, created_after: datetime = None,
                                        created_before: datetime = None, thank_you_type: ThankYouType = None,
-                                       leaders_num: int = 3) -> Tuple[Slack_User_ID_Type, int]:
+                                       leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]:
         with self._get_session() as session:
             result = session.query(ThankYouReceiver.slack_user_id, func.count()).join(ThankYouMessage)
             result = result.join(Company).filter(Company.uuid == company_uuid)

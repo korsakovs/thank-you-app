@@ -1,3 +1,4 @@
+import datetime
 import logging
 from typing import Optional
 
@@ -63,9 +64,30 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
     except Exception:
         company = get_or_create_company_by_slack_team_id(client.default_params["team_id"])
 
+    sender_leaders = []
+    receiver_leaders = []
+    leaders_stats_from_datetime = datetime.datetime.utcnow() - datetime.timedelta(days=30)
+    for thank_you_type in dao.read_thank_you_types(company_uuid=company.uuid):
+        type_leaders = dao.get_thank_you_sender_leaders(
+            company_uuid=company.uuid,
+            thank_you_type=thank_you_type,
+            created_after=datetime.datetime.utcnow() - datetime.timedelta(days=30)
+        )
+        sender_leaders.append((thank_you_type, type_leaders))
+        type_leaders = dao.get_thank_you_receiver_leaders(
+            company_uuid=company.uuid,
+            thank_you_type=thank_you_type,
+            created_after=datetime.datetime.utcnow() - datetime.timedelta(days=30)
+        )
+        receiver_leaders.append((thank_you_type, type_leaders))
+
     view = home_page_company_thank_yous_view(
         thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
                                                        last_n=20),
+        sender_leaders=sender_leaders,
+        receiver_leaders=receiver_leaders,
+        leaders_stats_from_date=leaders_stats_from_datetime.date(),
+        leaders_stats_until_date=datetime.datetime.utcnow().date(),
         is_admin=is_admin,
         current_user_slack_id=user_id
     )

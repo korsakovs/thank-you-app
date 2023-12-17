@@ -27,6 +27,7 @@ class Company:
 @dataclass
 class ThankYouType:
     name: str
+    company_uuid: UUID_Type
     company: Company
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     deleted: bool = False
