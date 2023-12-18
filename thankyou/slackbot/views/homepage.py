@@ -5,7 +5,8 @@ from slack_sdk.models.blocks import DividerBlock
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouMessage, ThankYouType, Slack_User_ID_Type
-from thankyou.slackbot.blocks.homepage import home_page_actions_block, thank_you_list_blocks, home_page_leaders_block
+from thankyou.slackbot.blocks.homepage import home_page_actions_block, thank_you_list_blocks, home_page_leaders_block, \
+    home_page_show_leaders_button_block
 
 
 def home_page_my_thank_yous_view(thank_you_messages: List[ThankYouMessage], is_admin: bool = False):
@@ -35,6 +36,8 @@ def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
             from_date=leaders_stats_from_date,
             until_date=leaders_stats_until_date
         ))
+    else:
+        leaders_blocks.append(home_page_show_leaders_button_block())
     return View(
         type="home",
         title="Say Thank You :)",

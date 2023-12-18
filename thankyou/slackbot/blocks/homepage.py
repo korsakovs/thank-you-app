@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date
 from typing import List, Optional, Tuple
 
 from slack_sdk.models.blocks import ButtonElement, ActionsBlock, SectionBlock, HeaderBlock, DividerBlock
@@ -33,6 +33,14 @@ def home_page_actions_block(selected: str = "my_updates", show_configuration: bo
         ))
 
     return ActionsBlock(elements=elements)
+
+
+def home_page_show_leaders_button_block() -> ActionsBlock:
+    return ActionsBlock(
+        elements=[
+            ButtonElement(text="🥇 Show leaders!", action_id="home_page_show_leaders_button_clicked"),
+        ]
+    )
 
 
 def home_page_leaders_block(sender_leaders: List[Tuple[ThankYouType, List[Tuple[Slack_User_ID_Type, int]]]],
