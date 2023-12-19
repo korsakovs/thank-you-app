@@ -2,6 +2,7 @@ import uuid
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 from typing import Optional, List
 
 UUID_Type = str
@@ -17,11 +18,29 @@ class SlackUserInfo:
 
 
 @dataclass
+class CompanyAdmin:
+    slack_user_id: Slack_User_ID_Type
+
+
+class LeaderbordTimeSettings(Enum):
+    LAST_30_DAYS = 1
+    LAST_FULL_MONTH = 2
+    LAST_7_DAYS = 3
+    LAST_FULL_WEEK = 4
+
+
+@dataclass
 class Company:
     name: str
     slack_team_id: Slack_Team_ID_Type
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     deleted: bool = False
+
+    # Config
+    admins: List[CompanyAdmin] = field(default_factory=lambda: list())
+    share_messages_in_slack_channel = None
+    leaderbord_time_settings: LeaderbordTimeSettings = LeaderbordTimeSettings.LAST_30_DAYS
+    weekly_thank_you_limit: int = 5
 
 
 @dataclass

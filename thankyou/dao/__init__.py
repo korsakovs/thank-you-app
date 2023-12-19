@@ -18,6 +18,6 @@ def create_initial_data(company: Company):
             if thank_you_type_.name == name:
                 break
         else:
-            new_thank_you_type = ThankYouType(name=name, company=company)
+            new_thank_you_type = ThankYouType(name=name, company=company, company_uuid=company.uuid)
             dao.create_thank_you_type(new_thank_you_type)
             existing_thank_you_types.append(new_thank_you_type)

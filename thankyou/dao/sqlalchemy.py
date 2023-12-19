@@ -4,15 +4,16 @@ from datetime import datetime
 from typing import List, Optional, Generator, Tuple
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, true, \
-    false, desc, and_, func, Integer
+    false, desc, and_, func, Integer, Enum
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
-    ThankYouMessageImage, Slack_User_ID_Type
+    ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings
 from thankyou.dao.interface import Dao
 
 
 class SQLAlchemyDao(Dao, ABC):
+    _COMPANY_ADMINS_TABLE = "company_admins"
     _COMPANIES_TABLE = "companies"
     _THANK_YOU_MESSAGES_TABLE = "thank_you_messages"
     _THANK_YOU_TYPES_TABLE = "thank_you_types"
@@ -26,6 +27,14 @@ class SQLAlchemyDao(Dao, ABC):
         self._mapper_registry = registry()
         self._metadata_obj = MetaData()
 
+        self._company_admins_table = Table(
+            self._COMPANY_ADMINS_TABLE,
+            self._metadata_obj,
+            Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"),
+                   primary_key=True, nullable=False),
+            Column("slack_user_id", String(256), primary_key=True, nullable=False)
+        )
+
         self._companies_table = Table(
             self._COMPANIES_TABLE,
             self._metadata_obj,
@@ -33,6 +42,9 @@ class SQLAlchemyDao(Dao, ABC):
             Column("slack_team_id", String(256), nullable=False, unique=True, index=True),
             Column("name", String(256), nullable=False),
             Column("deleted", Boolean, nullable=False),
+            Column("share_messages_in_slack_channel", String(256), nullable=True),
+            Column("leaderbord_time_settings", Enum(LeaderbordTimeSettings), nullable=False),
+            Column("weekly_thank_you_limit", Integer, nullable=False),
         )
 
         self._thank_you_types_table = Table(
@@ -78,7 +90,12 @@ class SQLAlchemyDao(Dao, ABC):
             Column("ordering_key", Integer, nullable=False),
         )
 
-        self._mapper_registry.map_imperatively(Company, self._companies_table)
+        self._mapper_registry.map_imperatively(CompanyAdmin, self._company_admins_table)
+
+        self._mapper_registry.map_imperatively(Company, self._companies_table, properties={
+            "admins": relationship(CompanyAdmin)
+        })
+
         self._mapper_registry.map_imperatively(ThankYouType, self._thank_you_types_table, properties={
             "company": relationship(Company)
         })
