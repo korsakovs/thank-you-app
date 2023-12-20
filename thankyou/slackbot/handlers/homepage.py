@@ -88,12 +88,15 @@ def home_page_my_thank_you_button_clicked_action_handler(body, logger):
 
 
 def home_page_say_thank_you_button_clicked_action_handler(body, logger):
-    company_uuid = get_or_create_company_by_body(body).uuid
+    company = get_or_create_company_by_body(body)
 
     try:
         app.client.views_open(
             trigger_id=body["trigger_id"],
-            view=thank_you_dialog_view(thank_you_types=dao.read_thank_you_types(company_uuid=company_uuid)),
+            view=thank_you_dialog_view(
+                thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+                enable_rich_text=company.enable_rich_text_in_thank_you_messages
+            ),
         )
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")

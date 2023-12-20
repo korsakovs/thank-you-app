@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from typing import List, Optional, Tuple
 
-from thankyou.core.models import Company, ThankYouMessage, ThankYouType, ThankYouStats, Slack_User_ID_Type
+from thankyou.core.models import Company, ThankYouMessage, ThankYouType, ThankYouStats, Slack_User_ID_Type, CompanyAdmin
 
 
 class Dao(ABC):
@@ -31,6 +31,12 @@ class Dao(ABC):
 
     @abstractmethod
     def read_companies(self, company_name: str = None, slack_team_id: str = None) -> List[Company]: ...
+
+    @abstractmethod
+    def create_company_admin(self, company_admin: CompanyAdmin): ...
+
+    @abstractmethod
+    def delete_company_admin(self, company_uuid: str, slack_user_id: str): ...
 
     @abstractmethod
     def create_thank_you_type(self, thank_you_type: ThankYouType): ...

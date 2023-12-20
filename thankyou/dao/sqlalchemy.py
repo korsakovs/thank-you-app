@@ -45,6 +45,8 @@ class SQLAlchemyDao(Dao, ABC):
             Column("share_messages_in_slack_channel", String(256), nullable=True),
             Column("leaderbord_time_settings", Enum(LeaderbordTimeSettings), nullable=False),
             Column("weekly_thank_you_limit", Integer, nullable=False),
+            Column("enable_leaderboard", Boolean, nullable=False),
+            Column("enable_rich_text_in_thank_you_messages", Boolean, nullable=False),
         )
 
         self._thank_you_types_table = Table(
@@ -64,6 +66,7 @@ class SQLAlchemyDao(Dao, ABC):
                    nullable=False, index=True),
             Column("deleted", Boolean, nullable=False),
             Column("text", Text, nullable=False),
+            Column("is_rich_text", Boolean, nullable=False),
             Column("author_slack_user_id", String(256), nullable=False, index=True),
             Column("author_slack_user_name", String(256), nullable=True),
             Column("created_at", DateTime, nullable=False, index=True),
@@ -204,6 +207,16 @@ class SQLAlchemyDao(Dao, ABC):
             if slack_team_id is not None:
                 result = result.filter(Company.slack_team_id == slack_team_id)
             return result.all()
+
+    def create_company_admin(self, company_admin: CompanyAdmin):
+        self._set_obj(company_admin)
+
+    def delete_company_admin(self, company_uuid: str, slack_user_id: str):
+        with self._get_session() as session:
+            session.query(CompanyAdmin).where(and_(
+                CompanyAdmin.company_uuid == company_uuid,
+                CompanyAdmin.slack_user_id == slack_user_id
+            )).delete()
 
     def create_thank_you_type(self, thank_you_type: ThankYouType):
         self._set_obj(thank_you_type)

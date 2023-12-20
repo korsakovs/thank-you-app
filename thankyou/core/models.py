@@ -8,6 +8,7 @@ from typing import Optional, List
 UUID_Type = str
 Slack_Team_ID_Type = str
 Slack_User_ID_Type = str
+Slack_Channel_ID_Type = str
 
 
 @dataclass
@@ -19,35 +20,39 @@ class SlackUserInfo:
 
 @dataclass
 class CompanyAdmin:
+    company_uuid: str
     slack_user_id: Slack_User_ID_Type
 
 
 class LeaderbordTimeSettings(Enum):
     LAST_30_DAYS = 1
-    LAST_FULL_MONTH = 2
-    LAST_7_DAYS = 3
-    LAST_FULL_WEEK = 4
+    CURRENT_FULL_MONTH = 2
+    LAST_FULL_MONTH = 3
+    LAST_7_DAYS = 4
+    LAST_FULL_WEEK = 5
 
 
 @dataclass
 class Company:
     name: str
     slack_team_id: Slack_Team_ID_Type
-    uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
-    deleted: bool = False
 
     # Config
-    admins: List[CompanyAdmin] = field(default_factory=lambda: list())
-    share_messages_in_slack_channel = None
-    leaderbord_time_settings: LeaderbordTimeSettings = LeaderbordTimeSettings.LAST_30_DAYS
-    weekly_thank_you_limit: int = 5
+    admins: List[CompanyAdmin]
+    share_messages_in_slack_channel: Optional[Slack_Channel_ID_Type]
+    leaderbord_time_settings: LeaderbordTimeSettings
+    weekly_thank_you_limit: int
+    enable_leaderboard: bool
+    enable_rich_text_in_thank_you_messages: bool
+
+    uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
+    deleted: bool = False
 
 
 @dataclass
 class ThankYouType:
     name: str
     company_uuid: UUID_Type
-    company: Company
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     deleted: bool = False
 
@@ -69,6 +74,7 @@ class ThankYouMessageImage:
 class ThankYouMessage:
     text: str
     company: Company
+    is_rich_text: bool
 
     type: Optional[ThankYouType] = None
 

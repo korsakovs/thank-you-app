@@ -43,7 +43,6 @@ def get_user_info(slack_user_id: str) -> Optional[SlackUserInfo]:
 
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
 def get_sender_and_receiver_leaders(company_uuid: str):
-    print("GETTING LEADERS (not from the cache)")
     leaders_stats_from_datetime = datetime.utcnow() - timedelta(days=30)
     leaders_stats_until_datetime = datetime.utcnow()
     sender_leaders = []

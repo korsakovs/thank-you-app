@@ -9,8 +9,8 @@ from thankyou.slackbot.blocks.thank_you import thank_you_type_block, thank_you_t
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 
 
-def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None, max_images_num: int = 10
-                          ) -> View:
+def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None, max_images_num: int = 10,
+                          enable_rich_text: bool = False) -> View:
     extra_blocks = []
 
     if max_images_num > 0:
@@ -47,7 +47,8 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             #                      action_id=STATUS_UPDATE_MODAL_STATUS_UPDATE_LINK_ACTION_ID),
             thank_you_text_block(initial_value=None if state is None else state.text,
                                  block_id="thank_you_dialog_text_block",
-                                 action_id="thank_you_dialog_text_action_id"),
+                                 action_id="thank_you_dialog_text_action_id",
+                                 enable_rich_text=enable_rich_text),
             *extra_blocks
         ]
     )

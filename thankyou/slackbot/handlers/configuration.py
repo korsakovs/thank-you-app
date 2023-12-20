@@ -1,7 +1,9 @@
+from thankyou.core.models import CompanyAdmin, LeaderbordTimeSettings
 from thankyou.dao import dao
 from thankyou.slackbot.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.views.configuration import configuration_view
+from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_dialog
 
 
 def home_page_configuration_button_clicked_action_handler(body, logger):
@@ -11,5 +13,171 @@ def home_page_configuration_button_clicked_action_handler(body, logger):
 
     app.client.views_publish(
         user_id=user_id,
-        view=configuration_view(thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid))
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+        )
+    )
+
+
+def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    selected_slack_user_ids = body["actions"][0]["selected_users"]
+
+    admins_to_remove = [admin for admin in company.admins if admin.slack_user_id not in selected_slack_user_ids]
+    admins_to_add = [CompanyAdmin(slack_user_id=slack_user_id, company_uuid=company.uuid)
+                     for slack_user_id in selected_slack_user_ids
+                     if slack_user_id not in [admin.slack_user_id for admin in company.admins]]
+
+    for admin in admins_to_remove:
+        dao.delete_company_admin(company_uuid=company.uuid, slack_user_id=admin.slack_user_id)
+    for admin in admins_to_add:
+        dao.create_company_admin(admin)
+
+    company = dao.read_company(company_uuid=company.uuid)
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+        )
+    )
+
+
+def home_page_configuration_notification_slack_channel_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    channel_slack_id = body["actions"][0]["selected_channel"]
+    if company.share_messages_in_slack_channel != channel_slack_id:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.share_messages_in_slack_channel = channel_slack_id
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+        )
+    )
+
+
+def home_page_configuration_stats_time_period_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    try:
+        new_time_period = LeaderbordTimeSettings[body["actions"][0]["selected_option"]["value"]]
+    except (KeyError, TypeError):
+        new_time_period = LeaderbordTimeSettings.LAST_30_DAYS
+
+    if company.leaderbord_time_settings != new_time_period:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.leaderbord_time_settings = new_time_period
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+        )
+    )
+
+
+def home_page_configuration_max_number_of_messages_per_week_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    try:
+        new_limit = int(body["actions"][0]["selected_option"]["value"])
+        new_limit = max(1, new_limit)
+        new_limit = min(5, new_limit)
+    except (TypeError, ValueError):
+        new_limit = 5
+
+    if company.weekly_thank_you_limit != new_limit:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.weekly_thank_you_limit = new_limit
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+        )
+    )
+
+
+def home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    new_enable_rich_text_value = "enable_rich_text_in_thank_you_messages" \
+                                 in [option["value"] for option in body["actions"][0]["selected_options"]]
+
+    if company.enable_rich_text_in_thank_you_messages != new_enable_rich_text_value:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.enable_rich_text_in_thank_you_messages = new_enable_rich_text_value
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+        )
+    )
+
+
+def home_page_configuration_edit_company_value_clicked_action_handler(body, logger):
+    logger.info(body)
+    # user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    thank_you_type_uuid = body["actions"][0]["value"]
+    thank_you_type = dao.read_thank_you_type(company_uuid=company.uuid, thank_you_type_uuid=thank_you_type_uuid)
+
+    app.client.views_open(
+        trigger_id=body["trigger_id"],
+        view=thank_you_type_dialog(
+            state=thank_you_type
+        )
+    )
+
+
+def home_page_configuration_add_new_company_value_clicked_action_handler(body, logger):
+    app.client.views_open(
+        trigger_id=body["trigger_id"],
+        view=thank_you_type_dialog()
     )

@@ -1,7 +1,7 @@
 from threading import Lock
 from typing import Optional
 
-from thankyou.core.models import Company
+from thankyou.core.models import Company, LeaderbordTimeSettings
 from thankyou.dao import dao, create_initial_data
 
 CREATE_COMPANY_LOCK = Lock()
@@ -16,7 +16,16 @@ def get_or_create_company_by_slack_team_id(slack_team_id: str, new_name: str = N
             try:
                 return dao.read_companies(slack_team_id=slack_team_id)[0]
             except IndexError:
-                company = Company(slack_team_id=slack_team_id, name=new_name or "")
+                company = Company(
+                    slack_team_id=slack_team_id,
+                    name=new_name or "",
+                    admins=[],
+                    share_messages_in_slack_channel=None,
+                    leaderbord_time_settings=LeaderbordTimeSettings.LAST_30_DAYS,
+                    weekly_thank_you_limit=5,
+                    enable_leaderboard=True,
+                    enable_rich_text_in_thank_you_messages=False
+                )
                 dao.create_company(company)
                 create_initial_data(company)
                 return company

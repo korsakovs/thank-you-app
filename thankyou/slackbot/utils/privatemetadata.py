@@ -6,16 +6,22 @@ from thankyou.slackbot.utils.company import get_or_create_company_by_body
 
 
 class PrivateMetadata:
-    def __init__(self, thank_you_message_uuid: str = None):
+    def __init__(self, thank_you_message_uuid: str = None, thank_you_type_uuid: str = None):
         self.thank_you_message_uuid = thank_you_message_uuid
+        self.thank_you_type_uuid = thank_you_type_uuid
 
     def __str__(self):
         return self.as_str()
 
     def as_str(self):
-        return json.dumps({
-            "thank_you_message_uuid": self.thank_you_message_uuid
-        })
+        result = dict()
+        for key, value in {
+            "thank_you_message_uuid": self.thank_you_message_uuid,
+            "thank_you_type_uuid": self.thank_you_type_uuid
+        }.items():
+            if value is not None:
+                result[key] = value
+        return json.dumps(result)
 
     @classmethod
     def from_str(cls, s: str):
@@ -23,7 +29,8 @@ class PrivateMetadata:
             return PrivateMetadata()
         d = json.loads(s)
         return PrivateMetadata(
-            thank_you_message_uuid=d.get("thank_you_message_uuid")
+            thank_you_message_uuid=d.get("thank_you_message_uuid"),
+            thank_you_type_uuid=d.get("thank_you_type_uuid")
         )
 
 
@@ -69,9 +76,18 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
               for ordering_key, image in enumerate(values["thank_you_dialog_attached_files_block"][
                                                        "thank_you_dialog_attached_files_action_id"]["files"])]
 
+    text_element = values["thank_you_dialog_text_block"]["thank_you_dialog_text_action_id"]
+    if text_element["type"] == "rich_text_input":
+        text = json.dumps(text_element["rich_text_value"])
+        is_rich_text = True
+    else:
+        text = text_element["value"]
+        is_rich_text = False
+
     return ThankYouMessage(
         type=selected_type,
-        text=values["thank_you_dialog_text_block"]["thank_you_dialog_text_action_id"]["value"],
+        text=text,
+        is_rich_text=is_rich_text,
         author_slack_user_id=user_id,
         author_slack_user_name=user_name,
         receivers=receivers,
