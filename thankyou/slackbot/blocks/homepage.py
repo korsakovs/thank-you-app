@@ -51,7 +51,8 @@ def home_page_leaders_block(sender_leaders: List[Tuple[ThankYouType, List[Tuple[
     receiver_leaders_field = "_*Received the most \"thank yous\"*_\n\n"
 
     for thank_you_type, category_leaders in sender_leaders:
-        sender_leaders_field += f"\n\n*{thank_you_type.name}*\n"
+        if thank_you_type:
+            sender_leaders_field += f"\n\n*{thank_you_type.name}*\n"
         if category_leaders:
             sender_leaders_field += "\n".join(f"{position + 1}. <@{slack_user_id}>: {thank_you_messages_num} messages"
                                               for position, (slack_user_id, thank_you_messages_num)
@@ -60,7 +61,8 @@ def home_page_leaders_block(sender_leaders: List[Tuple[ThankYouType, List[Tuple[
             sender_leaders_field += "_There are no leaders in this category yet_"
 
     for thank_you_type, category_leaders in receiver_leaders:
-        receiver_leaders_field += f"\n\n*{thank_you_type.name}*\n"
+        if thank_you_type:
+            receiver_leaders_field += f"\n\n*{thank_you_type.name}*\n"
         if category_leaders:
             receiver_leaders_field += "\n".join(f"{position + 1}. <@{slack_user_id}>: {thank_you_messages_num} messages"
                                                 for position, (slack_user_id, thank_you_messages_num)
@@ -68,9 +70,13 @@ def home_page_leaders_block(sender_leaders: List[Tuple[ThankYouType, List[Tuple[
         else:
             receiver_leaders_field += "_There are no leaders in this category yet_"
 
+    def _format_date(d: date):
+        return d.strftime("%b, %d")
+
     from_until_text = None
     if from_date and until_date:
-        from_until_text = f"\n\n_These statistics only count messages sent from {from_date} to {until_date}_"
+        from_until_text = f"\n\n_These statistics only count messages sent between {_format_date(from_date)} " \
+                          f"and {_format_date(until_date)}_"
 
     return SectionBlock(fields=[
         sender_leaders_field, receiver_leaders_field, from_until_text

@@ -10,7 +10,8 @@ from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 
 
 def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None, max_images_num: int = 10,
-                          enable_rich_text: bool = False) -> View:
+                          enable_rich_text: bool = False, enable_company_values: bool = True,
+                          max_receivers_num: int = 10) -> View:
     extra_blocks = []
 
     if max_images_num > 0:
@@ -36,12 +37,15 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
         close="Cancel",
         private_metadata=str(PrivateMetadata(thank_you_message_uuid=None if state is None else state.uuid)),
         blocks=[
-            thank_you_type_block(thank_you_types,
-                                 selected_value=None if state is None or state.type is None else state.type,
-                                 block_id="thank_you_dialog_thank_you_type_block",
-                                 action_id="thank_you_dialog_thank_you_type_action_id"),
+            *([] if not (enable_company_values and thank_you_types) else [
+                thank_you_type_block(thank_you_types,
+                                     selected_value=None if state is None or state.type is None else state.type,
+                                     block_id="thank_you_dialog_thank_you_type_block",
+                                     action_id="thank_you_dialog_thank_you_type_action_id"),
+            ]),
             thank_you_receivers_block(block_id="thank_you_dialog_receivers_block",
-                                      action_id="thank_you_dialog_receivers_action_id"),
+                                      action_id="thank_you_dialog_receivers_action_id",
+                                      max_selected_items=max_receivers_num),
             # thank_you_link_block(initial_value=None if state is None else state.link,
             #                      block_id=STATUS_UPDATE_LINK_BLOCK,
             #                      action_id=STATUS_UPDATE_MODAL_STATUS_UPDATE_LINK_ACTION_ID),

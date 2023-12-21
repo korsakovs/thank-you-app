@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from slack_sdk import WebClient
 
 from thankyou.dao import dao
@@ -24,7 +22,8 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
         thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
                                                        last_n=20),
         is_admin=is_admin,
-        current_user_slack_id=user_id
+        current_user_slack_id=user_id,
+        enable_leaderboard=company.enable_leaderboard,
     )
 
     client.views_publish(
@@ -45,6 +44,7 @@ def home_page_company_thank_you_button_clicked_action_handler(body, logger):
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
             is_admin=user_info.is_admin,
             current_user_slack_id=user_id,
+            enable_leaderboard=company.enable_leaderboard,
         )
     )
 
@@ -55,7 +55,11 @@ def home_page_show_leaders_button_clicked_action_handler(body, logger):
     user_info = get_user_info(user_id)
     company = get_or_create_company_by_body(body)
 
-    sender_leaders, receiver_leaders = get_sender_and_receiver_leaders(company_uuid=company.uuid)
+    senders_receivers_stats = get_sender_and_receiver_leaders(
+        company_uuid=company.uuid,
+        leaderboard_time_settings=company.leaderbord_time_settings,
+        group_by_company_values=company.enable_company_values
+    )
 
     app.client.views_publish(
         user_id=user_id,
@@ -63,10 +67,11 @@ def home_page_show_leaders_button_clicked_action_handler(body, logger):
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
             is_admin=user_info.is_admin,
             current_user_slack_id=user_id,
-            sender_leaders=sender_leaders,
-            receiver_leaders=receiver_leaders,
-            leaders_stats_from_date=(datetime.utcnow() - timedelta(days=30)).date(),
-            leaders_stats_until_date=datetime.utcnow().date(),
+            sender_leaders=senders_receivers_stats.sender_leaders,
+            receiver_leaders=senders_receivers_stats.receiver_leaders,
+            leaders_stats_from_date=senders_receivers_stats.leaders_stats_from_datetime.date(),
+            leaders_stats_until_date=senders_receivers_stats.leaders_stats_until_datetime.date(),
+            enable_leaderboard=company.enable_leaderboard,
         )
     )
 
@@ -95,7 +100,9 @@ def home_page_say_thank_you_button_clicked_action_handler(body, logger):
             trigger_id=body["trigger_id"],
             view=thank_you_dialog_view(
                 thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-                enable_rich_text=company.enable_rich_text_in_thank_you_messages
+                enable_rich_text=company.enable_rich_text_in_thank_you_messages,
+                enable_company_values=company.enable_company_values,
+                max_receivers_num=company.receivers_number_limit,
             ),
         )
     except Exception as e:

@@ -27,7 +27,8 @@ def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
                                       receiver_leaders: List[Tuple[ThankYouType, List[Tuple[Slack_User_ID_Type, int]]]]
                                       = None,
                                       leaders_stats_from_date: date = None, leaders_stats_until_date: date = None,
-                                      is_admin: bool = False, current_user_slack_id: str = None):
+                                      is_admin: bool = False, current_user_slack_id: str = None,
+                                      enable_leaderboard: bool = True):
     leaders_blocks = []
     if sender_leaders and receiver_leaders:
         leaders_blocks.append(home_page_leaders_block(
@@ -36,7 +37,7 @@ def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
             from_date=leaders_stats_from_date,
             until_date=leaders_stats_until_date
         ))
-    else:
+    elif enable_leaderboard:
         leaders_blocks.append(home_page_show_leaders_button_block())
     return View(
         type="home",

@@ -4,8 +4,8 @@ from thankyou.slackbot.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 from thankyou.slackbot.views.configuration import configuration_view
-from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_dialog, \
-    thank_you_type_deletion_confirmation_dialog, thank_you_type_deletion_completion_dialog
+from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_deletion_confirmation_dialog, \
+    thank_you_type_deletion_completion_dialog
 
 
 def thank_you_type_dialog_save_button_clicked_action_handler(body, logger):
@@ -33,7 +33,11 @@ def thank_you_type_dialog_save_button_clicked_action_handler(body, logger):
             admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
             leaderbord_time_settings=company.leaderbord_time_settings,
             share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            weekly_thank_you_limit=company.weekly_thank_you_limit
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+            enable_leaderboard=company.enable_leaderboard,
+            enable_company_values=company.enable_company_values,
+            max_thank_you_receivers_num=company.receivers_number_limit,
         )
     )
 
@@ -73,6 +77,10 @@ def thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handle
             admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
             leaderbord_time_settings=company.leaderbord_time_settings,
             share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            weekly_thank_you_limit=company.weekly_thank_you_limit
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+            enable_leaderboard=company.enable_leaderboard,
+            enable_company_values=company.enable_company_values,
+            max_thank_you_receivers_num=company.receivers_number_limit,
         )
     )

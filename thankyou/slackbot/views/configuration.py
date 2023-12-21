@@ -11,7 +11,28 @@ from thankyou.slackbot.blocks.homepage import home_page_actions_block
 def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
                        share_messages_in_slack_channel: Slack_Channel_ID_Type, thank_you_types: List[ThankYouType],
                        leaderbord_time_settings: LeaderbordTimeSettings, weekly_thank_you_limit: int,
-                       enable_rich_text_in_thank_you_messages: bool):
+                       enable_rich_text_in_thank_you_messages: bool, enable_company_values: bool,
+                       enable_leaderboard: bool, max_thank_you_receivers_num: int):
+    def checkbox_action_block(
+        element_action_id: str,
+        checkbox_value: str,
+        checkbox_label: str,
+        enabled: bool,
+    ):
+        return ActionsBlock(
+            elements=[
+                CheckboxesElement(
+                    action_id=element_action_id,
+                    initial_options=[] if not enabled else [
+                        Option(value=checkbox_value, label=checkbox_label)
+                    ],
+                    options=[
+                        Option(value=checkbox_value, label=checkbox_label)
+                    ]
+                )
+            ]
+        )
+
     stats_time_period_to_use_options = []
     stats_time_period_to_use_selected_option = None
     for enum, option in (
@@ -26,6 +47,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
             stats_time_period_to_use_selected_option = option
 
     weekly_limit_options = sorted(list(set(list(range(1, 6)) + [weekly_thank_you_limit])))
+    max_thank_you_receivers_options = sorted(list(set(list(range(1, 11)) + [max_thank_you_receivers_num])))
 
     return View(
         type="home",
@@ -63,14 +85,22 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
             HeaderBlock(
                 text="Leaderboards Settings"
             ),
-            SectionBlock(
-                text="Time period to use",
-                accessory=StaticSelectElement(
-                    options=stats_time_period_to_use_options,
-                    initial_option=stats_time_period_to_use_selected_option,
-                    action_id="home_page_configuration_stats_time_period_value_changed"
-                )
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_leaderboard_value_changed",
+                checkbox_value="enable_leaderboard",
+                checkbox_label="Enable Leaderboard",
+                enabled=enable_leaderboard
             ),
+            *([] if not enable_leaderboard else [
+                SectionBlock(
+                    text="Time period to use",
+                    accessory=StaticSelectElement(
+                        options=stats_time_period_to_use_options,
+                        initial_option=stats_time_period_to_use_selected_option,
+                        action_id="home_page_configuration_stats_time_period_value_changed"
+                    )
+                ),
+            ]),
             HeaderBlock(
                 text="Weekly limits"
             ),
@@ -83,43 +113,54 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
                 )
             ),
             HeaderBlock(
+                text="Maximum number of thank you receivers"
+            ),
+            SectionBlock(
+                text="How many people one can add as receivers for a thank you message they share?",
+                accessory=StaticSelectElement(
+                    options=[Option(value=str(num), label=str(num)) for num in max_thank_you_receivers_options],
+                    initial_option=Option(value=str(max_thank_you_receivers_num),
+                                          label=str(max_thank_you_receivers_num)),
+                    action_id="home_page_configuration_max_number_of_thank_you_receivers_value_changed"
+                )
+            ),
+            HeaderBlock(
                 text="Rich Text Editing"
             ),
-            ActionsBlock(
-                elements=[
-                    CheckboxesElement(
-                        action_id="home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed",
-                        initial_options=[] if not enable_rich_text_in_thank_you_messages else [
-                            Option(value="enable_rich_text_in_thank_you_messages",
-                                   label="Enable Rich Text editing in the \"Say Thank You!\" dialog")
-                        ],
-                        options=[
-                            Option(value="enable_rich_text_in_thank_you_messages",
-                                   label="Enable Rich Text editing in the \"Say Thank You!\" dialog")
-                        ]
-                    )
-                ]
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed",
+                checkbox_value="enable_rich_text_in_thank_you_messages",
+                checkbox_label="Enable Rich Text editing in the \"Say Thank You!\" dialog",
+                enabled=enable_rich_text_in_thank_you_messages
             ),
             HeaderBlock(
                 text="Company values"
             ),
-            *[
-                SectionBlock(
-                    text=f"*{thank_you_type.name}*",
-                    accessory=ButtonElement(
-                        text="Edit...",
-                        action_id="home_page_configuration_edit_company_value_clicked",
-                        value=thank_you_type.uuid
-                    ),
-                ) for thank_you_type in thank_you_types
-            ],
-            ActionsBlock(
-                elements=[
-                    ButtonElement(
-                        text="Add a new value...",
-                        action_id="home_page_configuration_add_new_company_value_clicked"
-                    )
-                ]
-            )
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_company_values_value_changed",
+                checkbox_value="enable_company_values",
+                checkbox_label="Enable Company Values",
+                enabled=enable_company_values
+            ),
+            *([] if not enable_company_values else [
+                *[
+                    SectionBlock(
+                        text=f"*{thank_you_type.name}*",
+                        accessory=ButtonElement(
+                            text="Edit...",
+                            action_id="home_page_configuration_edit_company_value_clicked",
+                            value=thank_you_type.uuid
+                        ),
+                    ) for thank_you_type in thank_you_types
+                ],
+                ActionsBlock(
+                    elements=[
+                        ButtonElement(
+                            text="Add a new value...",
+                            action_id="home_page_configuration_add_new_company_value_clicked"
+                        )
+                    ]
+                )
+            ]),
         ]
     )

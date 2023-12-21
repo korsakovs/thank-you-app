@@ -45,10 +45,14 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
     private_metadata = retrieve_private_metadata_from_view(body)
     company_uuid = get_or_create_company_by_body(body).uuid
 
-    selected_type = values["thank_you_dialog_thank_you_type_block"]["thank_you_dialog_thank_you_type_action_id"][
-        "selected_option"]
-    if selected_type is not None:
-        selected_type = dao.read_thank_you_type(company_uuid=company_uuid, thank_you_type_uuid=selected_type["value"])
+    try:
+        selected_type = values["thank_you_dialog_thank_you_type_block"]["thank_you_dialog_thank_you_type_action_id"][
+            "selected_option"]
+        if selected_type is not None:
+            selected_type = dao.read_thank_you_type(company_uuid=company_uuid,
+                                                    thank_you_type_uuid=selected_type["value"])
+    except (TypeError, KeyError):
+        selected_type = None
 
     """
     try:

@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import List, Optional, Generator, Tuple
 
-from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, true, \
-    false, desc, and_, func, Integer, Enum
+from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, desc, \
+    and_, func, Integer, Enum
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
@@ -21,7 +21,8 @@ class SQLAlchemyDao(Dao, ABC):
     _THANK_YOU_MESSAGE_IMAGES = "thank_you_message_images"
 
     @abstractmethod
-    def _create_engine(self) -> Engine: ...
+    def _create_engine(self) -> Engine:
+        ...
 
     def __init__(self):
         self._mapper_registry = registry()
@@ -45,7 +46,9 @@ class SQLAlchemyDao(Dao, ABC):
             Column("share_messages_in_slack_channel", String(256), nullable=True),
             Column("leaderbord_time_settings", Enum(LeaderbordTimeSettings), nullable=False),
             Column("weekly_thank_you_limit", Integer, nullable=False),
+            Column("receivers_number_limit", Integer, nullable=False),
             Column("enable_leaderboard", Boolean, nullable=False),
+            Column("enable_company_values", Boolean, nullable=False),
             Column("enable_rich_text_in_thank_you_messages", Boolean, nullable=False),
         )
 
@@ -71,7 +74,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("author_slack_user_name", String(256), nullable=True),
             Column("created_at", DateTime, nullable=False, index=True),
             Column("thank_you_type_uuid", String(256), ForeignKey(f"{self._THANK_YOU_TYPES_TABLE}.uuid"),
-                   nullable=False, index=True),
+                   nullable=True, index=True),
         )
 
         self._thank_you_receivers_table = Table(
@@ -171,7 +174,7 @@ class SQLAlchemyDao(Dao, ABC):
                 result = result.filter(or_(ThankYouMessage.type == type_ for type_ in with_types))
 
             if deleted is not None:
-                result = result.filter(ThankYouMessage.deleted == (true() if deleted else false()))
+                result = result.filter(ThankYouMessage.deleted == deleted)
 
             if author_slack_user_id is not None:
                 result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
@@ -199,13 +202,16 @@ class SQLAlchemyDao(Dao, ABC):
     def read_company(self, company_uuid: str) -> Optional[Company]:
         return self._get_obj(Company, company_uuid)
 
-    def read_companies(self, company_name: str = None, slack_team_id: str = None) -> List[Company]:
+    def read_companies(self, company_name: str = None, slack_team_id: str = None, deleted: Optional[bool] = False) \
+            -> List[Company]:
         with self._get_session() as session:
-            result = session.query(Company).filter(Company.deleted == false())
+            result = session.query(Company)
             if company_name is not None:
                 result = result.filter(Company.name == company_name)
             if slack_team_id is not None:
                 result = result.filter(Company.slack_team_id == slack_team_id)
+            if deleted is not None:
+                result = result.filter(Company.deleted == deleted)
             return result.all()
 
     def create_company_admin(self, company_admin: CompanyAdmin):
@@ -226,10 +232,13 @@ class SQLAlchemyDao(Dao, ABC):
         if thank_you_type and thank_you_type.company_uuid == company_uuid:
             return thank_you_type
 
-    def read_thank_you_types(self, company_uuid: str, name: str = None) -> List[ThankYouType]:
+    def read_thank_you_types(self, company_uuid: str, name: str = None, deleted: Optional[bool] = False) \
+            -> List[ThankYouType]:
         with self._get_session() as session:
-            result = session.query(ThankYouType).filter(ThankYouType.deleted == false())
+            result = session.query(ThankYouType)
             result = result.join(Company).filter(Company.uuid == company_uuid)
+            if deleted is not None:
+                result = result.filter(ThankYouType.deleted == deleted)
             if name:
                 result = result.filter(ThankYouType.name == name)
             return result.all()
@@ -247,10 +256,11 @@ class SQLAlchemyDao(Dao, ABC):
                                      leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]:
         with self._get_session() as session:
             result = session.query(ThankYouMessage.author_slack_user_id, func.count())
+            result = result.filter(ThankYouMessage.deleted == False)
             result = result.join(Company).filter(Company.uuid == company_uuid)
 
             if created_after:
-                result = result.filter(ThankYouMessage.created_at >= created_after)
+                result = result.filter(ThankYouMessage.created_at > created_after)
 
             if created_before:
                 result = result.filter(ThankYouMessage.created_at <= created_before)
@@ -269,6 +279,7 @@ class SQLAlchemyDao(Dao, ABC):
                                        leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]:
         with self._get_session() as session:
             result = session.query(ThankYouReceiver.slack_user_id, func.count()).join(ThankYouMessage)
+            result = result.filter(ThankYouMessage.deleted == False)
             result = result.join(Company).filter(Company.uuid == company_uuid)
 
             if created_after:

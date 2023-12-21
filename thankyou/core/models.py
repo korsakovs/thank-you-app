@@ -42,7 +42,9 @@ class Company:
     share_messages_in_slack_channel: Optional[Slack_Channel_ID_Type]
     leaderbord_time_settings: LeaderbordTimeSettings
     weekly_thank_you_limit: int
+    receivers_number_limit: int
     enable_leaderboard: bool
+    enable_company_values: bool
     enable_rich_text_in_thank_you_messages: bool
 
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))

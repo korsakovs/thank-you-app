@@ -91,7 +91,7 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
 
 
 def thank_you_type_block(thank_you_types: List[ThankYouType],
-                         label: str = "Thank You Type", select_text="Select a thank you type...",
+                         label: str = "Select a company value", select_text="Select a company value...",
                          selected_value: ThankYouType = None, block_id: str = None,
                          action_id: str = None) -> InputBlock:
     def type_as_option(thank_you_type: ThankYouType) -> Option:
@@ -118,7 +118,8 @@ def thank_you_type_block(thank_you_types: List[ThankYouType],
     )
 
 
-def thank_you_receivers_block(label: str = "Receivers", block_id: str = None, action_id: str = None) -> InputBlock:
+def thank_you_receivers_block(label: str = "Receivers", block_id: str = None, action_id: str = None,
+                              max_selected_items: int = 10) -> InputBlock:
     return InputBlock(
         block_id=block_id,
         label=label,
@@ -126,7 +127,7 @@ def thank_you_receivers_block(label: str = "Receivers", block_id: str = None, ac
         element=UserMultiSelectElement(
             action_id=action_id,
             initial_users=None,
-            max_selected_items=10
+            max_selected_items=max_selected_items
         )
     )
 
@@ -144,7 +145,7 @@ def thank_you_text_block(label: str = "Thank You", initial_value: str = None, bl
             action_id=action_id,
             multiline=True,
             initial_value=initial_value,
-            max_length=256,
+            max_length=1000,
             focus_on_load=True
         )
 
