@@ -76,9 +76,12 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
                  for receiver_slack_id in values["thank_you_dialog_receivers_block"][
                      "thank_you_dialog_receivers_action_id"]["selected_users"]]
 
-    images = [ThankYouMessageImage(url=image["url_private"], filename=image["name"], ordering_key=ordering_key)
-              for ordering_key, image in enumerate(values["thank_you_dialog_attached_files_block"][
-                                                       "thank_you_dialog_attached_files_action_id"]["files"])]
+    try:
+        images = [ThankYouMessageImage(url=image["url_private"], filename=image["name"], ordering_key=ordering_key)
+                  for ordering_key, image in enumerate(values["thank_you_dialog_attached_files_block"][
+                                                           "thank_you_dialog_attached_files_action_id"]["files"])]
+    except (TypeError, KeyError):
+        images = []
 
     text_element = values["thank_you_dialog_text_block"]["thank_you_dialog_text_action_id"]
     if text_element["type"] == "rich_text_input":

@@ -46,6 +46,8 @@ class Company:
     enable_leaderboard: bool
     enable_company_values: bool
     enable_rich_text_in_thank_you_messages: bool
+    enable_attaching_files: bool
+    max_attached_files_num: int
 
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     deleted: bool = False

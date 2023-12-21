@@ -12,7 +12,8 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
                        share_messages_in_slack_channel: Slack_Channel_ID_Type, thank_you_types: List[ThankYouType],
                        leaderbord_time_settings: LeaderbordTimeSettings, weekly_thank_you_limit: int,
                        enable_rich_text_in_thank_you_messages: bool, enable_company_values: bool,
-                       enable_leaderboard: bool, max_thank_you_receivers_num: int):
+                       enable_leaderboard: bool, max_thank_you_receivers_num: int, enable_attaching_files: bool,
+                       max_attached_files_num: int):
     def checkbox_action_block(
         element_action_id: str,
         checkbox_value: str,
@@ -48,6 +49,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
 
     weekly_limit_options = sorted(list(set(list(range(1, 6)) + [weekly_thank_you_limit])))
     max_thank_you_receivers_options = sorted(list(set(list(range(1, 11)) + [max_thank_you_receivers_num])))
+    max_attached_files_num_options = sorted(list(set(list(range(1, 11)) + [max_attached_files_num])))
 
     return View(
         type="home",
@@ -133,6 +135,26 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
                 checkbox_label="Enable Rich Text editing in the \"Say Thank You!\" dialog",
                 enabled=enable_rich_text_in_thank_you_messages
             ),
+            HeaderBlock(
+                text="Attaching files"
+            ),
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_attaching_files_value_changed",
+                checkbox_value="enable_attaching_files",
+                checkbox_label="Enable attaching files to the \"Thank You!\" messages",
+                enabled=enable_attaching_files
+            ),
+            *([] if not enable_attaching_files else [
+                SectionBlock(
+                    text="How many files can be attached to one thank you message?",
+                    accessory=StaticSelectElement(
+                        options=[Option(value=str(num), label=str(num)) for num in max_attached_files_num_options],
+                        initial_option=Option(value=str(max_attached_files_num),
+                                              label=str(max_attached_files_num)),
+                        action_id="home_page_configuration_max_attached_files_num_value_changed"
+                    )
+                ),
+            ]),
             HeaderBlock(
                 text="Company values"
             ),

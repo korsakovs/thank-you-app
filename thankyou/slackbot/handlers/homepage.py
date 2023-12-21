@@ -103,6 +103,8 @@ def home_page_say_thank_you_button_clicked_action_handler(body, logger):
                 enable_rich_text=company.enable_rich_text_in_thank_you_messages,
                 enable_company_values=company.enable_company_values,
                 max_receivers_num=company.receivers_number_limit,
+                enable_attaching_files=company.enable_attaching_files,
+                max_attached_files_num=company.max_attached_files_num,
             ),
         )
     except Exception as e:

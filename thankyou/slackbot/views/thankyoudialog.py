@@ -9,21 +9,22 @@ from thankyou.slackbot.blocks.thank_you import thank_you_type_block, thank_you_t
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 
 
-def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None, max_images_num: int = 10,
+def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None,
                           enable_rich_text: bool = False, enable_company_values: bool = True,
-                          max_receivers_num: int = 10) -> View:
+                          max_receivers_num: int = 10, enable_attaching_files: bool = True,
+                          max_attached_files_num: int = 10) -> View:
     extra_blocks = []
 
-    if max_images_num > 0:
+    if enable_attaching_files and max_attached_files_num > 0:
         extra_blocks.append(
             InputBlock(
-                label="Attach an image" + ("" if max_images_num == 1 else "(s)"),
+                label="Attach an image" + ("" if max_attached_files_num == 1 else "(s)"),
                 block_id="thank_you_dialog_attached_files_block",
                 dispatch_action=True,
                 element=FileInputElement(
                     action_id="thank_you_dialog_attached_files_action_id",
                     filetypes=["jpg", "jpeg", "png", "gif"],
-                    max_files=max_images_num,
+                    max_files=max_attached_files_num,
                 ),
                 optional=True,
             ),

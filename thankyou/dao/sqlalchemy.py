@@ -50,6 +50,8 @@ class SQLAlchemyDao(Dao, ABC):
             Column("enable_leaderboard", Boolean, nullable=False),
             Column("enable_company_values", Boolean, nullable=False),
             Column("enable_rich_text_in_thank_you_messages", Boolean, nullable=False),
+            Column("enable_attaching_files", Boolean, nullable=False),
+            Column("max_attached_files_num", Integer, nullable=False),
         )
 
         self._thank_you_types_table = Table(

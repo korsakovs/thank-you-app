@@ -118,7 +118,7 @@ def thank_you_type_block(thank_you_types: List[ThankYouType],
     )
 
 
-def thank_you_receivers_block(label: str = "Receivers", block_id: str = None, action_id: str = None,
+def thank_you_receivers_block(label: str = "Who do you want to thank?", block_id: str = None, action_id: str = None,
                               max_selected_items: int = 10) -> InputBlock:
     return InputBlock(
         block_id=block_id,

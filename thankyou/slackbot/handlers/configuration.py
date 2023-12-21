@@ -23,6 +23,8 @@ def home_page_configuration_button_clicked_action_handler(body, logger):
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -58,6 +60,8 @@ def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(bo
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -84,6 +88,8 @@ def home_page_configuration_notification_slack_channel_value_changed_action_hand
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -112,6 +118,8 @@ def home_page_configuration_enable_leaderboard_value_changed_action_handler(body
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -142,6 +150,8 @@ def home_page_configuration_stats_time_period_value_changed_action_handler(body,
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -174,6 +184,8 @@ def home_page_configuration_max_number_of_thank_you_receivers_value_changed_acti
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -206,6 +218,8 @@ def home_page_configuration_max_number_of_messages_per_week_value_changed_action
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -234,8 +248,76 @@ def home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
+
+
+def home_page_configuration_enable_attaching_files_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    new_enable_attaching_files = "enable_attaching_files" \
+                                 in [option["value"] for option in body["actions"][0]["selected_options"]]
+
+    if company.enable_attaching_files != new_enable_attaching_files:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.enable_attaching_files = new_enable_attaching_files
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+            enable_company_values=company.enable_company_values,
+            enable_leaderboard=company.enable_leaderboard,
+            max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
+        )
+    )
+
+
+def home_page_configuration_max_attached_files_num_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    try:
+        new_limit = int(body["actions"][0]["selected_option"]["value"])
+        new_limit = max(1, new_limit)
+        new_limit = min(10, new_limit)
+    except (TypeError, ValueError):
+        new_limit = 5
+
+    if company.max_attached_files_num != new_limit:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.max_attached_files_num = new_limit
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+            enable_company_values=company.enable_company_values,
+            enable_leaderboard=company.enable_leaderboard,
+            max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
+        )
+    )
+
+
 
 
 def home_page_configuration_enable_company_values_value_changed_action_handler(body, logger):
@@ -262,6 +344,8 @@ def home_page_configuration_enable_company_values_value_changed_action_handler(b
             enable_company_values=company.enable_company_values,
             enable_leaderboard=company.enable_leaderboard,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 

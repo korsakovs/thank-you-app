@@ -38,6 +38,8 @@ def thank_you_type_dialog_save_button_clicked_action_handler(body, logger):
             enable_leaderboard=company.enable_leaderboard,
             enable_company_values=company.enable_company_values,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
 
@@ -82,5 +84,7 @@ def thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handle
             enable_leaderboard=company.enable_leaderboard,
             enable_company_values=company.enable_company_values,
             max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
         )
     )
