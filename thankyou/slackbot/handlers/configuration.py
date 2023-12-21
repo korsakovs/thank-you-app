@@ -318,8 +318,6 @@ def home_page_configuration_max_attached_files_num_value_changed_action_handler(
     )
 
 
-
-
 def home_page_configuration_enable_company_values_value_changed_action_handler(body, logger):
     logger.info(body)
     user_id = body["user"]["id"]
