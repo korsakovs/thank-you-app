@@ -3,7 +3,7 @@ from random import choices
 
 import pytest
 
-from thankyou.core.models import Company, ThankYouMessage
+from thankyou.core.models import Company, ThankYouMessage, LeaderbordTimeSettings, ThankYouType
 from thankyou.dao import dao, create_initial_data
 
 
@@ -17,8 +17,20 @@ def non_existing_company_slack_team_id() -> str:
 
 @pytest.fixture
 def non_existing_company(non_existing_company_slack_team_id) -> Company:
-    company = Company("test_company_" + "".join(choices(string.ascii_letters, k=16)),
-                      slack_team_id=non_existing_company_slack_team_id)
+    company = Company(
+        name="test_company_" + "".join(choices(string.ascii_letters, k=16)),
+        slack_team_id=non_existing_company_slack_team_id,
+        admins=[],
+        share_messages_in_slack_channel=None,
+        leaderbord_time_settings=LeaderbordTimeSettings.LAST_30_DAYS,
+        weekly_thank_you_limit=5,
+        receivers_number_limit=5,
+        enable_leaderboard=True,
+        enable_company_values=True,
+        enable_rich_text_in_thank_you_messages=True,
+        enable_attaching_files=True,
+        max_attached_files_num=5,
+    )
     for c_ in dao.read_companies():
         if c_.uuid == company.uuid:
             raise AssertionError("Can not create non-existing company")
@@ -39,14 +51,12 @@ def existing_company(non_existing_company) -> Company:
 
 def test_thank_you_message_insertion(existing_company):
     thank_you_message = ThankYouMessage(
+        author_slack_user_id="AUTHOR_SLACK_ID",
         text="Some Text",
         type=dao.read_thank_you_types(company_uuid=existing_company.uuid)[0],
-        company=existing_company
+        company=existing_company,
+        is_rich_text=False,
     )
     dao.create_thank_you_message(thank_you_message)
-    assert thank_you_message.uuid not in [su.uuid for su in dao.read_thank_you_messages(
-        company_uuid=existing_company.uuid)]
-    assert thank_you_message.uuid not in [su.uuid for su in dao.read_thank_you_messages(
-        company_uuid=existing_company.uuid)]
     assert thank_you_message.uuid in [su.uuid for su in dao.read_thank_you_messages(
         company_uuid=existing_company.uuid)]
