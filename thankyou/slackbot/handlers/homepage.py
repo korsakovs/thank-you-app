@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import List
 
 from slack_sdk import WebClient
@@ -105,6 +106,17 @@ def home_page_my_thank_you_button_clicked_action_handler(body, logger):
 
 def home_page_say_thank_you_button_clicked_action_handler(body, logger):
     company = get_or_create_company_by_body(body)
+    user_id = body["user"]["id"]
+
+    beginning_of_the_week = (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                             - timedelta(days=datetime.utcnow().weekday()))
+    end_of_the_week = beginning_of_the_week + timedelta(days=7)
+    sent_messages_num = len(dao.read_thank_you_messages(
+        company_uuid=company.uuid,
+        author_slack_user_id=user_id,
+        created_after=beginning_of_the_week,
+        created_before=end_of_the_week
+    ))
 
     try:
         app.client.views_open(
@@ -116,6 +128,7 @@ def home_page_say_thank_you_button_clicked_action_handler(body, logger):
                 max_receivers_num=company.receivers_number_limit,
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
+                num_of_messages_a_user_can_send=max(0, company.weekly_thank_you_limit - sent_messages_num),
             ),
         )
     except Exception as e:

@@ -1,6 +1,6 @@
 from typing import List
 
-from slack_sdk.models.blocks import InputBlock
+from slack_sdk.models.blocks import InputBlock, SectionBlock
 from slack_sdk.models.blocks.block_elements import FileInputElement
 from slack_sdk.models.views import View
 
@@ -12,7 +12,7 @@ from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None,
                           enable_rich_text: bool = False, enable_company_values: bool = True,
                           max_receivers_num: int = 10, enable_attaching_files: bool = True,
-                          max_attached_files_num: int = 10) -> View:
+                          max_attached_files_num: int = 10, num_of_messages_a_user_can_send: int = 10) -> View:
     extra_blocks = []
 
     if enable_attaching_files and max_attached_files_num > 0:
@@ -30,14 +30,21 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             ),
         )
 
-    return View(
-        type="modal",
-        callback_id="thank_you_dialog_save_button_clicked",
-        title="Update Thank You!" if state else "Say Thank you!",
-        submit="Save",
-        close="Cancel",
-        private_metadata=str(PrivateMetadata(thank_you_message_uuid=None if state is None else state.uuid)),
-        blocks=[
+    if not num_of_messages_a_user_can_send:
+        submit = None
+        blocks = [
+            SectionBlock(
+                text="You have already sent many thank you messages! Next week you will be able to send more :)"
+            )
+        ]
+    else:
+        submit = "Say!"
+        blocks = [
+            *([] if num_of_messages_a_user_can_send > 3 else [
+                SectionBlock(
+                    text=f"You can send {num_of_messages_a_user_can_send} more thank you(s) this week."
+                )
+            ]),
             *([] if not (enable_company_values and thank_you_types) else [
                 thank_you_type_block(thank_you_types,
                                      selected_value=None if state is None or state.type is None else state.type,
@@ -56,4 +63,13 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                                  enable_rich_text=enable_rich_text),
             *extra_blocks
         ]
+
+    return View(
+        type="modal",
+        callback_id="thank_you_dialog_save_button_clicked",
+        title="Update Thank You!" if state else "Say Thank you!",
+        submit=submit,
+        close="Cancel",
+        private_metadata=str(PrivateMetadata(thank_you_message_uuid=None if state is None else state.uuid)),
+        blocks=blocks
     )
