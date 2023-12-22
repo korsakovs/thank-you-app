@@ -198,7 +198,7 @@ def home_page_configuration_max_number_of_messages_per_week_value_changed_action
     try:
         new_limit = int(body["actions"][0]["selected_option"]["value"])
         new_limit = max(1, new_limit)
-        new_limit = min(5, new_limit)
+        new_limit = min(10, new_limit)
     except (TypeError, ValueError):
         new_limit = 5
 

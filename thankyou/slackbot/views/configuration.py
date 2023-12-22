@@ -47,7 +47,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
         if enum == leaderbord_time_settings:
             stats_time_period_to_use_selected_option = option
 
-    weekly_limit_options = sorted(list(set(list(range(1, 6)) + [weekly_thank_you_limit])))
+    weekly_limit_options = sorted(list(set(list(range(1, 11)) + [weekly_thank_you_limit])))
     max_thank_you_receivers_options = sorted(list(set(list(range(1, 11)) + [max_thank_you_receivers_num])))
     max_attached_files_num_options = sorted(list(set(list(range(1, 11)) + [max_attached_files_num])))
 
