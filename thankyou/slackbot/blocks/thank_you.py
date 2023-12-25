@@ -6,6 +6,7 @@ from slack_sdk.models.blocks import SectionBlock, TextObject, ContextBlock, Opti
     RichTextInputElement, RichTextBlock
 
 from thankyou.core.models import ThankYouMessage, ThankYouType
+from thankyou.slackbot.blocks.utils import rich_text_block_as_markdown
 from thankyou.slackbot.utils.string import es
 
 
@@ -20,9 +21,17 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
 
     # text = es(thank_you_message.text)
 
+    is_rich_text = thank_you_message.is_rich_text
+    text = thank_you_message.text
+    if is_rich_text and thank_you_message.images:
+        markdown_text = rich_text_block_as_markdown(text)
+        if markdown_text is not None:
+            is_rich_text = False
+            text = markdown_text
+
     if title:
         title_accessory = None
-        if thank_you_message.is_rich_text and thank_you_message.images:
+        if is_rich_text and thank_you_message.images:
             image = sorted(thank_you_message.images, key=lambda i: i.ordering_key)[0]
             title_accessory = ImageElement(
                 image_url=image.url,
@@ -37,7 +46,7 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
             accessory=title_accessory
         ))
 
-    if thank_you_message.is_rich_text:
+    if is_rich_text:
         result.append(RichTextBlock(
             elements=json.loads(thank_you_message.text)["elements"]
         ))
@@ -54,7 +63,7 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
             result.append(SectionBlock(
                 text=TextObject(
                     type="mrkdwn",
-                    text=thank_you_message.text,
+                    text=text,
                     # emoji=True
                 )
             ))
@@ -64,7 +73,7 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
             result.append(SectionBlock(
                 text=TextObject(
                     type="mrkdwn",
-                    text=thank_you_message.text + "\n---\n"
+                    text=text + "\n---\n"
                          + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
                 ),
                 accessory=ImageElement(
