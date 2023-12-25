@@ -41,6 +41,7 @@ class Company:
     admins: List[CompanyAdmin]
     share_messages_in_slack_channel: Optional[Slack_Channel_ID_Type]
     leaderbord_time_settings: LeaderbordTimeSettings
+    enable_weekly_thank_you_limit: bool
     weekly_thank_you_limit: int
     receivers_number_limit: int
     enable_leaderboard: bool

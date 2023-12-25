@@ -22,6 +22,7 @@ def get_or_create_company_by_slack_team_id(slack_team_id: str, new_name: str = N
                     admins=[],
                     share_messages_in_slack_channel=None,
                     leaderbord_time_settings=LeaderbordTimeSettings.LAST_30_DAYS,
+                    enable_weekly_thank_you_limit=True,
                     weekly_thank_you_limit=5,
                     receivers_number_limit=10,
                     enable_leaderboard=True,

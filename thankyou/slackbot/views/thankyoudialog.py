@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from slack_sdk.models.blocks import InputBlock, SectionBlock
 from slack_sdk.models.blocks.block_elements import FileInputElement
@@ -12,7 +12,8 @@ from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None,
                           enable_rich_text: bool = False, enable_company_values: bool = True,
                           max_receivers_num: int = 10, enable_attaching_files: bool = True,
-                          max_attached_files_num: int = 10, num_of_messages_a_user_can_send: int = 10) -> View:
+                          max_attached_files_num: int = 10,
+                          num_of_messages_a_user_can_send: Optional[int] = None) -> View:
     extra_blocks = []
 
     if enable_attaching_files and max_attached_files_num > 0:
@@ -30,7 +31,7 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             ),
         )
 
-    if not num_of_messages_a_user_can_send:
+    if num_of_messages_a_user_can_send is not None and num_of_messages_a_user_can_send <= 0:
         submit = None
         blocks = [
             SectionBlock(
@@ -40,7 +41,7 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
     else:
         submit = "Say!"
         blocks = [
-            *([] if num_of_messages_a_user_can_send > 3 else [
+            *([] if num_of_messages_a_user_can_send is None or num_of_messages_a_user_can_send > 3 else [
                 SectionBlock(
                     text=f"You can send {num_of_messages_a_user_can_send} more thank you(s) this week."
                 )

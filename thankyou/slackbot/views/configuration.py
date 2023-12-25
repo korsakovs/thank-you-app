@@ -10,7 +10,8 @@ from thankyou.slackbot.blocks.homepage import home_page_actions_block
 
 def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
                        share_messages_in_slack_channel: Slack_Channel_ID_Type, thank_you_types: List[ThankYouType],
-                       leaderbord_time_settings: LeaderbordTimeSettings, weekly_thank_you_limit: int,
+                       leaderbord_time_settings: LeaderbordTimeSettings, enable_weekly_thank_you_limit: bool,
+                       weekly_thank_you_limit: int,
                        enable_rich_text_in_thank_you_messages: bool, enable_company_values: bool,
                        enable_leaderboard: bool, max_thank_you_receivers_num: int, enable_attaching_files: bool,
                        max_attached_files_num: int):
@@ -106,14 +107,20 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
             HeaderBlock(
                 text="Weekly limits"
             ),
-            SectionBlock(
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_weekly_thank_you_limit_value_changed",
+                checkbox_value="enable_weekly_thank_you_limit",
+                checkbox_label="Enable weekly limit for the number of thank yous a single user can send",
+                enabled=enable_weekly_thank_you_limit
+            ),
+            *([] if not enable_weekly_thank_you_limit else [SectionBlock(
                 text="How many thank yous a user can send in one week",
                 accessory=StaticSelectElement(
                     options=[Option(value=str(num), label=str(num)) for num in weekly_limit_options],
                     initial_option=Option(value=str(weekly_thank_you_limit), label=str(weekly_thank_you_limit)),
                     action_id="home_page_configuration_max_number_of_messages_per_week_value_changed"
                 )
-            ),
+            )]),
             HeaderBlock(
                 text="Maximum number of thank you receivers"
             ),

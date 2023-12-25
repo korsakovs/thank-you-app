@@ -118,6 +118,11 @@ def home_page_say_thank_you_button_clicked_action_handler(body, logger):
         created_before=end_of_the_week
     ))
 
+    if company.enable_weekly_thank_you_limit:
+        num_of_messages_a_user_can_send = max(0, company.weekly_thank_you_limit - sent_messages_num)
+    else:
+        num_of_messages_a_user_can_send = None
+
     try:
         app.client.views_open(
             trigger_id=body["trigger_id"],
@@ -128,7 +133,7 @@ def home_page_say_thank_you_button_clicked_action_handler(body, logger):
                 max_receivers_num=company.receivers_number_limit,
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
-                num_of_messages_a_user_can_send=max(0, company.weekly_thank_you_limit - sent_messages_num),
+                num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
             ),
         )
     except Exception as e:
