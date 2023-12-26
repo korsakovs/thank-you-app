@@ -22,6 +22,8 @@ from thankyou.slackbot.handlers.configuration import home_page_configuration_but
 from thankyou.slackbot.handlers.homepage import app_home_opened_action_handler, \
     home_page_company_thank_you_button_clicked_action_handler, home_page_my_thank_you_button_clicked_action_handler, \
     home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler
+from thankyou.slackbot.handlers.shortcuts import say_thank_you_global_shortcut_action_handler, \
+    say_thank_you_message_shortcut_action_handler
 from thankyou.slackbot.handlers.slashcommands import merci_slash_command_action_handler
 from thankyou.slackbot.handlers.thankyoudialog import thank_you_dialog_save_button_clicked_action_handler
 from thankyou.slackbot.handlers.thankyoutypedialog import thank_you_type_dialog_save_button_clicked_action_handler, \
@@ -170,6 +172,18 @@ def _thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handl
 def _merci_slash_command_action_handler(ack, body, logger):
     ack()
     merci_slash_command_action_handler(body, logger)
+
+
+@app.shortcut("say_thank_you_global_shortcut")
+def _say_thank_you_global_shortcut_action_handler(ack, body, logger):
+    ack()
+    say_thank_you_global_shortcut_action_handler(body, logger)
+
+
+@app.shortcut("say_thank_you_message_shortcut")
+def _say_thank_you_message_shortcut_action_handler(ack, body, logger):
+    ack()
+    say_thank_you_message_shortcut_action_handler(body, logger)
 
 
 if __name__ == "__main__":
