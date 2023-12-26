@@ -4,9 +4,10 @@ from typing import Optional, Tuple, List
 
 from cachetools import TTLCache, cached
 
-from thankyou.core.models import SlackUserInfo, LeaderbordTimeSettings, ThankYouType
+from thankyou.core.models import SlackUserInfo, LeaderbordTimeSettings, ThankYouType, CompanyAdmin, Company
 from thankyou.dao import dao
 from thankyou.slackbot.app import app
+from thankyou.slackbot.views.configuration import configuration_no_access_view, configuration_view
 
 
 @cached(cache=TTLCache(maxsize=1024 * 20, ttl=60 * 60))
@@ -40,6 +41,14 @@ def get_user_info(slack_user_id: str) -> Optional[SlackUserInfo]:
             is_admin=bool(user_data["is_admin"]),
             is_owner=bool(user_data["is_owner"])
         )
+
+
+def is_user_an_admin(company_admins: List[CompanyAdmin], slack_user_id: str):
+    result = slack_user_id in [admin.slack_user_id for admin in company_admins]
+    if not result:
+        user_info = get_user_info(slack_user_id)
+        result = user_info and (user_info.is_admin or user_info.is_owner)
+    return result
 
 
 @dataclass
@@ -110,4 +119,31 @@ def get_sender_and_receiver_leaders(company_uuid: str, leaderboard_time_settings
         leaders_stats_until_datetime=leaders_stats_until_datetime,
         sender_leaders=sender_leaders,
         receiver_leaders=receiver_leaders
+    )
+
+
+def publish_configuration_view(company: Company, user_id: str):
+    is_admin = is_user_an_admin(company_admins=company.admins, slack_user_id=user_id)
+
+    if not is_admin:
+        view = configuration_no_access_view(admin_slack_ids=[admin.slack_user_id for admin in company.admins])
+    else:
+        view = configuration_view(
+            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
+            leaderbord_time_settings=company.leaderbord_time_settings,
+            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
+            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
+            weekly_thank_you_limit=company.weekly_thank_you_limit,
+            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
+            enable_company_values=company.enable_company_values,
+            enable_leaderboard=company.enable_leaderboard,
+            max_thank_you_receivers_num=company.receivers_number_limit,
+            enable_attaching_files=company.enable_attaching_files,
+            max_attached_files_num=company.max_attached_files_num,
+        )
+
+    app.client.views_publish(
+        user_id=user_id,
+        view=view
     )

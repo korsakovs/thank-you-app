@@ -1,24 +1,14 @@
 from datetime import datetime, timedelta
-from typing import List
 
 from slack_sdk import WebClient
 
-from thankyou.core.models import CompanyAdmin
 from thankyou.dao import dao
 from thankyou.slackbot.app import app
-from thankyou.slackbot.handlers.common import get_user_info, get_sender_and_receiver_leaders
+from thankyou.slackbot.handlers.common import get_sender_and_receiver_leaders
 from thankyou.slackbot.utils.company import get_or_create_company_by_event, get_or_create_company_by_slack_team_id, \
     get_or_create_company_by_body
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, home_page_my_thank_yous_view
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
-
-
-def is_user_an_admin(company_admins: List[CompanyAdmin], slack_user_id: str):
-    result = slack_user_id in [admin.slack_user_id for admin in company_admins]
-    if not result:
-        user_info = get_user_info(slack_user_id)
-        result = user_info and (user_info.is_admin or user_info.is_owner)
-    return result
 
 
 def app_home_opened_action_handler(client: WebClient, event, logger):
@@ -28,12 +18,10 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
         company = get_or_create_company_by_slack_team_id(client.default_params["team_id"])
 
     user_id = event["user"]
-    is_admin = is_user_an_admin(company_admins=company.admins, slack_user_id=user_id)
 
     view = home_page_company_thank_yous_view(
         thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
                                                        last_n=20),
-        is_admin=is_admin,
         current_user_slack_id=user_id,
         enable_leaderboard=company.enable_leaderboard,
     )
@@ -48,13 +36,11 @@ def home_page_company_thank_you_button_clicked_action_handler(body, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
-    is_admin = is_user_an_admin(company_admins=company.admins, slack_user_id=user_id)
 
     app.client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
-            is_admin=is_admin,
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
         )
@@ -65,7 +51,6 @@ def home_page_show_leaders_button_clicked_action_handler(body, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
-    is_admin = is_user_an_admin(company_admins=company.admins, slack_user_id=user_id)
 
     senders_receivers_stats = get_sender_and_receiver_leaders(
         company_uuid=company.uuid,
@@ -77,7 +62,6 @@ def home_page_show_leaders_button_clicked_action_handler(body, logger):
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
-            is_admin=is_admin,
             current_user_slack_id=user_id,
             sender_leaders=senders_receivers_stats.sender_leaders,
             receiver_leaders=senders_receivers_stats.receiver_leaders,
@@ -92,14 +76,12 @@ def home_page_my_thank_you_button_clicked_action_handler(body, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
-    is_admin = is_user_an_admin(company_admins=company.admins, slack_user_id=user_id)
 
     app.client.views_publish(
         user_id=user_id,
         view=home_page_my_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
                                                            last_n=20),
-            is_admin=is_admin
         )
     )
 

@@ -1,32 +1,16 @@
 from thankyou.core.models import CompanyAdmin, LeaderbordTimeSettings
 from thankyou.dao import dao
 from thankyou.slackbot.app import app
+from thankyou.slackbot.handlers.common import publish_configuration_view
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
-from thankyou.slackbot.views.configuration import configuration_view
 from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_dialog
 
 
 def home_page_configuration_button_clicked_action_handler(body, logger):
     logger.info(body)
-    user_id = body["user"]["id"]
-    company = get_or_create_company_by_body(body)
-
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=get_or_create_company_by_body(body),
+        user_id=body["user"]["id"]
     )
 
 
@@ -49,22 +33,9 @@ def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(bo
 
     company = dao.read_company(company_uuid=company.uuid)
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -78,22 +49,9 @@ def home_page_configuration_notification_slack_channel_value_changed_action_hand
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.share_messages_in_slack_channel = channel_slack_id
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -109,22 +67,9 @@ def home_page_configuration_enable_leaderboard_value_changed_action_handler(body
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.enable_leaderboard = new_enable_leaderboard
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -142,22 +87,9 @@ def home_page_configuration_stats_time_period_value_changed_action_handler(body,
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.leaderbord_time_settings = new_time_period
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -177,22 +109,9 @@ def home_page_configuration_max_number_of_thank_you_receivers_value_changed_acti
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.receivers_number_limit = new_limit
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -208,22 +127,9 @@ def home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_h
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.enable_weekly_thank_you_limit = new_enable_weekly_thank_you_limit
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -243,22 +149,9 @@ def home_page_configuration_max_number_of_messages_per_week_value_changed_action
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.weekly_thank_you_limit = new_limit
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -274,22 +167,9 @@ def home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.enable_rich_text_in_thank_you_messages = new_enable_rich_text_value
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -305,22 +185,9 @@ def home_page_configuration_enable_attaching_files_value_changed_action_handler(
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.enable_attaching_files = new_enable_attaching_files
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -340,22 +207,9 @@ def home_page_configuration_max_attached_files_num_value_changed_action_handler(
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.max_attached_files_num = new_limit
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 
@@ -371,22 +225,9 @@ def home_page_configuration_enable_company_values_value_changed_action_handler(b
         # ORM_WARNING: the following statement works because we use SQL Alchemy
         company.enable_company_values = new_enable_company_values
 
-    app.client.views_publish(
-        user_id=user_id,
-        view=configuration_view(
-            thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
-            admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
-            leaderbord_time_settings=company.leaderbord_time_settings,
-            share_messages_in_slack_channel=company.share_messages_in_slack_channel,
-            enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
-            weekly_thank_you_limit=company.weekly_thank_you_limit,
-            enable_rich_text_in_thank_you_messages=company.enable_rich_text_in_thank_you_messages,
-            enable_company_values=company.enable_company_values,
-            enable_leaderboard=company.enable_leaderboard,
-            max_thank_you_receivers_num=company.receivers_number_limit,
-            enable_attaching_files=company.enable_attaching_files,
-            max_attached_files_num=company.max_attached_files_num,
-        )
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
     )
 
 

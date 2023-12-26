@@ -1,11 +1,41 @@
 from typing import List
 
 from slack_sdk.models.blocks import SectionBlock, ButtonElement, HeaderBlock, ContextBlock, TextObject, \
-    ChannelSelectElement, StaticSelectElement, Option, UserMultiSelectElement, ActionsBlock, CheckboxesElement
+    ChannelSelectElement, StaticSelectElement, Option, UserMultiSelectElement, ActionsBlock, CheckboxesElement, \
+    DividerBlock
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouType, Slack_User_ID_Type, Slack_Channel_ID_Type, LeaderbordTimeSettings
 from thankyou.slackbot.blocks.homepage import home_page_actions_block
+
+
+def configuration_no_access_view(admin_slack_ids: List[str] = None):
+    admins_str = ""
+    if admin_slack_ids:
+        admins_str = (" You can also ask " + ", ".join(f"<@{admin_slack_id}>" for admin_slack_id in admin_slack_ids)
+                      + ", as they also have access to the configuration settings, and can give you permissions.")
+
+    return View(
+        type="home",
+        title="Configuration",
+        blocks=[
+            home_page_actions_block(selected="configuration"),
+            HeaderBlock(
+                text="Configuration"
+            ),
+            ContextBlock(
+                elements=[TextObject(text="This page is only accessible by Slack Workspace Admins and other people "
+                                          "they have granted access to",
+                                     type="mrkdwn")]
+            ),
+            DividerBlock(),
+            SectionBlock(
+                text="Unfortunately, you don't have access to the app configuration. Are you sure you need "
+                     "to configure the \"Merci!\" application? If so, ask you Slack admins to add you "
+                     "to the list of administrators." + admins_str
+            ),
+        ],
+    )
 
 
 def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
@@ -56,7 +86,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
         type="home",
         title="Configuration",
         blocks=[
-            home_page_actions_block(selected="configuration", show_configuration=True),
+            home_page_actions_block(selected="configuration"),
             HeaderBlock(
                 text="Configuration"
             ),

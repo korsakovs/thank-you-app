@@ -7,7 +7,7 @@ from thankyou.core.models import ThankYouMessage, ThankYouType, Slack_User_ID_Ty
 from thankyou.slackbot.blocks.thank_you import thank_you_message_blocks
 
 
-def home_page_actions_block(selected: str = "my_updates", show_configuration: bool = False) -> ActionsBlock:
+def home_page_actions_block(selected: str = "my_updates") -> ActionsBlock:
     elements = [
         ButtonElement(
             text="Say Thank you!",
@@ -24,13 +24,12 @@ def home_page_actions_block(selected: str = "my_updates", show_configuration: bo
             style="primary" if selected == "my_thank_yous" else None,
             action_id="home_page_my_thank_you_button_clicked"
         ),
-    ]
-    if show_configuration:
-        elements.append(ButtonElement(
+        ButtonElement(
             text="Configuration",
             style="primary" if selected == "configuration" else None,
             action_id="home_page_configuration_button_clicked"
-        ))
+        )
+    ]
 
     return ActionsBlock(elements=elements)
 
