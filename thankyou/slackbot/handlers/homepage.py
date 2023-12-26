@@ -20,8 +20,7 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
     user_id = event["user"]
 
     view = home_page_company_thank_yous_view(
-        thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
-                                                       last_n=20),
+        thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
         current_user_slack_id=user_id,
         enable_leaderboard=company.enable_leaderboard,
     )
