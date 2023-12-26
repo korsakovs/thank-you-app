@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from typing import List, Optional, Tuple
 
-from thankyou.core.models import Company, ThankYouMessage, ThankYouType, ThankYouStats, Slack_User_ID_Type, CompanyAdmin
+from thankyou.core.models import Company, ThankYouMessage, ThankYouType, Slack_User_ID_Type, CompanyAdmin
 
 
 class Dao(ABC):
