@@ -10,6 +10,21 @@ from thankyou.slackbot.app import app
 from thankyou.slackbot.views.configuration import configuration_no_access_view, configuration_view
 
 
+_already_invited_to_a_channel = TTLCache(maxsize=1024 * 20, ttl=10 * 60)
+
+
+def already_invited_to_a_channel(company_id: str, channel: str, user_id: str):
+    key = "++".join((company_id, channel, user_id))
+
+    global _already_invited_to_a_channel
+
+    if key in _already_invited_to_a_channel:
+        return True
+
+    _already_invited_to_a_channel[key] = True
+    return False
+
+
 @cached(cache=TTLCache(maxsize=1024 * 20, ttl=60 * 60))
 def get_user_info(slack_user_id: str) -> Optional[SlackUserInfo]:
     user = app.client.users_info(user=slack_user_id)
@@ -132,6 +147,7 @@ def publish_configuration_view(company: Company, user_id: str):
             thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
             admin_slack_user_ids=[admin.slack_user_id for admin in company.admins],
             leaderbord_time_settings=company.leaderbord_time_settings,
+            enable_sharing_in_a_slack_channel=company.enable_sharing_in_a_slack_channel,
             share_messages_in_slack_channel=company.share_messages_in_slack_channel,
             enable_weekly_thank_you_limit=company.enable_weekly_thank_you_limit,
             weekly_thank_you_limit=company.weekly_thank_you_limit,

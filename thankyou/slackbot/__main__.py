@@ -18,7 +18,8 @@ from thankyou.slackbot.handlers.configuration import home_page_configuration_but
     home_page_configuration_max_number_of_thank_you_receivers_value_changed_action_handler, \
     home_page_configuration_enable_attaching_files_value_changed_action_handler, \
     home_page_configuration_max_attached_files_num_value_changed_action_handler, \
-    home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler
+    home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler, \
+    home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler
 from thankyou.slackbot.handlers.homepage import app_home_opened_action_handler, \
     home_page_company_thank_you_button_clicked_action_handler, home_page_my_thank_you_button_clicked_action_handler, \
     home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler
@@ -76,6 +77,12 @@ def _home_page_configuration_button_clicked_action_handler(ack, body, logger):
 def _home_page_configuration_admin_slack_user_ids_value_changed_action_handler(ack, body, logger):
     ack()
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler(body, logger)
+
+
+@app.action("home_page_configuration_enable_sharing_in_a_slack_channel_value_changed")
+def _home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(ack, body, logger):
+    ack()
+    home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(body, logger)
 
 
 @app.action("home_page_configuration_notification_slack_channel_value_changed")

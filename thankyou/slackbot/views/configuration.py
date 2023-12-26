@@ -38,7 +38,7 @@ def configuration_no_access_view(admin_slack_ids: List[str] = None):
     )
 
 
-def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
+def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sharing_in_a_slack_channel: bool,
                        share_messages_in_slack_channel: Slack_Channel_ID_Type, thank_you_types: List[ThankYouType],
                        leaderbord_time_settings: LeaderbordTimeSettings, enable_weekly_thank_you_limit: bool,
                        weekly_thank_you_limit: int,
@@ -108,13 +108,21 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type],
             HeaderBlock(
                 text="Notification Settings"
             ),
-            SectionBlock(
-                text="Share all thank yous in a Slack channel",
-                accessory=ChannelSelectElement(
-                    initial_channel=share_messages_in_slack_channel,
-                    action_id="home_page_configuration_notification_slack_channel_value_changed"
-                )
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_sharing_in_a_slack_channel_value_changed",
+                checkbox_value="enable_sharing_in_a_slack_channel",
+                checkbox_label="Enable sharing all thank you messages in a public Slack channel",
+                enabled=enable_sharing_in_a_slack_channel
             ),
+            *([] if not enable_sharing_in_a_slack_channel else [
+                SectionBlock(
+                    text="Share all thank yous in a Slack channel",
+                    accessory=ChannelSelectElement(
+                        initial_channel=share_messages_in_slack_channel,
+                        action_id="home_page_configuration_notification_slack_channel_value_changed"
+                    )
+                ),
+            ]),
             HeaderBlock(
                 text="Leaderboards Settings"
             ),

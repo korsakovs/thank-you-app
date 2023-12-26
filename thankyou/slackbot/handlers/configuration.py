@@ -39,6 +39,24 @@ def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(bo
     )
 
 
+def home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    new_enable_sharing_in_a_slack_channel = ("enable_sharing_in_a_slack_channel"
+                                             in [option["value"] for option in body["actions"][0]["selected_options"]])
+
+    if company.enable_sharing_in_a_slack_channel != new_enable_sharing_in_a_slack_channel:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.enable_sharing_in_a_slack_channel = new_enable_sharing_in_a_slack_channel
+
+    publish_configuration_view(
+        company=company,
+        user_id=user_id
+    )
+
+
 def home_page_configuration_notification_slack_channel_value_changed_action_handler(body, logger):
     logger.info(body)
     user_id = body["user"]["id"]

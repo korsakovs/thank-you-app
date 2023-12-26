@@ -43,6 +43,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("slack_team_id", String(256), nullable=False, unique=True, index=True),
             Column("name", String(256), nullable=False),
             Column("deleted", Boolean, nullable=False),
+            Column("enable_sharing_in_a_slack_channel", Boolean, nullable=False),
             Column("share_messages_in_slack_channel", String(256), nullable=True),
             Column("leaderbord_time_settings", Enum(LeaderbordTimeSettings), nullable=False),
             Column("enable_weekly_thank_you_limit", Boolean, nullable=False),
