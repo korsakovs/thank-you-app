@@ -1,0 +1,15 @@
+name: Push
+
+on:
+  push:
+
+jobs:
+  my-deployment:
+    name: deploy to production
+    runs-on: docker-latest
+    steps:
+      - run: apk update
+      - run: apk add openssh-client
+      - run: eval $(ssh-agent -s)
+      - run: echo ${{ secrets.$WWF_SSH_PRIVATE_KEY }} | ssh-add -
+      - run: mkdir -p ~/.ssh
