@@ -11,5 +11,5 @@ jobs:
       - run: apk update
       - run: apk add openssh-client
       - run: eval $(ssh-agent -s)
-      - run: echo ${{ secrets.$WWF_SSH_PRIVATE_KEY }} | ssh-add -
+      - run: echo ${{ secrets.WWF_SSH_PRIVATE_KEY }} | ssh-add -
       - run: mkdir -p ~/.ssh
