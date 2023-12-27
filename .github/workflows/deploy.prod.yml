@@ -11,6 +11,6 @@ jobs:
 #      - run: apk update
       - run: sudo apt-get install openssh-client
       - run: eval $(ssh-agent -s)
-      - run: echo ${{ secrets.WWF_SSH_PRIVATE_KEY }} | ssh-add -
+      - run: echo "${{ secrets.WWF_SSH_PRIVATE_KEY }}" | ssh-add -
       - run: mkdir -p ~/.ssh
       - run: echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
