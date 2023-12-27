@@ -6,7 +6,7 @@ on:
 jobs:
   my-deployment:
     name: deploy to production
-    runs-on: docker-latest
+    runs-on: ubuntu-latest
     steps:
       - run: apk update
       - run: apk add openssh-client
