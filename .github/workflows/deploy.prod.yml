@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 #      - run: apk update
+      - uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
       - uses: actions/checkout@v3
       - uses: webfactory/ssh-agent@v0.8.0
         with:
