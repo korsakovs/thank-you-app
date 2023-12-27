@@ -14,7 +14,7 @@ jobs:
     steps:
 #      - run: apk update
       - run: sudo apt-get install openssh-client
-      - run: eval $(ssh-agent -s)
+      - run: exec ssh-agent bash
       - run: sleep 5
       - run: echo "${{ secrets.WWF_SSH_PRIVATE_KEY }}" | ssh-add -
       - run: mkdir -p ~/.ssh
