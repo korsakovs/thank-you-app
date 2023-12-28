@@ -13,8 +13,8 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - type: bind
-        # source: /home/wwf/pg_data/pg-thank-you-data
-        source: ./merci/pg_data/pg-thank-you-data
+        source: /home/wwf/pg_data/pg-thank-you-data
+        # source: ./merci/pg_data/pg-thank-you-data
         target: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
