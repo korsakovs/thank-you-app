@@ -25,7 +25,7 @@ jobs:
       - run: docker context create remote --docker "host=ssh://${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }}"
       - run: docker --context remote compose -f docker-compose.yml build
       # as we can't set --project-directory for a remote context, we have to use "ssh" to run docker compose
-      - run: scp ./docker-compose.prod.yml ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }}:~/
+      - run: scp ./docker-compose.yml ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }}:~/
       - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "docker compose -f docker-compose.yml up -d --force-recreate"
       - run: docker --context remote image prune -a -f
       - run: docker --context remote image container -a -f
