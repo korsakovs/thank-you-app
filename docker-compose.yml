@@ -5,7 +5,7 @@ services:
     container_name: merci-postgres
     build:
       context: .
-      dockerfile: docker/postgres/.Dockerfile
+      dockerfile: postgres.Dockerfile
     environment:
       - POSTGRES_DB=thank_you
       - POSTGRES_USER=postgres
@@ -46,7 +46,7 @@ services:
       - THANK_YOU_DAO=${THANK_YOU_DAO}
     build:
       context: .
-      dockerfile: docker/bot/.Dockerfile
+      dockerfile: bot.Dockerfile
     restart: always
     networks:
       - wwf_network
