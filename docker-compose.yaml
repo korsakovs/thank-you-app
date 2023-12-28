@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  merci-postgres:
+    container_name: merci-postgres
+    build:
+      context: .
+      dockerfile: docker/postgres/.Dockerfile
+    environment:
+      - POSTGRES_DB=thank_you
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./pg_data/pg-thank-you-data:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    networks:
+      - wwf_network
+
+  merci-bot:
+    container_name: merci-bot
+    depends_on:
+      merci-postgres:
+        condition: service_healthy
+        restart: true
+    environment:
+      - POSTGRES_HOST=merci-postgres
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+      - THANK_YOU_DAO=${THANK_YOU_DAO}
+    build:
+      context: .
+      dockerfile: docker/bot/.Dockerfile
+    restart: always
+    networks:
+      - wwf_network
+
+  pgadmin:
+    container_name: merci-pgadmin
+    depends_on:
+      - merci-postgres
+    image: dpage/pgadmin4:7.2
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=test@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5433:80"
+    networks:
+      - wwf_network
+
+
+volumes:
+  thank-you-data:
+    name: thank-you-data
+
+
+networks:
+  wwf_network:
+    name: wwf_network
+    driver: bridge
