@@ -7,12 +7,12 @@ from thankyou.dao.sqlalchemy import SQLAlchemyDao
 
 
 class SQLiteDao(SQLAlchemyDao):
-    _DB_FILENAME = "update_me.db"
-    _DB_PYTEST_FILENAME = "pytest_update_me.db"
+    _DB_FILENAME = "thank_you.db"
+    _DB_PYTEST_FILENAME = "pytest_thank_you.db"
 
     @property
     def _db_folder(self):
-        return os.path.join(os.path.dirname(__file__), "..", "..", "db")
+        return os.path.join(os.path.dirname(__file__), "..", "..", "sqlite_data")
 
     @property
     def _db_file(self):

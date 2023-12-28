@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  merci-postgres:
+    environment:
+      - POSTGRES_DB=thank_you
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ../pg_data:/var/lib/postgresql/data/pgdata
+
+  merci-bot:
+    environment:
+      - POSTGRES_HOST=merci-postgres
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+      - THANK_YOU_DAO=SQLITE
+    volumes:
+      - ../sqlite_data:/merci-bot/sqlite_data
+
+  pgadmin:
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=test@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_CONFIG_SERVER_MODE=False
+
+
+networks:
+  wwf_network:
+    name: wwf_network
+    driver: bridge
+    external: false

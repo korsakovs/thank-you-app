@@ -4,18 +4,13 @@ services:
   merci-postgres:
     container_name: merci-postgres
     build:
-      context: .
-      dockerfile: postgres.Dockerfile
+      context: ..
+      dockerfile: docker/postgres/postgres.Dockerfile
     environment:
       - POSTGRES_DB=thank_you
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/data/pgdata
-    volumes:
-      - type: bind
-        source: /home/wwf/pg_data/pg-thank-you-data
-        # source: ./merci/pg_data/pg-thank-you-data
-        target: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     healthcheck:
@@ -35,6 +30,9 @@ services:
 
   merci-bot:
     container_name: merci-bot
+    build:
+      context: ..
+      dockerfile: docker/bot/bot.Dockerfile
     depends_on:
       merci-postgres:
         condition: service_healthy
@@ -44,9 +42,6 @@ services:
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
       - THANK_YOU_DAO=${THANK_YOU_DAO}
-    build:
-      context: .
-      dockerfile: bot.Dockerfile
     restart: always
     networks:
       - wwf_network

@@ -1,11 +1,15 @@
+import logging
+
 from thankyou.core.config import get_active_dao_type, DaoType, INITIAL_THANK_YOU_TYPES
 from thankyou.core.models import Company, ThankYouType
 from thankyou.dao.postres import PostgresDao
 from thankyou.dao.sqlite import SQLiteDao
 
 if get_active_dao_type() == DaoType.POSTGRES:
+    logging.info("USING POSTGRES DAO")
     dao = PostgresDao()
 elif get_active_dao_type() == DaoType.SQLITE:
+    logging.info("USING SQLITE DAO")
     dao = SQLiteDao()
 else:
     raise TypeError(f"DAO {get_active_dao_type().name} is not supported")
