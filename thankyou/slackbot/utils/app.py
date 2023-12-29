@@ -18,6 +18,7 @@ _IS_SOCKET_MODE = None
 if oauth_settings and slack_signing_secret():
     _IS_SOCKET_MODE = False
     logger.info("Creating an HTTP app with OAuth")
+    logger.info(f"Slack signing secret = '{slack_signing_secret()}'")
     app = App(
         signing_secret=slack_signing_secret(),
         oauth_settings=oauth_settings,
