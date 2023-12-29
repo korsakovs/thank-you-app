@@ -11,10 +11,15 @@ from thankyou.dao.sqlalchemy import SQLAlchemyDao
 
 def get_installation_store(client_id: str):
     if isinstance(dao, SQLAlchemyDao):
-        return SQLAlchemyInstallationStore(
+        installation_store = SQLAlchemyInstallationStore(
             engine=dao.engine,
             client_id=client_id
         )
+        try:
+            installation_store.create_tables()
+        except Exception as e:
+            logging.warning(f"Can not create Slack installation state tables: {e}")
+        return installation_store
     else:
         raise TypeError(f"An installation store for the Dao type {type(dao)} can not be created")
 
@@ -29,6 +34,7 @@ def get_oauth_state_store():
             state_store.create_tables()
         except Exception as e:
             logging.warning(f"Can not create OAuth state table: {e}")
+        return state_store
     else:
         raise TypeError(f"An OAuth state store for the Dao type {type(dao)} can not be created")
 
