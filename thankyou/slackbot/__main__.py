@@ -3,7 +3,7 @@ import logging
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 
-from thankyou.core.config import slack_app_token
+from thankyou.core.config import slack_app_token, slack_client_id, slack_client_secret
 from thankyou.slackbot.handlers.configuration import home_page_configuration_button_clicked_action_handler, \
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler, \
     home_page_configuration_notification_slack_channel_value_changed_action_handler, \
@@ -194,6 +194,8 @@ def _say_thank_you_message_shortcut_action_handler(ack, body, logger):
 
 
 if __name__ == "__main__":
+    print(f"Using Slack Client Id: {slack_client_id()}")
+    print(f"Using Slack Client Secret: {slack_client_secret()}")
     if is_socket_mode():
         handler = SocketModeHandler(app, slack_app_token())
         handler.start()
