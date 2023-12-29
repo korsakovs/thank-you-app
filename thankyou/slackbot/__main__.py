@@ -193,17 +193,7 @@ def _say_thank_you_message_shortcut_action_handler(ack, body, logger):
     say_thank_you_message_shortcut_action_handler(body, logger)
 
 
-print(f"11Using Slack Client Id: {slack_client_id()}")
-print(f"11Using Slack Client Secret: {slack_client_secret()}")
-logging.info(f"11Using Slack Client Id: {slack_client_id()}")
-logging.info(f"11Using Slack Client Secret: {slack_client_secret()}")
-
-
 if __name__ == "__main__":
-    print(f"Using Slack Client Id: {slack_client_id()}")
-    print(f"Using Slack Client Secret: {slack_client_secret()}")
-    logging.info(f"Using Slack Client Id: {slack_client_id()}")
-    logging.info(f"Using Slack Client Secret: {slack_client_secret()}")
     if is_socket_mode():
         handler = SocketModeHandler(app, slack_app_token())
         handler.start()
