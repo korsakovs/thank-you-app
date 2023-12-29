@@ -10,6 +10,7 @@ logger.setLevel(logging.DEBUG)
 for handler in logger.root.handlers:
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(filename)s %(funcName)s "
                                            "- %(thread)d - %(message)s"))
+    handler.setLevel(logging.DEBUG)
 
 _IS_SOCKET_MODE = None
 

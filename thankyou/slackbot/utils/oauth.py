@@ -21,10 +21,14 @@ def get_installation_store(client_id: str):
 
 def get_oauth_state_store():
     if isinstance(dao, SQLAlchemyDao):
-        return SQLAlchemyOAuthStateStore(
+        state_store = SQLAlchemyOAuthStateStore(
             expiration_seconds=600,
             engine=dao.engine,
         )
+        try:
+            state_store.create_tables()
+        except Exception as e:
+            logging.warning(f"Can not create OAuth state table: {e}")
     else:
         raise TypeError(f"An OAuth state store for the Dao type {type(dao)} can not be created")
 
