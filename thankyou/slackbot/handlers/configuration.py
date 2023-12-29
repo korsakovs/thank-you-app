@@ -1,20 +1,20 @@
 from thankyou.core.models import CompanyAdmin, LeaderbordTimeSettings
 from thankyou.dao import dao
 from thankyou.slackbot.handlers.common import publish_configuration_view
-from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_dialog
 
 
-def home_page_configuration_button_clicked_action_handler(body, logger):
+def home_page_configuration_button_clicked_action_handler(body, client, logger):
     logger.info(body)
     publish_configuration_view(
+        client=client,
         company=get_or_create_company_by_body(body),
         user_id=body["user"]["id"]
     )
 
 
-def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(body, logger):
+def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -34,12 +34,13 @@ def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(bo
     company = dao.read_company(company_uuid=company.uuid)
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(body, logger):
+def home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -52,12 +53,13 @@ def home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_acti
         company.enable_sharing_in_a_slack_channel = new_enable_sharing_in_a_slack_channel
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_notification_slack_channel_value_changed_action_handler(body, logger):
+def home_page_configuration_notification_slack_channel_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -68,12 +70,13 @@ def home_page_configuration_notification_slack_channel_value_changed_action_hand
         company.share_messages_in_slack_channel = channel_slack_id
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_enable_leaderboard_value_changed_action_handler(body, logger):
+def home_page_configuration_enable_leaderboard_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -86,12 +89,13 @@ def home_page_configuration_enable_leaderboard_value_changed_action_handler(body
         company.enable_leaderboard = new_enable_leaderboard
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_stats_time_period_value_changed_action_handler(body, logger):
+def home_page_configuration_stats_time_period_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -106,12 +110,13 @@ def home_page_configuration_stats_time_period_value_changed_action_handler(body,
         company.leaderbord_time_settings = new_time_period
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_max_number_of_thank_you_receivers_value_changed_action_handler(body, logger):
+def home_page_configuration_max_number_of_thank_you_receivers_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -128,12 +133,13 @@ def home_page_configuration_max_number_of_thank_you_receivers_value_changed_acti
         company.receivers_number_limit = new_limit
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler(body, logger):
+def home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -146,12 +152,13 @@ def home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_h
         company.enable_weekly_thank_you_limit = new_enable_weekly_thank_you_limit
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_max_number_of_messages_per_week_value_changed_action_handler(body, logger):
+def home_page_configuration_max_number_of_messages_per_week_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -168,12 +175,13 @@ def home_page_configuration_max_number_of_messages_per_week_value_changed_action
         company.weekly_thank_you_limit = new_limit
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed_action_handler(body, logger):
+def home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -186,12 +194,13 @@ def home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed
         company.enable_rich_text_in_thank_you_messages = new_enable_rich_text_value
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_enable_attaching_files_value_changed_action_handler(body, logger):
+def home_page_configuration_enable_attaching_files_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -204,12 +213,13 @@ def home_page_configuration_enable_attaching_files_value_changed_action_handler(
         company.enable_attaching_files = new_enable_attaching_files
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_max_attached_files_num_value_changed_action_handler(body, logger):
+def home_page_configuration_max_attached_files_num_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -226,12 +236,13 @@ def home_page_configuration_max_attached_files_num_value_changed_action_handler(
         company.max_attached_files_num = new_limit
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_enable_company_values_value_changed_action_handler(body, logger):
+def home_page_configuration_enable_company_values_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -244,12 +255,13 @@ def home_page_configuration_enable_company_values_value_changed_action_handler(b
         company.enable_company_values = new_enable_company_values
 
     publish_configuration_view(
+        client=client,
         company=company,
         user_id=user_id
     )
 
 
-def home_page_configuration_edit_company_value_clicked_action_handler(body, logger):
+def home_page_configuration_edit_company_value_clicked_action_handler(body, client, logger):
     logger.info(body)
     # user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -257,7 +269,7 @@ def home_page_configuration_edit_company_value_clicked_action_handler(body, logg
     thank_you_type_uuid = body["actions"][0]["value"]
     thank_you_type = dao.read_thank_you_type(company_uuid=company.uuid, thank_you_type_uuid=thank_you_type_uuid)
 
-    app.client.views_open(
+    client.views_open(
         trigger_id=body["trigger_id"],
         view=thank_you_type_dialog(
             state=thank_you_type
@@ -265,8 +277,8 @@ def home_page_configuration_edit_company_value_clicked_action_handler(body, logg
     )
 
 
-def home_page_configuration_add_new_company_value_clicked_action_handler(body, logger):
-    app.client.views_open(
+def home_page_configuration_add_new_company_value_clicked_action_handler(body, client, logger):
+    client.views_open(
         trigger_id=body["trigger_id"],
         view=thank_you_type_dialog()
     )

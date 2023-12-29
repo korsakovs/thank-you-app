@@ -4,7 +4,6 @@ from slack_sdk import WebClient
 
 from thankyou.dao import dao
 from thankyou.slackbot.handlers.common import get_sender_and_receiver_leaders
-from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_event, get_or_create_company_by_slack_team_id, \
     get_or_create_company_by_body
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, home_page_my_thank_yous_view
@@ -31,12 +30,12 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
     )
 
 
-def home_page_company_thank_you_button_clicked_action_handler(body, logger):
+def home_page_company_thank_you_button_clicked_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
-    app.client.views_publish(
+    client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
@@ -46,7 +45,7 @@ def home_page_company_thank_you_button_clicked_action_handler(body, logger):
     )
 
 
-def home_page_show_leaders_button_clicked_action_handler(body, logger):
+def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
@@ -57,7 +56,7 @@ def home_page_show_leaders_button_clicked_action_handler(body, logger):
         group_by_company_values=company.enable_company_values
     )
 
-    app.client.views_publish(
+    client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
@@ -71,12 +70,12 @@ def home_page_show_leaders_button_clicked_action_handler(body, logger):
     )
 
 
-def home_page_my_thank_you_button_clicked_action_handler(body, logger):
+def home_page_my_thank_you_button_clicked_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
-    app.client.views_publish(
+    client.views_publish(
         user_id=user_id,
         view=home_page_my_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
@@ -85,7 +84,7 @@ def home_page_my_thank_you_button_clicked_action_handler(body, logger):
     )
 
 
-def home_page_say_thank_you_button_clicked_action_handler(body, logger):
+def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
     company = get_or_create_company_by_body(body)
     user_id = body["user"]["id"]
 
@@ -105,7 +104,7 @@ def home_page_say_thank_you_button_clicked_action_handler(body, logger):
         num_of_messages_a_user_can_send = None
 
     try:
-        app.client.views_open(
+        client.views_open(
             trigger_id=body["trigger_id"],
             view=thank_you_dialog_view(
                 thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),

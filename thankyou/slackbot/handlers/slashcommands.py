@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
 
 from thankyou.dao import dao
-from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
 
-def merci_slash_command_action_handler(body, logger):
+def merci_slash_command_action_handler(body, client, logger):
     company = get_or_create_company_by_body(body)
     user_id = body["user_id"]
 
@@ -25,7 +24,7 @@ def merci_slash_command_action_handler(body, logger):
         num_of_messages_a_user_can_send = None
 
     try:
-        app.client.views_open(
+        client.views_open(
             trigger_id=body["trigger_id"],
             view=thank_you_dialog_view(
                 thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),

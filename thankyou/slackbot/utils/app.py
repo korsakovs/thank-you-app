@@ -2,8 +2,7 @@ import logging
 
 from slack_bolt import App
 
-from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token, slack_client_id, \
-    slack_client_secret
+from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token
 from thankyou.slackbot.utils.oauth import oauth_settings
 
 logger = logging.getLogger(__name__)
@@ -18,11 +17,11 @@ _IS_SOCKET_MODE = None
 if oauth_settings and slack_signing_secret():
     _IS_SOCKET_MODE = False
     logger.info("Creating an HTTP app with OAuth")
-    logger.info(f"Slack signing secret = '{slack_signing_secret()}'")
+    logger.info(f"Slack signing secret = '{str(slack_signing_secret())[0:3]}...'")
     app = App(
         signing_secret=slack_signing_secret(),
         oauth_settings=oauth_settings,
-        logger=logger
+        logger=logger,
     )
     logger.info("Created")
 elif slack_bot_token() and slack_app_token():

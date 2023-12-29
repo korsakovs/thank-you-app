@@ -6,7 +6,6 @@ from cachetools import TTLCache, cached
 
 from thankyou.core.models import SlackUserInfo, LeaderbordTimeSettings, ThankYouType, CompanyAdmin, Company
 from thankyou.dao import dao
-from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.views.configuration import configuration_no_access_view, configuration_view
 
 
@@ -26,8 +25,8 @@ def already_invited_to_a_channel(company_id: str, channel: str, user_id: str):
 
 
 @cached(cache=TTLCache(maxsize=1024 * 20, ttl=60 * 60))
-def get_user_info(slack_user_id: str) -> Optional[SlackUserInfo]:
-    user = app.client.users_info(user=slack_user_id)
+def get_user_info(client, slack_user_id: str) -> Optional[SlackUserInfo]:
+    user = client.users_info(user=slack_user_id)
     try:
         user_data = user.data["user"]
         profile = user_data["profile"]
@@ -58,10 +57,10 @@ def get_user_info(slack_user_id: str) -> Optional[SlackUserInfo]:
         )
 
 
-def is_user_an_admin(company_admins: List[CompanyAdmin], slack_user_id: str):
+def is_user_an_admin(client, company_admins: List[CompanyAdmin], slack_user_id: str):
     result = slack_user_id in [admin.slack_user_id for admin in company_admins]
     if not result:
-        user_info = get_user_info(slack_user_id)
+        user_info = get_user_info(client, slack_user_id)
         result = user_info and (user_info.is_admin or user_info.is_owner)
     return result
 
@@ -137,8 +136,8 @@ def get_sender_and_receiver_leaders(company_uuid: str, leaderboard_time_settings
     )
 
 
-def publish_configuration_view(company: Company, user_id: str):
-    is_admin = is_user_an_admin(company_admins=company.admins, slack_user_id=user_id)
+def publish_configuration_view(client, company: Company, user_id: str):
+    is_admin = is_user_an_admin(client=client, company_admins=company.admins, slack_user_id=user_id)
 
     if not is_admin:
         view = configuration_no_access_view(admin_slack_ids=[admin.slack_user_id for admin in company.admins])
@@ -159,7 +158,7 @@ def publish_configuration_view(company: Company, user_id: str):
             max_attached_files_num=company.max_attached_files_num,
         )
 
-    app.client.views_publish(
+    client.views_publish(
         user_id=user_id,
         view=view
     )

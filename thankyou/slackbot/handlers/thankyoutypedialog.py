@@ -1,14 +1,13 @@
 from thankyou.core.models import ThankYouType
 from thankyou.dao import dao
 from thankyou.slackbot.handlers.common import publish_configuration_view
-from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_deletion_confirmation_dialog, \
     thank_you_type_deletion_completion_dialog
 
 
-def thank_you_type_dialog_save_button_clicked_action_handler(body, logger):
+def thank_you_type_dialog_save_button_clicked_action_handler(body, client, logger):
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
@@ -27,16 +26,17 @@ def thank_you_type_dialog_save_button_clicked_action_handler(body, logger):
         ))
 
     publish_configuration_view(
+        client=client,
         company=get_or_create_company_by_body(body),
         user_id=user_id
     )
 
 
-def thank_you_type_dialog_delete_value_button_clicked_action_handler(body, logger):
+def thank_you_type_dialog_delete_value_button_clicked_action_handler(body, client, logger):
     company = get_or_create_company_by_body(body)
     thank_you_type_uuid = body["actions"][0]["value"]
 
-    app.client.views_update(
+    client.views_update(
         view_id=body["view"]["id"],
         view=thank_you_type_deletion_confirmation_dialog(thank_you_type=dao.read_thank_you_type(
             company_uuid=company.uuid,
@@ -45,7 +45,7 @@ def thank_you_type_dialog_delete_value_button_clicked_action_handler(body, logge
     )
 
 
-def thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handler(body, logger):
+def thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handler(body, client, logger):
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
@@ -55,12 +55,13 @@ def thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handle
 
     dao.delete_thank_you_type(company_uuid=company.uuid, thank_you_type_uuid=thank_you_type_uuid)
 
-    app.client.views_open(
+    client.views_open(
         trigger_id=body["trigger_id"],
         view=thank_you_type_deletion_completion_dialog(thank_you_type_name=thank_you_type_name)
     )
 
     publish_configuration_view(
+        client=client,
         company=get_or_create_company_by_body(body),
         user_id=user_id
     )
