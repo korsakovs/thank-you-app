@@ -1,6 +1,7 @@
 import logging
 import os
 from enum import Enum
+from typing import Optional, List
 
 
 def _demand_env_variable(name: str) -> str:
@@ -10,12 +11,38 @@ def _demand_env_variable(name: str) -> str:
     return result
 
 
-def slack_bot_token() -> str:
-    return _demand_env_variable("SLACK_BOT_TOKEN")
+def slack_bot_token() -> Optional[str]:
+    return os.getenv("SLACK_BOT_TOKEN")
 
 
-def slack_app_token() -> str:
-    return _demand_env_variable("SLACK_APP_TOKEN")
+def slack_app_token() -> Optional[str]:
+    return os.getenv("SLACK_APP_TOKEN")
+
+
+def slack_client_id() -> Optional[str]:
+    return os.getenv("SLACK_CLIENT_ID")
+
+
+def slack_client_secret() -> Optional[str]:
+    return os.getenv("SLACK_CLIENT_SECRET")
+
+
+def slack_signing_secret() -> Optional[str]:
+    return os.getenv("SLACK_SIGNING_SECRET")
+
+
+def required_slack_app_permissions() -> List[str]:
+    return [
+        "channels:join",  # Join public channels in a workspace
+        "channels:write.invites",  # Invite members to public channels
+        "chat:write",  # Send messages as @Merci App
+        "chat:write.public",  # Send messages to channels @Merci App isn't a member of
+        "commands",  # Add shortcuts and/or slash commands that people can use
+        "files:read",  # View files shared in channels and conversations that [DEV] Merci App has been added to
+        "im:write",  # Start direct messages with people
+        "users.profile:read",  # View profile details about people in a workspace
+        "users:read",  # View people in a workspace
+    ]
 
 
 class Env(Enum):

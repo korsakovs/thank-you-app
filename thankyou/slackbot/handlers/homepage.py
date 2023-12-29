@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from slack_sdk import WebClient
 
 from thankyou.dao import dao
-from thankyou.slackbot.app import app
 from thankyou.slackbot.handlers.common import get_sender_and_receiver_leaders
+from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_event, get_or_create_company_by_slack_team_id, \
     get_or_create_company_by_body
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, home_page_my_thank_yous_view

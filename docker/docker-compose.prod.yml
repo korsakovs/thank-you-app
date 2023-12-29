@@ -8,14 +8,17 @@ services:
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - /home/wwf/pg-thank-you-data:/var/lib/postgresql/data/pgdata
+      - /home/wwf/thank_you_data/postgres:/var/lib/postgresql/data/pgdata
 
   merci-bot:
     environment:
       - POSTGRES_HOST=merci-postgres
-      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
-      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
-      - THANK_YOU_DAO=${THANK_YOU_DAO}
+      - SLACK_CLIENT_ID=${SLACK_CLIENT_ID}
+      - SLACK_CLIENT_SECRET=${SLACK_CLIENT_SECRET} \
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET} \
+      - THANK_YOU_DAO=SQLITE
+    volumes:
+      - /home/wwf/thank_you_data/sqlite:/merci-bot/sqlite_data
 
   pgadmin:
     environment:

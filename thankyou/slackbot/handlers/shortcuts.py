@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from thankyou.dao import dao
-from thankyou.slackbot.app import app
+from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 

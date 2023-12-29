@@ -6,7 +6,7 @@ from cachetools import TTLCache, cached
 
 from thankyou.core.models import SlackUserInfo, LeaderbordTimeSettings, ThankYouType, CompanyAdmin, Company
 from thankyou.dao import dao
-from thankyou.slackbot.app import app
+from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.views.configuration import configuration_no_access_view, configuration_view
 
 

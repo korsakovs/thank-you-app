@@ -4,7 +4,6 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from slack_sdk import WebClient
 
 from thankyou.core.config import slack_app_token
-from thankyou.slackbot.app import app
 from thankyou.slackbot.handlers.configuration import home_page_configuration_button_clicked_action_handler, \
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler, \
     home_page_configuration_notification_slack_channel_value_changed_action_handler, \
@@ -30,6 +29,7 @@ from thankyou.slackbot.handlers.thankyoudialog import thank_you_dialog_save_butt
 from thankyou.slackbot.handlers.thankyoutypedialog import thank_you_type_dialog_save_button_clicked_action_handler, \
     thank_you_type_dialog_delete_value_button_clicked_action_handler, \
     thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handler
+from thankyou.slackbot.utils.app import app, is_socket_mode
 
 
 @app.event("app_home_opened")
@@ -194,6 +194,8 @@ def _say_thank_you_message_shortcut_action_handler(ack, body, logger):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    handler = SocketModeHandler(app, slack_app_token())
-    handler.start()
+    if is_socket_mode():
+        handler = SocketModeHandler(app, slack_app_token())
+        handler.start()
+    else:
+        app.start(port=3000)

@@ -1,7 +1,7 @@
 from thankyou.core.models import ThankYouType
 from thankyou.dao import dao
-from thankyou.slackbot.app import app
 from thankyou.slackbot.handlers.common import publish_configuration_view
+from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_deletion_confirmation_dialog, \

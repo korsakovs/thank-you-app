@@ -2,9 +2,9 @@ from slack_sdk.errors import SlackApiError
 from slack_sdk.web import SlackResponse
 
 from thankyou.dao import dao
-from thankyou.slackbot.app import app
 from thankyou.slackbot.blocks.thank_you import thank_you_message_blocks
 from thankyou.slackbot.handlers.common import already_invited_to_a_channel
+from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.utils.privatemetadata import retrieve_thank_you_message_from_body
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view

@@ -139,6 +139,10 @@ class SQLAlchemyDao(Dao, ABC):
         yield self._session
         self._session.commit()
 
+    @property
+    def engine(self) -> Engine:
+        return self._engine
+
     def _get_obj(self, cls, uuid):
         with self._get_session() as session:
             return session.get(cls, uuid)
