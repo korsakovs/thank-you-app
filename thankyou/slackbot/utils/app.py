@@ -19,8 +19,8 @@ if oauth_settings and slack_signing_secret():
     _IS_SOCKET_MODE = False
     print(f"22Using Slack Client Id: {slack_client_id()}")
     print(f"22Using Slack Client Secret: {slack_client_secret()}")
-    logging.info(f"22Using Slack Client Id: {slack_client_id()}")
-    logging.info(f"22Using Slack Client Secret: {slack_client_secret()}")
+    logger.info(f"22Using Slack Client Id: {slack_client_id()}")
+    logger.info(f"22Using Slack Client Secret: {slack_client_secret()}")
     app = App(
         signing_secret=slack_signing_secret(),
         oauth_settings=oauth_settings,
@@ -30,8 +30,8 @@ elif slack_bot_token() and slack_app_token():
     _IS_SOCKET_MODE = True
     print(f"33Using Slack Client Id: {slack_client_id()}")
     print(f"33Using Slack Client Secret: {slack_client_secret()}")
-    logging.info(f"33Using Slack Client Id: {slack_client_id()}")
-    logging.info(f"33Using Slack Client Secret: {slack_client_secret()}")
+    logger.info(f"33Using Slack Client Id: {slack_client_id()}")
+    logger.info(f"33Using Slack Client Secret: {slack_client_secret()}")
     app = App(token=slack_bot_token(), logger=logger)
 else:
     raise ValueError("Can not create a Slack application instance")
