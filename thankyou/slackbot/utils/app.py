@@ -37,5 +37,11 @@ else:
     raise ValueError("Can not create a Slack application instance")
 
 
+print(f"44Using Slack Client Id: {slack_client_id()}")
+print(f"44Using Slack Client Secret: {slack_client_secret()}")
+logger.info(f"44Using Slack Client Id: {slack_client_id()}")
+logger.info(f"44Using Slack Client Secret: {slack_client_secret()}")
+
+
 def is_socket_mode() -> bool:
     return _IS_SOCKET_MODE
