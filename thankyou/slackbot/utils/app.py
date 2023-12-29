@@ -2,7 +2,8 @@ import logging
 
 from slack_bolt import App
 
-from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token
+from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token, slack_client_id, \
+    slack_client_secret
 from thankyou.slackbot.utils.oauth import oauth_settings
 
 logger = logging.getLogger(__name__)
@@ -16,6 +17,10 @@ _IS_SOCKET_MODE = None
 
 if oauth_settings and slack_signing_secret():
     _IS_SOCKET_MODE = False
+    print(f"11Using Slack Client Id: {slack_client_id()}")
+    print(f"11Using Slack Client Secret: {slack_client_secret()}")
+    logging.info(f"11Using Slack Client Id: {slack_client_id()}")
+    logging.info(f"11Using Slack Client Secret: {slack_client_secret()}")
     app = App(
         signing_secret=slack_signing_secret(),
         oauth_settings=oauth_settings,
