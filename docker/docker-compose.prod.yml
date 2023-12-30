@@ -16,7 +16,7 @@ services:
       - SLACK_CLIENT_ID=${SLACK_CLIENT_ID}
       - SLACK_CLIENT_SECRET=${SLACK_CLIENT_SECRET}
       - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
-      - THANK_YOU_DAO=SQLITE
+      - THANK_YOU_DAO=POSTGRES
     volumes:
       - /home/wwf/thank_you_data/sqlite:/merci-bot/sqlite_data
 

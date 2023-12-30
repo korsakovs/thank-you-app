@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from datetime import datetime
@@ -5,6 +6,7 @@ from typing import List, Optional, Generator, Tuple
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, desc, \
     and_, func, Integer, Enum
+from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
@@ -304,3 +306,14 @@ class SQLAlchemyDao(Dao, ABC):
             result = result.limit(leaders_num)
 
             return result.all()
+
+    def on_app_error(self, error):
+        logging.error(f"An App error occurred: {error}")
+        if isinstance(error, PendingRollbackError) or isinstance(error, BrokenPipeError):
+            logging.info("Rolling back the session...")
+            try:
+                self._session.rollback()
+            except Exception as e:
+                logging.error(f"Can not roll back the session: {e}")
+            else:
+                logging.info("Rolled back!")

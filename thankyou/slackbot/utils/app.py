@@ -3,6 +3,7 @@ import logging
 from slack_bolt import App
 
 from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token
+from thankyou.dao import dao
 from thankyou.slackbot.utils.oauth import oauth_settings
 
 logger = logging.getLogger(__name__)
@@ -35,3 +36,8 @@ else:
 
 def is_socket_mode() -> bool:
     return _IS_SOCKET_MODE
+
+
+@app.error
+def app_error_handler(error):
+    dao.on_app_error(error)
