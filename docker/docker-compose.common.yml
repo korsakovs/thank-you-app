@@ -7,10 +7,12 @@ services:
       context: ..
       dockerfile: docker/postgres/postgres.Dockerfile
     environment:
-      - POSTGRES_DB=thank_you
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      POSTGRES_DB: merci
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      SLACK_APP_POSTGRES_USERNAME: merci_app
+      SLACK_APP_POSTGRES_PASSWORD: merci_app
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     healthcheck:
@@ -38,10 +40,13 @@ services:
         condition: service_healthy
         restart: true
     environment:
-      - POSTGRES_HOST=merci-postgres
-      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
-      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
-      - THANK_YOU_DAO=${THANK_YOU_DAO}
+      THANK_YOU_DAO: ${THANK_YOU_DAO}
+      POSTGRES_HOST: merci-postgres
+      POSTGRES_DB: merci
+      SLACK_APP_POSTGRES_USERNAME: merci_app
+      SLACK_APP_POSTGRES_PASSWORD: merci_app
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
+      SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
     restart: always
     networks:
       - wwf_network
@@ -52,18 +57,13 @@ services:
       - merci-postgres
     image: dpage/pgadmin4:7.2
     environment:
-      - PGADMIN_DEFAULT_EMAIL=test@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=postgres
-      - PGADMIN_CONFIG_SERVER_MODE=False
+      PGADMIN_DEFAULT_EMAIL: test@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
       - "5433:80"
     networks:
       - wwf_network
-
-
-volumes:
-  thank-you-data:
-    name: thank-you-data
 
 
 networks:

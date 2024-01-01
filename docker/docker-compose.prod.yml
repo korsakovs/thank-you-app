@@ -4,25 +4,23 @@ services:
   merci-postgres:
     stop_grace_period: 1m
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      SLACK_APP_POSTGRES_PASSWORD: ${SLACK_APP_POSTGRES_PASSWORD}
     volumes:
-      - /home/wwf/thank_you_data/postgres:/var/lib/postgresql/data/pgdata
+      - /home/wwf/merci_data/postgres:/var/lib/postgresql/data/pgdata
 
   merci-bot:
     environment:
-      - POSTGRES_HOST=merci-postgres
-      - SLACK_CLIENT_ID=${SLACK_CLIENT_ID}
-      - SLACK_CLIENT_SECRET=${SLACK_CLIENT_SECRET}
-      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
-      - THANK_YOU_DAO=POSTGRES
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
+      THANK_YOU_DAO: POSTGRES
+      SLACK_APP_POSTGRES_PASSWORD: ${SLACK_APP_POSTGRES_PASSWORD}
     volumes:
-      - /home/wwf/thank_you_data/sqlite:/merci-bot/sqlite_data
+      - /home/wwf/merci_data/sqlite:/merci-bot/sqlite_data
 
   pgadmin:
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-      - PGADMIN_CONFIG_SERVER_MODE=False
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}

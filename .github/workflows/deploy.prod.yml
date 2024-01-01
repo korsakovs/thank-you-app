@@ -16,6 +16,7 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.PROD_POSTGRES_PASSWORD }}
       PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PROD_PGADMIN_DEFAULT_PASSWORD }}
       PGADMIN_DEFAULT_EMAIL: ${{ secrets.PROD_PGADMIN_DEFAULT_EMAIL }}
+      SLACK_APP_POSTGRES_PASSWORD: ${{ secrets.PROD_SLACK_APP_POSTGRES_PASSWORD }}
     name: deploy to production
     runs-on: ubuntu-latest
     steps:
@@ -30,8 +31,8 @@ jobs:
           ssh-private-key: ${{ secrets.WWF_SSH_PRIVATE_KEY }}
       - run: mkdir -p ~/.ssh
       - run: echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-      - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./thank_you_data/postgres"
-      - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./thank_you_data/sqlite"
+      - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./merci_data/postgres"
+      - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./merci_data/sqlite"
       - run: docker context create remote --docker "host=ssh://${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }}"
       - run: docker --context remote compose -f docker/docker-compose.common.yml -f docker/docker-compose.prod.yml build
       - run: docker --context remote compose -f docker/docker-compose.common.yml -f docker/docker-compose.prod.yml up -d --force-recreate
