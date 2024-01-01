@@ -11,8 +11,12 @@ services:
       - /home/wwf/merci_data/postgres:/var/lib/postgresql/data/pgdata
 
   merci-postgres-backup:
+    container_name: merci-postgres-backup
     image: postgres:alpine
     stop_grace_period: 10m
+    depends_on:
+      merci-postgres:
+        condition: service_healthy
     environment:
       POSTGRES_HOST: merci-postgres
       POSTGRES_DB: merci
@@ -25,8 +29,10 @@ services:
         PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h $$POSTGRES_HOST -U $$POSTGRES_USER -Fc $$POSTGRES_DB > /backup/$$(date +%Y-%m-%d-%H-%M-%S).dump
         echo ""Backup done at $$(date +%Y-%m-%d_%H:%M:%S)""
         ls -1 /backup/*.dump | head -n -2 | xargs rm -f
-        sleep 300
+        sleep 60
       done"
+    networks:
+      - wwf_network
 
   merci-bot:
     environment:
