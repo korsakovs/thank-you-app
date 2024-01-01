@@ -28,7 +28,7 @@ services:
         PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h $$POSTGRES_HOST -U $$POSTGRES_USER -Fc $$POSTGRES_DB > /backup/$$(date +%Y-%m-%d-%H-%M-%S).dump
         echo ""Backup done at $$(date +%Y-%m-%d_%H:%M:%S)""
         ls -1 /backup/*.dump | head -n -2 | xargs rm -f
-        sleep 60
+        sleep 86400
       done"
     networks:
       - wwf_network
