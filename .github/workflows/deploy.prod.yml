@@ -32,6 +32,7 @@ jobs:
       - run: mkdir -p ~/.ssh
       - run: echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
       - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./merci_data/postgres"
+      - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./merci_data/postgres_backup"
       - run: ssh ${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }} "mkdir -p ./merci_data/sqlite"
       - run: docker context create remote --docker "host=ssh://${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }}"
       - run: docker --context remote compose -f docker/docker-compose.common.yml -f docker/docker-compose.prod.yml build
