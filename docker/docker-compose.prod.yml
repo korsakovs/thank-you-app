@@ -13,7 +13,6 @@ services:
   merci-postgres-backup:
     container_name: merci-postgres-backup
     image: postgres:alpine
-    stop_grace_period: 10m
     depends_on:
       merci-postgres:
         condition: service_healthy
