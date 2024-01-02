@@ -127,7 +127,10 @@ class SQLAlchemyDao(Dao, ABC):
         self._mapper_registry.map_imperatively(ThankYouMessageImage, self._thank_you_message_images_table)
 
         self._engine = self._create_engine()
-        self._metadata_obj.create_all(bind=self._engine, checkfirst=True)
+        try:
+            self._metadata_obj.create_all(bind=self._engine, checkfirst=True)
+        except Exception as e:
+            logging.error(f"Can not create database objects (tables / keys): {e}")
         self._session_maker = sessionmaker(bind=self._engine)
         self._session = self._session_maker()
 
