@@ -71,7 +71,7 @@ def get_active_dao_type(default=DaoType.POSTGRES) -> DaoType:
 
 
 INITIAL_THANK_YOU_TYPES = [
-    "🎉 Release",
-    "🚀 Launch",
-    "📄 RFC",
+    "🎉 Collaboration",
+    "🚀 Innovation",
+    "🌐 Ethical Responsibility",
 ]

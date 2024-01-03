@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from cachetools import cached, TTLCache
 from slack_sdk import WebClient
 
 from thankyou.dao import dao
@@ -10,6 +11,11 @@ from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, 
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
 
+@cached(cache=TTLCache(maxsize=1024, ttl=60))
+def messages_sent_num(company_uuid: str, interval: timedelta = timedelta(days=30)):
+    return dao.read_thank_you_messages_num(company_uuid=company_uuid, created_after=datetime.utcnow() - interval)
+
+
 def app_home_opened_action_handler(client: WebClient, event, logger):
     try:
         company = get_or_create_company_by_event(event)
@@ -18,10 +24,20 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
 
     user_id = event["user"]
 
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20)
+
+    slack_channel_with_all_messages = None
+    if company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
+        slack_channel_with_all_messages = company.share_messages_in_slack_channel
+
+    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid) - len(messages))
+
     view = home_page_company_thank_yous_view(
-        thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
+        thank_you_messages=messages,
         current_user_slack_id=user_id,
         enable_leaderboard=company.enable_leaderboard,
+        slack_channel_with_all_messages=slack_channel_with_all_messages,
+        hidden_messages_num=hidden_messages_num
     )
 
     client.views_publish(
@@ -35,12 +51,22 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20)
+
+    slack_channel_with_all_messages = None
+    if company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
+        slack_channel_with_all_messages = company.share_messages_in_slack_channel
+
+    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid) - len(messages))
+
     client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
+            slack_channel_with_all_messages=slack_channel_with_all_messages,
+            hidden_messages_num=hidden_messages_num
         )
     )
 

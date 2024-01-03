@@ -89,6 +89,8 @@ class ThankYouMessage:
     author_slack_user_id: Optional[Slack_User_ID_Type] = None
     author_slack_user_name: Optional[str] = None
 
+    slash_command_slack_channel_id: Optional[Slack_Channel_ID_Type] = None
+
     receivers: List[ThankYouReceiver] = field(default_factory=list)
     images: List[ThankYouMessageImage] = field(default_factory=list)
 

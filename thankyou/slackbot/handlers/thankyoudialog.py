@@ -1,3 +1,4 @@
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.web import SlackResponse
 
@@ -9,12 +10,30 @@ from thankyou.slackbot.utils.privatemetadata import retrieve_thank_you_message_f
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view
 
 
-def thank_you_dialog_save_button_clicked_action_handler(body, client, logger):
+def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient, logger):
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
     thank_you_message = retrieve_thank_you_message_from_body(body)
     dao.create_thank_you_message(thank_you_message)
+
+    if thank_you_message.slash_command_slack_channel_id:
+        try:
+            client.chat_postMessage(
+                channel=thank_you_message.slash_command_slack_channel_id,
+                blocks=thank_you_message_blocks(thank_you_message)
+            )
+        except SlackApiError as e:
+            if e.response.data["error"] == "channel_not_found":
+                client.chat_postMessage(
+                    text=f"Your thank you message was successfully sent to your colleague(s). However, it could not be "
+                         f"delivered to the Slack channel <#{thank_you_message.slash_command_slack_channel_id}>. "
+                         f"Are you sure that the Merci ! application was invited to this channel?",
+                    channel=thank_you_message.author_slack_user_id,
+                )
+            else:
+                logger.error("A thank you message was not delivered to the slack channel in which the slash command "
+                             f"was typed. Channel: {thank_you_message.slash_command_slack_channel_id}. Error: {e}")
 
     if company.share_messages_in_slack_channel:
         def invite_users():

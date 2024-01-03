@@ -9,6 +9,13 @@ def merci_slash_command_action_handler(body, client, logger):
     company = get_or_create_company_by_body(body)
     user_id = body["user_id"]
 
+    try:
+        channel_id = body["channel_id"]
+        if channel_id[0] != "C":
+            channel_id = None
+    except (TypeError, KeyError):
+        channel_id = None
+
     if company.enable_weekly_thank_you_limit:
         beginning_of_the_week = (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
                                  - timedelta(days=datetime.utcnow().weekday()))
@@ -34,6 +41,7 @@ def merci_slash_command_action_handler(body, client, logger):
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
                 num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
+                slash_command_slack_channel_id=channel_id
             ),
         )
     except Exception as e:

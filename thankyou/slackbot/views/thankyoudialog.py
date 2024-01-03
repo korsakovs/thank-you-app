@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from slack_sdk.models.blocks import InputBlock, SectionBlock
+from slack_sdk.models.blocks import InputBlock, SectionBlock, TextObject
 from slack_sdk.models.blocks.block_elements import FileInputElement
 from slack_sdk.models.views import View
 
@@ -13,7 +13,8 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                           enable_rich_text: bool = False, enable_company_values: bool = True,
                           max_receivers_num: int = 10, enable_attaching_files: bool = True,
                           max_attached_files_num: int = 10,
-                          num_of_messages_a_user_can_send: Optional[int] = None) -> View:
+                          num_of_messages_a_user_can_send: Optional[int] = None,
+                          slash_command_slack_channel_id: str = None) -> View:
     extra_blocks = []
 
     if enable_attaching_files and max_attached_files_num > 0:
@@ -41,6 +42,13 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
     else:
         submit = "Say!"
         blocks = [
+            *([] if not slash_command_slack_channel_id else [
+                SectionBlock(text=TextObject(
+                    text=f"This Thank you message will be posted in <#{slash_command_slack_channel_id}> slack channel. "
+                         f"*Do not forget to invite Merci ! application to this channel!*",
+                    type="mrkdwn"
+                ))
+            ]),
             *([] if num_of_messages_a_user_can_send is None or num_of_messages_a_user_can_send > 3 else [
                 SectionBlock(
                     text=f"You can send {num_of_messages_a_user_can_send} more thank you(s) this week."
@@ -71,6 +79,7 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
         title="Update Thank You!" if state else "Say Thank you!",
         submit=submit,
         close="Cancel",
-        private_metadata=str(PrivateMetadata(thank_you_message_uuid=None if state is None else state.uuid)),
+        private_metadata=str(PrivateMetadata(thank_you_message_uuid=None if state is None else state.uuid,
+                                             slash_command_slack_channel_id=slash_command_slack_channel_id)),
         blocks=blocks
     )

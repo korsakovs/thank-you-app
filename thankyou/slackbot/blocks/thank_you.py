@@ -84,7 +84,7 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
 
     published_by_text = ""
     if thank_you_message.author_slack_user_id:
-        published_by_text += f"Shared by <@{es(thank_you_message.author_slack_user_id)}>"
+        published_by_text += f"_This Thank You message was sent by <@{es(thank_you_message.author_slack_user_id)}>!_"
 
     if published_by_text:
         result.append(ContextBlock(

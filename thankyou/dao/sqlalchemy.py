@@ -7,7 +7,7 @@ from typing import List, Optional, Generator, Tuple
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, desc, \
     and_, func, Integer, Enum
 from sqlalchemy.exc import PendingRollbackError
-from sqlalchemy.orm import registry, relationship, sessionmaker, Session
+from sqlalchemy.orm import registry, relationship, sessionmaker, Session, Query
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
     ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings
@@ -78,6 +78,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("is_rich_text", Boolean, nullable=False),
             Column("author_slack_user_id", String(256), nullable=False, index=True),
             Column("author_slack_user_name", String(256), nullable=True),
+            Column("slash_command_slack_channel_id", String(256), nullable=True),
             Column("created_at", DateTime, nullable=False, index=True),
             Column("thank_you_type_uuid", String(256), ForeignKey(f"{self._THANK_YOU_TYPES_TABLE}.uuid"),
                    nullable=True, index=True),
@@ -164,41 +165,83 @@ class SQLAlchemyDao(Dao, ABC):
         if thank_you_message and thank_you_message.company.uuid == company_uuid:
             return thank_you_message
 
+    @classmethod
+    def _read_thank_you_messages_sqlalchemy_result(cls, session: Session, company_uuid: str,
+                                                   created_after: datetime = None, created_before: datetime = None,
+                                                   with_types: List[str] = None, deleted: Optional[bool] = False,
+                                                   author_slack_user_id: str = None, receiver_slack_user_id: str = None,
+                                                   last_n: int = None):
+        result = session.query(ThankYouMessage).join(Company)
+        if receiver_slack_user_id:
+            result = result.join(ThankYouReceiver)
+            result = result.filter(ThankYouReceiver.slack_user_id == receiver_slack_user_id)
+
+        result = result.filter(Company.uuid == company_uuid)
+
+        if created_after:
+            result = result.filter(ThankYouMessage.created_at >= created_after)
+
+        if created_before:
+            result = result.filter(ThankYouMessage.created_at <= created_before)
+
+        if with_types:
+            result = result.filter(or_(ThankYouMessage.type == type_ for type_ in with_types))
+
+        if deleted is not None:
+            result = result.filter(ThankYouMessage.deleted == deleted)
+
+        if author_slack_user_id is not None:
+            result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
+
+        # noinspection PyTypeChecker
+        result = result.order_by(desc(ThankYouMessage.created_at))
+
+        if last_n is not None:
+            result = result.limit(last_n)
+
+        return result.distinct()
+
     def read_thank_you_messages(self, company_uuid: str, created_after: datetime = None,
                                 created_before: datetime = None, with_types: List[str] = None,
                                 deleted: Optional[bool] = False, author_slack_user_id: str = None,
                                 receiver_slack_user_id: str = None, last_n: int = None
-                                ) -> List[ThankYouMessage]:
+                                ):
         with self._get_session() as session:
-            result = session.query(ThankYouMessage).join(Company)
-            if receiver_slack_user_id:
-                result = result.join(ThankYouReceiver)
-                result = result.filter(ThankYouReceiver.slack_user_id == receiver_slack_user_id)
+            result = self._read_thank_you_messages_sqlalchemy_result(
+                session=session,
+                company_uuid=company_uuid,
+                created_after=created_after,
+                created_before=created_before,
+                with_types=with_types,
+                deleted=deleted,
+                author_slack_user_id=author_slack_user_id,
+                receiver_slack_user_id=receiver_slack_user_id,
+                last_n=last_n
+            )
 
-            result = result.filter(Company.uuid == company_uuid)
+            return result.all()
 
-            if created_after:
-                result = result.filter(ThankYouMessage.created_at >= created_after)
+    def read_thank_you_messages_num(self, company_uuid: str, created_after: datetime = None,
+                                    created_before: datetime = None, with_types: List[str] = None,
+                                    deleted: Optional[bool] = False, author_slack_user_id: str = None,
+                                    receiver_slack_user_id: str = None, last_n: int = None
+                                    ) -> int:
+        with self._get_session() as session:
+            result = self._read_thank_you_messages_sqlalchemy_result(
+                session=session,
+                company_uuid=company_uuid,
+                created_after=created_after,
+                created_before=created_before,
+                with_types=with_types,
+                deleted=deleted,
+                author_slack_user_id=author_slack_user_id,
+                receiver_slack_user_id=receiver_slack_user_id,
+                last_n=last_n
+            )
 
-            if created_before:
-                result = result.filter(ThankYouMessage.created_at <= created_before)
+            return result.count()
 
-            if with_types:
-                result = result.filter(or_(ThankYouMessage.type == type_ for type_ in with_types))
 
-            if deleted is not None:
-                result = result.filter(ThankYouMessage.deleted == deleted)
-
-            if author_slack_user_id is not None:
-                result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
-
-            # noinspection PyTypeChecker
-            result = result.order_by(desc(ThankYouMessage.created_at))
-
-            if last_n is not None:
-                result = result.limit(last_n)
-
-            return result.distinct().all()
 
     def delete_thank_you_message(self, company_uuid: str, thank_you_message_uuid: str):
         with self._get_session() as session:

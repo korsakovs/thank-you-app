@@ -217,6 +217,12 @@ def _merci_slash_command_action_handler(ack, client, body, logger):
     merci_slash_command_action_handler(body, client, logger)
 
 
+@app.command("/merci_dev")
+def _merci_slash_command_action_handler(ack, client, body, logger):
+    ack()
+    merci_slash_command_action_handler(body, client, logger)
+
+
 @app.shortcut("say_thank_you_global_shortcut")
 def _say_thank_you_global_shortcut_action_handler(ack, client, body, logger):
     ack()

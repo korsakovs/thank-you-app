@@ -6,9 +6,11 @@ from thankyou.slackbot.utils.company import get_or_create_company_by_body
 
 
 class PrivateMetadata:
-    def __init__(self, thank_you_message_uuid: str = None, thank_you_type_uuid: str = None):
+    def __init__(self, thank_you_message_uuid: str = None, thank_you_type_uuid: str = None,
+                 slash_command_slack_channel_id: str = None):
         self.thank_you_message_uuid = thank_you_message_uuid
         self.thank_you_type_uuid = thank_you_type_uuid
+        self.slash_command_slack_channel_id = slash_command_slack_channel_id
 
     def __str__(self):
         return self.as_str()
@@ -17,7 +19,8 @@ class PrivateMetadata:
         result = dict()
         for key, value in {
             "thank_you_message_uuid": self.thank_you_message_uuid,
-            "thank_you_type_uuid": self.thank_you_type_uuid
+            "thank_you_type_uuid": self.thank_you_type_uuid,
+            "slash_command_slack_channel_id": self.slash_command_slack_channel_id,
         }.items():
             if value is not None:
                 result[key] = value
@@ -30,7 +33,8 @@ class PrivateMetadata:
         d = json.loads(s)
         return PrivateMetadata(
             thank_you_message_uuid=d.get("thank_you_message_uuid"),
-            thank_you_type_uuid=d.get("thank_you_type_uuid")
+            thank_you_type_uuid=d.get("thank_you_type_uuid"),
+            slash_command_slack_channel_id=d.get("slash_command_slack_channel_id")
         )
 
 
@@ -65,6 +69,9 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
     kwargs = dict()
     if private_metadata and private_metadata.thank_you_message_uuid:
         kwargs["uuid"] = private_metadata.thank_you_message_uuid
+
+    if private_metadata and private_metadata.slash_command_slack_channel_id:
+        kwargs["slash_command_slack_channel_id"] = private_metadata.slash_command_slack_channel_id
 
     slack_team_id = body["team"]["id"]
     try:

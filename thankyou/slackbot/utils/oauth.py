@@ -41,13 +41,13 @@ def get_oauth_state_store():
 
 oauth_settings = None
 
+
 if slack_client_id() and slack_client_secret():
-    print(f"Using Slack Client Id: {slack_client_id()}")
-    print(f"Using Slack Client Secret: {slack_client_secret()}")
     oauth_settings = OAuthSettings(
         client_id=slack_client_id(),
         client_secret=slack_client_secret(),
         scopes=required_slack_app_permissions(),
         installation_store=get_installation_store(slack_client_id()),
-        state_store=get_oauth_state_store()
+        state_store=get_oauth_state_store(),
+        install_page_rendering_enabled=False
     )
