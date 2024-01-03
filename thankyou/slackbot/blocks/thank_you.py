@@ -141,7 +141,7 @@ def thank_you_receivers_block(label: str = "Who do you want to thank?", block_id
     )
 
 
-def thank_you_text_block(label: str = "Thank You", initial_value: str = None, block_id: str = None,
+def thank_you_text_block(label: str = "Add a message", initial_value: str = None, block_id: str = None,
                          action_id: str = None, enable_rich_text: bool = False) -> InputBlock:
     if enable_rich_text:
         element = RichTextInputElement(
