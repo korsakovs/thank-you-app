@@ -44,7 +44,7 @@ services:
         condition: service_healthy
         restart: true
     environment:
-      THANK_YOU_DAO: ${THANK_YOU_DAO}
+      THANK_YOU_DAO: POSTGRES
       POSTGRES_HOST: merci-postgres
       POSTGRES_DB: merci
       SLACK_APP_POSTGRES_USERNAME: merci_app

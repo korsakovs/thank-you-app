@@ -9,7 +9,6 @@ services:
     environment:
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
-      THANK_YOU_DAO: POSTGRES
     volumes:
       - ../sqlite_data:/merci-bot/sqlite_data
 
