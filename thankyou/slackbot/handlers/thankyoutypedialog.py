@@ -14,11 +14,11 @@ def thank_you_type_dialog_save_button_clicked_action_handler(body, client, logge
     new_value_name = body["view"]["state"]["values"]["thank_you_type_dialog_value_name_block"][
         "thank_you_type_dialog_value_name_action"]["value"]
 
-    company_value_uuid = PrivateMetadata.from_str(body["view"]["private_metadata"]).thank_you_type_uuid
+    thank_you_type_uuid = PrivateMetadata.from_str(body["view"]["private_metadata"]).thank_you_type_uuid
 
-    if company_value_uuid:
-        company_value = dao.read_thank_you_type(company_uuid=company.uuid, thank_you_type_uuid=company_value_uuid)
-        company_value.name = new_value_name
+    if thank_you_type_uuid:
+        thank_you_type = dao.read_thank_you_type(company_uuid=company.uuid, thank_you_type_uuid=thank_you_type_uuid)
+        thank_you_type.name = new_value_name
     else:
         dao.create_thank_you_type(thank_you_type=ThankYouType(
             company_uuid=company.uuid,
