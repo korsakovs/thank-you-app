@@ -28,11 +28,15 @@ class SQLAlchemyDao(Dao, ABC):
     def _create_engine(self) -> Engine:
         ...
 
-    def text_column(self):
+    def encrypted_text_column(self):
         if not self.secret_key:
             return Text
-        else:
-            return StringEncryptedType(Text, key=self.secret_key, engine=AesEngine)
+        return StringEncryptedType(Text, key=self.secret_key, engine=AesEngine)
+
+    def encrypted_string_column(self, length: int):
+        if not self.secret_key:
+            return String(length)
+        return StringEncryptedType(String(length), key=self.secret_key, engine=AesEngine)
 
     def __init__(self, encryption_secret_key: str = None):
         super().__init__(
@@ -74,7 +78,7 @@ class SQLAlchemyDao(Dao, ABC):
             self._THANK_YOU_TYPES_TABLE,
             self._metadata_obj,
             Column("uuid", String(256), primary_key=True, nullable=False),
-            Column("name", String(256), nullable=False),
+            Column("name", self.encrypted_string_column(256), nullable=False),
             Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"), nullable=False),
             Column("deleted", Boolean, nullable=False),
         )
@@ -86,7 +90,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"),
                    nullable=False, index=True),
             Column("deleted", Boolean, nullable=False),
-            Column("text", self.text_column(), nullable=False),
+            Column("text", self.encrypted_text_column(), nullable=False),
             Column("is_rich_text", Boolean, nullable=False),
             Column("is_private", Boolean, nullable=False),
             Column("author_slack_user_id", String(256), nullable=False, index=True),
@@ -110,8 +114,8 @@ class SQLAlchemyDao(Dao, ABC):
             Column("uuid", String(256), primary_key=True, nullable=False),
             Column("thank_you_message_uuid", String(256), ForeignKey(f"{self._THANK_YOU_MESSAGES_TABLE}.uuid"),
                    nullable=False, index=True),
-            Column("url", String(1024), nullable=False),
-            Column("filename", String(1024), nullable=False),
+            Column("url", self.encrypted_string_column(1024), nullable=False),
+            Column("filename", self.encrypted_string_column(512), nullable=False),
             Column("ordering_key", Integer, nullable=False),
         )
 
