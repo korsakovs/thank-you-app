@@ -6,6 +6,7 @@ from slack_sdk.models.blocks import SectionBlock, ButtonElement, HeaderBlock, Co
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouType, Slack_User_ID_Type, Slack_Channel_ID_Type, LeaderbordTimeSettings
+from thankyou.slackbot.blocks.common import checkbox_action_block
 from thankyou.slackbot.blocks.homepage import home_page_actions_block
 
 
@@ -44,27 +45,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                        weekly_thank_you_limit: int,
                        enable_rich_text_in_thank_you_messages: bool, enable_company_values: bool,
                        enable_leaderboard: bool, max_thank_you_receivers_num: int, enable_attaching_files: bool,
-                       max_attached_files_num: int):
-    def checkbox_action_block(
-        element_action_id: str,
-        checkbox_value: str,
-        checkbox_label: str,
-        enabled: bool,
-    ):
-        return ActionsBlock(
-            elements=[
-                CheckboxesElement(
-                    action_id=element_action_id,
-                    initial_options=[] if not enabled else [
-                        Option(value=checkbox_value, label=checkbox_label)
-                    ],
-                    options=[
-                        Option(value=checkbox_value, label=checkbox_label)
-                    ]
-                )
-            ]
-        )
-
+                       enable_private_messages: bool, max_attached_files_num: int):
     stats_time_period_to_use_options = []
     stats_time_period_to_use_selected_option = None
     for enum, option in (
@@ -111,7 +92,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             checkbox_action_block(
                 element_action_id="home_page_configuration_enable_sharing_in_a_slack_channel_value_changed",
                 checkbox_value="enable_sharing_in_a_slack_channel",
-                checkbox_label="Enable sharing all thank you messages in a public Slack channel",
+                checkbox_label="Share all thank you messages in a public Slack channel",
                 enabled=enable_sharing_in_a_slack_channel
             ),
             *([] if not enable_sharing_in_a_slack_channel else [
@@ -122,6 +103,12 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                         action_id="home_page_configuration_notification_slack_channel_value_changed"
                     )
                 ),
+                checkbox_action_block(
+                    element_action_id="home_page_configuration_enable_private_messages_value_changed",
+                    checkbox_value="enable_private_messages",
+                    checkbox_label="Let employees send messages privately",
+                    enabled=enable_private_messages
+                )
             ]),
             HeaderBlock(
                 text="Leaderboards Settings"

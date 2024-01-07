@@ -5,6 +5,7 @@ from slack_sdk.models.blocks.block_elements import FileInputElement
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouType, ThankYouMessage
+from thankyou.slackbot.blocks.common import checkbox_action_block
 from thankyou.slackbot.blocks.thank_you import thank_you_type_block, thank_you_text_block, thank_you_receivers_block
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 
@@ -14,7 +15,8 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                           max_receivers_num: int = 10, enable_attaching_files: bool = True,
                           max_attached_files_num: int = 10,
                           num_of_messages_a_user_can_send: Optional[int] = None,
-                          slash_command_slack_channel_id: str = None) -> View:
+                          slash_command_slack_channel_id: str = None,
+                          display_private_message_option: bool = True) -> View:
     extra_blocks = []
 
     if enable_attaching_files and max_attached_files_num > 0:
@@ -45,7 +47,7 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             *([] if not slash_command_slack_channel_id else [
                 SectionBlock(text=TextObject(
                     text=f"This Thank you message will be posted in <#{slash_command_slack_channel_id}> slack channel. "
-                         f"*Do not forget to invite Merci ! application to this channel!*",
+                         f"*Do not forget to invite Merci! application to this channel if this channel is private!*",
                     type="mrkdwn"
                 ))
             ]),
@@ -70,6 +72,15 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                                  block_id="thank_you_dialog_text_block",
                                  action_id="thank_you_dialog_text_action_id",
                                  enable_rich_text=enable_rich_text),
+            *([] if not display_private_message_option else [
+                checkbox_action_block(
+                    block_id="thank_you_dialog_is_private_block",
+                    element_action_id="thank_you_dialog_send_privately_action",
+                    checkbox_value="is_private",
+                    checkbox_label="Send this message privately",
+                    enabled=False if not state else state.is_private
+                ),
+            ]),
             *extra_blocks
         ]
 

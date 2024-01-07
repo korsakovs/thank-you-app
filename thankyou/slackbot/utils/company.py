@@ -30,6 +30,7 @@ def get_or_create_company_by_slack_team_id(slack_team_id: str, new_name: str = N
                     enable_company_values=True,
                     enable_rich_text_in_thank_you_messages=False,
                     enable_attaching_files=True,
+                    enable_private_messages=False,
                     max_attached_files_num=5,
                 )
                 dao.create_company(company)

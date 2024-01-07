@@ -58,6 +58,12 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
     except (TypeError, KeyError):
         selected_type = None
 
+    try:
+        is_private = bool(len(values["thank_you_dialog_is_private_block"][
+                                  "thank_you_dialog_send_privately_action"]["selected_options"]))
+    except (TypeError, KeyError):
+        is_private = False
+
     """
     try:
         link = values[STATUS_UPDATE_LINK_BLOCK][
@@ -107,5 +113,6 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
         receivers=receivers,
         images=images,
         company=company,
+        is_private=is_private,
         **kwargs
     )

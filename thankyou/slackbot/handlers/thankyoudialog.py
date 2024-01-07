@@ -28,7 +28,7 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                 client.chat_postMessage(
                     text=f"Your thank you message was successfully sent to your colleague(s). However, it could not be "
                          f"delivered to the Slack channel <#{thank_you_message.slash_command_slack_channel_id}>. "
-                         f"Are you sure that the Merci ! application was invited to this channel?",
+                         f"Are you sure that the Merci! application was invited to this channel?",
                     channel=thank_you_message.author_slack_user_id,
                 )
             else:
@@ -71,10 +71,18 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                 raise
 
         try:
-            client.chat_postMessage(
-                channel=company.share_messages_in_slack_channel,
-                blocks=thank_you_message_blocks(thank_you_message)
-            )
+            if thank_you_message.is_private:
+                for receiver in thank_you_message.receivers:
+                    client.chat_postEphemeral(
+                        channel=company.share_messages_in_slack_channel,
+                        blocks=thank_you_message_blocks(thank_you_message),
+                        user=receiver.slack_user_id
+                    )
+            else:
+                client.chat_postMessage(
+                    channel=company.share_messages_in_slack_channel,
+                    blocks=thank_you_message_blocks(thank_you_message)
+                )
         except SlackApiError:
             pass
 
@@ -91,7 +99,7 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
     client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
-            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard
         )

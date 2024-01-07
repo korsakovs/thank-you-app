@@ -90,12 +90,12 @@ def home_page_hidden_messages_warn_block(slack_channel_with_all_messages: str = 
             text = (f"Only the latest messages are shown below. To read all the Thank You messages, "
                     f"please go to the <#{slack_channel_with_all_messages}> channel.")
         else:
-            text = (f"Don't forget to join the <#{slack_channel_with_all_messages}> slack channel in order "
-                    f"not to miss Thank You messages your colleagues will be sending to each other!")
+            text = (f"Don't forget to join the <#{slack_channel_with_all_messages}> slack channel so "
+                    f"you don't miss out on the Thank You messages your colleagues send to each other!")
     else:
         if hidden_messages_num and hidden_messages_num > 0:
             text = (f"Only the latest messages are shown below. To read all the Thank You messages, "
-                    f"please ask your Slack administrator to configure the Merci ! application, so the all "
+                    f"please ask your Slack administrator to configure the Merci! application, so the all "
                     f"Thank You messages are forwarded to a public slack channel.")
         else:
             text = None

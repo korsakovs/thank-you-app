@@ -5,9 +5,9 @@ from datetime import datetime
 from typing import List, Optional, Generator, Tuple
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, desc, \
-    and_, func, Integer, Enum
+    and_, func, Integer, Enum, false
 from sqlalchemy.exc import PendingRollbackError
-from sqlalchemy.orm import registry, relationship, sessionmaker, Session, Query
+from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
     ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings
@@ -55,6 +55,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("enable_company_values", Boolean, nullable=False),
             Column("enable_rich_text_in_thank_you_messages", Boolean, nullable=False),
             Column("enable_attaching_files", Boolean, nullable=False),
+            Column("enable_private_messages", Boolean, nullable=False),
             Column("max_attached_files_num", Integer, nullable=False),
         )
 
@@ -76,6 +77,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("deleted", Boolean, nullable=False),
             Column("text", Text, nullable=False),
             Column("is_rich_text", Boolean, nullable=False),
+            Column("is_private", Boolean, nullable=False),
             Column("author_slack_user_id", String(256), nullable=False, index=True),
             Column("author_slack_user_name", String(256), nullable=True),
             Column("slash_command_slack_channel_id", String(256), nullable=True),
@@ -169,8 +171,8 @@ class SQLAlchemyDao(Dao, ABC):
     def _read_thank_you_messages_sqlalchemy_result(cls, session: Session, company_uuid: str,
                                                    created_after: datetime = None, created_before: datetime = None,
                                                    with_types: List[str] = None, deleted: Optional[bool] = False,
-                                                   author_slack_user_id: str = None, receiver_slack_user_id: str = None,
-                                                   last_n: int = None):
+                                                   private: Optional[bool] = None, author_slack_user_id: str = None,
+                                                   receiver_slack_user_id: str = None, last_n: int = None):
         result = session.query(ThankYouMessage).join(Company)
         if receiver_slack_user_id:
             result = result.join(ThankYouReceiver)
@@ -190,6 +192,9 @@ class SQLAlchemyDao(Dao, ABC):
         if deleted is not None:
             result = result.filter(ThankYouMessage.deleted == deleted)
 
+        if private is not None:
+            result = result.filter(ThankYouMessage.is_private == private)
+
         if author_slack_user_id is not None:
             result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
 
@@ -203,9 +208,9 @@ class SQLAlchemyDao(Dao, ABC):
 
     def read_thank_you_messages(self, company_uuid: str, created_after: datetime = None,
                                 created_before: datetime = None, with_types: List[str] = None,
-                                deleted: Optional[bool] = False, author_slack_user_id: str = None,
-                                receiver_slack_user_id: str = None, last_n: int = None
-                                ):
+                                deleted: Optional[bool] = False, private: Optional[bool] = None,
+                                author_slack_user_id: str = None, receiver_slack_user_id: str = None,
+                                last_n: int = None) -> List[ThankYouMessage]:
         with self._get_session() as session:
             result = self._read_thank_you_messages_sqlalchemy_result(
                 session=session,
@@ -214,6 +219,7 @@ class SQLAlchemyDao(Dao, ABC):
                 created_before=created_before,
                 with_types=with_types,
                 deleted=deleted,
+                private=private,
                 author_slack_user_id=author_slack_user_id,
                 receiver_slack_user_id=receiver_slack_user_id,
                 last_n=last_n
@@ -223,9 +229,9 @@ class SQLAlchemyDao(Dao, ABC):
 
     def read_thank_you_messages_num(self, company_uuid: str, created_after: datetime = None,
                                     created_before: datetime = None, with_types: List[str] = None,
-                                    deleted: Optional[bool] = False, author_slack_user_id: str = None,
-                                    receiver_slack_user_id: str = None, last_n: int = None
-                                    ) -> int:
+                                    deleted: Optional[bool] = False, private: Optional[bool] = None,
+                                    author_slack_user_id: str = None, receiver_slack_user_id: str = None,
+                                    last_n: int = None) -> int:
         with self._get_session() as session:
             result = self._read_thank_you_messages_sqlalchemy_result(
                 session=session,
@@ -234,14 +240,13 @@ class SQLAlchemyDao(Dao, ABC):
                 created_before=created_before,
                 with_types=with_types,
                 deleted=deleted,
+                private=private,
                 author_slack_user_id=author_slack_user_id,
                 receiver_slack_user_id=receiver_slack_user_id,
                 last_n=last_n
             )
 
             return result.count()
-
-
 
     def delete_thank_you_message(self, company_uuid: str, thank_you_message_uuid: str):
         with self._get_session() as session:
@@ -324,6 +329,8 @@ class SQLAlchemyDao(Dao, ABC):
             if thank_you_type:
                 result = result.filter(ThankYouMessage.type == thank_you_type)
 
+            result = result.filter(ThankYouMessage.is_private == false())
+
             result = result.group_by(ThankYouMessage.author_slack_user_id)
             result = result.order_by(func.count().desc())
             result = result.limit(leaders_num)
@@ -346,6 +353,8 @@ class SQLAlchemyDao(Dao, ABC):
 
             if thank_you_type:
                 result = result.filter(ThankYouMessage.type == thank_you_type)
+
+            result = result.filter(ThankYouMessage.is_private == false())
 
             result = result.group_by(ThankYouReceiver.slack_user_id)
             result = result.order_by(func.count().desc())

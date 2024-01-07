@@ -76,6 +76,25 @@ def home_page_configuration_notification_slack_channel_value_changed_action_hand
     )
 
 
+def home_page_configuration_enable_private_messages_value_changed_action_handler(body, client, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    new_enable_private_messages = ("enable_private_messages"
+                                   in [option["value"] for option in body["actions"][0]["selected_options"]])
+
+    if company.enable_private_messages != new_enable_private_messages:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.enable_private_messages = new_enable_private_messages
+
+    publish_configuration_view(
+        client=client,
+        company=company,
+        user_id=user_id
+    )
+
+
 def home_page_configuration_enable_leaderboard_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]

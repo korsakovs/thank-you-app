@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from cachetools import cached, TTLCache
 from slack_sdk import WebClient
@@ -12,8 +13,9 @@ from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
-def messages_sent_num(company_uuid: str, interval: timedelta = timedelta(days=30)):
-    return dao.read_thank_you_messages_num(company_uuid=company_uuid, created_after=datetime.utcnow() - interval)
+def messages_sent_num(company_uuid: str, interval: timedelta = timedelta(days=30), private: Optional[bool] = False):
+    return dao.read_thank_you_messages_num(company_uuid=company_uuid, created_after=datetime.utcnow() - interval,
+                                           private=private)
 
 
 def app_home_opened_action_handler(client: WebClient, event, logger):
@@ -24,13 +26,13 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
 
     user_id = event["user"]
 
-    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20)
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
 
     slack_channel_with_all_messages = None
     if company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
         slack_channel_with_all_messages = company.share_messages_in_slack_channel
 
-    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid) - len(messages))
+    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid, private=False) - len(messages))
 
     view = home_page_company_thank_yous_view(
         thank_you_messages=messages,
@@ -51,18 +53,18 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
 
-    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20)
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
 
     slack_channel_with_all_messages = None
     if company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
         slack_channel_with_all_messages = company.share_messages_in_slack_channel
 
-    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid) - len(messages))
+    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid, private=False) - len(messages))
 
     client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
-            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
             slack_channel_with_all_messages=slack_channel_with_all_messages,
@@ -85,7 +87,7 @@ def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
     client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
-            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20),
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
             current_user_slack_id=user_id,
             sender_leaders=senders_receivers_stats.sender_leaders,
             receiver_leaders=senders_receivers_stats.receiver_leaders,
@@ -129,6 +131,10 @@ def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
     else:
         num_of_messages_a_user_can_send = None
 
+    display_private_message_option = (company.enable_sharing_in_a_slack_channel
+                                      and bool(company.share_messages_in_slack_channel)
+                                      and company.enable_private_messages)
+
     try:
         client.views_open(
             trigger_id=body["trigger_id"],
@@ -140,6 +146,7 @@ def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
                 num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
+                display_private_message_option=display_private_message_option,
             ),
         )
     except Exception as e:

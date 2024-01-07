@@ -156,6 +156,7 @@ def publish_configuration_view(client, company: Company, user_id: str):
             max_thank_you_receivers_num=company.receivers_number_limit,
             enable_attaching_files=company.enable_attaching_files,
             max_attached_files_num=company.max_attached_files_num,
+            enable_private_messages=company.enable_private_messages,
         )
 
     client.views_publish(

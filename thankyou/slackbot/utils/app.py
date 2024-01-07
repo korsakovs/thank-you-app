@@ -21,7 +21,8 @@ from thankyou.slackbot.handlers.configuration import home_page_configuration_but
     home_page_configuration_enable_attaching_files_value_changed_action_handler, \
     home_page_configuration_max_attached_files_num_value_changed_action_handler, \
     home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler, \
-    home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler
+    home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler, \
+    home_page_configuration_enable_private_messages_value_changed_action_handler
 from thankyou.slackbot.handlers.homepage import app_home_opened_action_handler, \
     home_page_company_thank_you_button_clicked_action_handler, home_page_my_thank_you_button_clicked_action_handler, \
     home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler
@@ -97,6 +98,11 @@ def _home_page_say_thank_you_button_clicked_action_handler(ack, client, body, lo
     home_page_say_thank_you_button_clicked_action_handler(body, client, logger)
 
 
+@app.action("thank_you_dialog_send_privately_action")
+def _thank_you_dialog_send_privately_action_handler(ack):
+    ack()
+
+
 @app.view("thank_you_dialog_save_button_clicked")
 def _thank_you_dialog_save_button_clicked_action_handler(ack, client, body, logger):
     ack()
@@ -125,6 +131,12 @@ def _home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_act
 def _home_page_configuration_notification_slack_channel_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_notification_slack_channel_value_changed_action_handler(body, client, logger)
+
+
+@app.action("home_page_configuration_enable_private_messages_value_changed")
+def _home_page_configuration_enable_private_messages_value_changed_action_handler(ack, client, body, logger):
+    ack()
+    home_page_configuration_enable_private_messages_value_changed_action_handler(body, client, logger)
 
 
 @app.action("home_page_configuration_enable_leaderboard_value_changed")
@@ -236,5 +248,6 @@ def _say_thank_you_message_shortcut_action_handler(ack, client, body, logger):
 
 
 @app.error
-def app_error_handler(error):
+def app_error_handler(error, logger):
+    logger.exception(error)
     dao.on_app_error(error)
