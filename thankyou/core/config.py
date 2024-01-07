@@ -70,6 +70,13 @@ def get_active_dao_type(default=DaoType.POSTGRES) -> DaoType:
         return default
 
 
+def database_encryption_secret_key(default=None) -> Optional[str]:
+    secret_key = os.getenv("DATABASE_ENCRYPTION_SECRET_KEY", default)
+    if secret_key == "":
+        secret_key = default
+    return secret_key
+
+
 INITIAL_THANK_YOU_TYPES = [
     "🎉 Collaboration",
     "🚀 Innovation",

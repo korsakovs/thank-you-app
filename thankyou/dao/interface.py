@@ -7,6 +7,9 @@ from thankyou.core.models import Company, ThankYouMessage, ThankYouType, Slack_U
 
 
 class Dao(ABC):
+    def __init__(self, encryption_secret_key: str = None):
+        self.secret_key = encryption_secret_key
+
     @abstractmethod
     def create_thank_you_message(self, thank_you_message: ThankYouMessage): ...
 

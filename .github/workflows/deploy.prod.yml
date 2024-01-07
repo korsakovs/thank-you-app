@@ -17,6 +17,7 @@ jobs:
       PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PROD_PGADMIN_DEFAULT_PASSWORD }}
       PGADMIN_DEFAULT_EMAIL: ${{ secrets.PROD_PGADMIN_DEFAULT_EMAIL }}
       SLACK_APP_POSTGRES_PASSWORD: ${{ secrets.PROD_SLACK_APP_POSTGRES_PASSWORD }}
+      DATABASE_ENCRYPTION_SECRET_KEY: ${{ secrets.PROD_DATABASE_ENCRYPTION_SECRET_KEY }}
     name: deploy to production
     runs-on: ubuntu-latest
     steps:

@@ -51,6 +51,7 @@ services:
       SLACK_APP_POSTGRES_PASSWORD: merci_app
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
+      DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
     restart: always
     networks:
       - wwf_network

@@ -8,6 +8,8 @@ from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Bool
     and_, func, Integer, Enum, false
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
+from sqlalchemy_utils import StringEncryptedType
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
     ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings
@@ -26,7 +28,17 @@ class SQLAlchemyDao(Dao, ABC):
     def _create_engine(self) -> Engine:
         ...
 
-    def __init__(self):
+    def text_column(self):
+        if not self.secret_key:
+            return Text
+        else:
+            return StringEncryptedType(Text, key=self.secret_key, engine=AesEngine)
+
+    def __init__(self, encryption_secret_key: str = None):
+        super().__init__(
+            encryption_secret_key=encryption_secret_key
+        )
+
         self._mapper_registry = registry()
         self._metadata_obj = MetaData()
 
@@ -75,7 +87,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"),
                    nullable=False, index=True),
             Column("deleted", Boolean, nullable=False),
-            Column("text", Text, nullable=False),
+            Column("text", self.text_column(), nullable=False),
             Column("is_rich_text", Boolean, nullable=False),
             Column("is_private", Boolean, nullable=False),
             Column("author_slack_user_id", String(256), nullable=False, index=True),
