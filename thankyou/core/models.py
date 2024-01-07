@@ -34,7 +34,6 @@ class LeaderbordTimeSettings(Enum):
 
 @dataclass
 class Company:
-    name: str
     slack_team_id: Slack_Team_ID_Type
 
     # Config
@@ -89,7 +88,6 @@ class ThankYouMessage:
     deleted: bool = False
 
     author_slack_user_id: Optional[Slack_User_ID_Type] = None
-    author_slack_user_name: Optional[str] = None
 
     slash_command_slack_channel_id: Optional[Slack_Channel_ID_Type] = None
 

@@ -18,7 +18,6 @@ def non_existing_company_slack_team_id() -> str:
 @pytest.fixture
 def non_existing_company(non_existing_company_slack_team_id) -> Company:
     company = Company(
-        name="test_company_" + "".join(choices(string.ascii_letters, k=16)),
         slack_team_id=non_existing_company_slack_team_id,
         admins=[],
         share_messages_in_slack_channel=None,
@@ -30,6 +29,9 @@ def non_existing_company(non_existing_company_slack_team_id) -> Company:
         enable_rich_text_in_thank_you_messages=True,
         enable_attaching_files=True,
         max_attached_files_num=5,
+        enable_private_messages=False,
+        enable_weekly_thank_you_limit=False,
+        enable_sharing_in_a_slack_channel=False,
     )
     for c_ in dao.read_companies():
         if c_.uuid == company.uuid:

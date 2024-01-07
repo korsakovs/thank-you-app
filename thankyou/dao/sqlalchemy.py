@@ -55,7 +55,6 @@ class SQLAlchemyDao(Dao, ABC):
             self._metadata_obj,
             Column("uuid", String(256), primary_key=True, nullable=False),
             Column("slack_team_id", String(256), nullable=False, unique=True, index=True),
-            Column("name", String(256), nullable=False),
             Column("deleted", Boolean, nullable=False),
             Column("enable_sharing_in_a_slack_channel", Boolean, nullable=False),
             Column("share_messages_in_slack_channel", String(256), nullable=True),
@@ -91,7 +90,6 @@ class SQLAlchemyDao(Dao, ABC):
             Column("is_rich_text", Boolean, nullable=False),
             Column("is_private", Boolean, nullable=False),
             Column("author_slack_user_id", String(256), nullable=False, index=True),
-            Column("author_slack_user_name", String(256), nullable=True),
             Column("slash_command_slack_channel_id", String(256), nullable=True),
             Column("created_at", DateTime, nullable=False, index=True),
             Column("thank_you_type_uuid", String(256), ForeignKey(f"{self._THANK_YOU_TYPES_TABLE}.uuid"),
@@ -275,12 +273,10 @@ class SQLAlchemyDao(Dao, ABC):
     def read_company(self, company_uuid: str) -> Optional[Company]:
         return self._get_obj(Company, company_uuid)
 
-    def read_companies(self, company_name: str = None, slack_team_id: str = None, deleted: Optional[bool] = False) \
+    def read_companies(self, slack_team_id: str = None, deleted: Optional[bool] = False) \
             -> List[Company]:
         with self._get_session() as session:
             result = session.query(Company)
-            if company_name is not None:
-                result = result.filter(Company.name == company_name)
             if slack_team_id is not None:
                 result = result.filter(Company.slack_team_id == slack_team_id)
             if deleted is not None:

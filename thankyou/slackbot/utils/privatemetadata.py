@@ -45,7 +45,6 @@ def retrieve_private_metadata_from_view(body) -> PrivateMetadata:
 def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
     values = body["view"]["state"]["values"]
     user_id = body["user"]["id"]
-    user_name = body["user"]["name"]
     private_metadata = retrieve_private_metadata_from_view(body)
     company_uuid = get_or_create_company_by_body(body).uuid
 
@@ -109,7 +108,6 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
         text=text,
         is_rich_text=is_rich_text,
         author_slack_user_id=user_id,
-        author_slack_user_name=user_name,
         receivers=receivers,
         images=images,
         company=company,

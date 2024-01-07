@@ -7,7 +7,7 @@ from thankyou.dao import dao, create_initial_data
 CREATE_COMPANY_LOCK = Lock()
 
 
-def get_or_create_company_by_slack_team_id(slack_team_id: str, new_name: str = None) -> Company:
+def get_or_create_company_by_slack_team_id(slack_team_id: str) -> Company:
     companies = dao.read_companies(slack_team_id=slack_team_id)
     try:
         return companies[0]
@@ -18,7 +18,6 @@ def get_or_create_company_by_slack_team_id(slack_team_id: str, new_name: str = N
             except IndexError:
                 company = Company(
                     slack_team_id=slack_team_id,
-                    name=new_name or "",
                     admins=[],
                     enable_sharing_in_a_slack_channel=False,
                     share_messages_in_slack_channel=None,
@@ -46,7 +45,7 @@ def get_or_create_company_by_body(body) -> Company:
     if not slack_team_id:
         raise Exception(f"Can not find slack_team_id in a body: {body}")
 
-    return get_or_create_company_by_slack_team_id(slack_team_id, slack_team_id)
+    return get_or_create_company_by_slack_team_id(slack_team_id)
 
 
 def get_or_create_company_by_event(event) -> Optional[Company]:

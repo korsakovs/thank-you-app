@@ -40,7 +40,7 @@ class Dao(ABC):
     def read_company(self, company_uuid: str) -> Optional[Company]: ...
 
     @abstractmethod
-    def read_companies(self, company_name: str = None, slack_team_id: str = None, deleted: Optional[bool] = False) \
+    def read_companies(self, slack_team_id: str = None, deleted: Optional[bool] = False) \
         -> List[Company]: ...
 
     @abstractmethod
