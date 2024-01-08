@@ -154,7 +154,7 @@ def thank_you_text_block(label: str = "Add a message", initial_value: str = None
             action_id=action_id,
             multiline=True,
             initial_value=initial_value,
-            max_length=1000,
+            max_length=8192,
             focus_on_load=True
         )
 
