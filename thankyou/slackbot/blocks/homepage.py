@@ -16,7 +16,7 @@ def home_page_actions_block(selected: str = "my_updates") -> ActionsBlock:
             action_id="home_page_say_thank_you_button_clicked"
         ),
         ButtonElement(
-            text="Company Thank yous",
+            text="All Thank yous",
             style="primary" if selected == "company_thank_yous" else None,
             action_id="home_page_company_thank_you_button_clicked"
         ),
