@@ -80,7 +80,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                 text="Access to the configuration page"
             ),
             SectionBlock(
-                text="Select users that will have an access to this Configuration page",
+                text="Select the users who will have access to this configuration page.",
                 accessory=UserMultiSelectElement(
                     initial_users=admin_slack_user_ids,
                     action_id="home_page_configuration_admin_slack_user_ids_value_changed"
@@ -97,7 +97,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             ),
             *([] if not enable_sharing_in_a_slack_channel else [
                 SectionBlock(
-                    text="Share all thank yous in a Slack channel",
+                    text="Select a public Slack channel.",
                     accessory=ChannelSelectElement(
                         initial_channel=share_messages_in_slack_channel,
                         action_id="home_page_configuration_notification_slack_channel_value_changed"
@@ -106,7 +106,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                 checkbox_action_block(
                     element_action_id="home_page_configuration_enable_private_messages_value_changed",
                     checkbox_value="enable_private_messages",
-                    checkbox_label="Let employees send messages privately",
+                    checkbox_label="Allow users to send messages privately",
                     enabled=enable_private_messages
                 )
             ]),
@@ -121,7 +121,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             ),
             *([] if not enable_leaderboard else [
                 SectionBlock(
-                    text="Time period to use",
+                    text="Time period for identifying leaders",
                     accessory=StaticSelectElement(
                         options=stats_time_period_to_use_options,
                         initial_option=stats_time_period_to_use_selected_option,
@@ -135,11 +135,11 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             checkbox_action_block(
                 element_action_id="home_page_configuration_enable_weekly_thank_you_limit_value_changed",
                 checkbox_value="enable_weekly_thank_you_limit",
-                checkbox_label="Enable weekly limit for the number of thank yous a single user can send",
+                checkbox_label="Enable a weekly limit on the number of thank you messages that one user can send.",
                 enabled=enable_weekly_thank_you_limit
             ),
             *([] if not enable_weekly_thank_you_limit else [SectionBlock(
-                text="How many thank yous a user can send in one week",
+                text="How many thank you messages can a user send in a week?",
                 accessory=StaticSelectElement(
                     options=[Option(value=str(num), label=str(num)) for num in weekly_limit_options],
                     initial_option=Option(value=str(weekly_thank_you_limit), label=str(weekly_thank_you_limit)),
@@ -150,7 +150,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                 text="Maximum number of thank you receivers"
             ),
             SectionBlock(
-                text="How many people one can add as receivers for a thank you message they share?",
+                text="How many people can users add as recipients of thank you messages they send?",
                 accessory=StaticSelectElement(
                     options=[Option(value=str(num), label=str(num)) for num in max_thank_you_receivers_options],
                     initial_option=Option(value=str(max_thank_you_receivers_num),
@@ -173,12 +173,12 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             checkbox_action_block(
                 element_action_id="home_page_configuration_enable_attaching_files_value_changed",
                 checkbox_value="enable_attaching_files",
-                checkbox_label="Enable attaching files to the \"Thank You!\" messages",
+                checkbox_label="Enable attaching images to \"Thank You!\" messages",
                 enabled=enable_attaching_files
             ),
             *([] if not enable_attaching_files else [
                 SectionBlock(
-                    text="How many files can be attached to one thank you message?",
+                    text="How many images can be attached to one thank you message?",
                     accessory=StaticSelectElement(
                         options=[Option(value=str(num), label=str(num)) for num in max_attached_files_num_options],
                         initial_option=Option(value=str(max_attached_files_num),
