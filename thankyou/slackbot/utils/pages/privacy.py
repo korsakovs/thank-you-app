@@ -21,7 +21,7 @@ privacy_page_html = """<h1>Privacy Policy</h1>
 <p><strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Merci !.</p>
 </li>
 <li>
-<p><strong>Country</strong> refers to:  France</p>
+<p><strong>Country</strong> refers to: France</p>
 </li>
 <li>
 <p><strong>Device</strong> means any device that can access the Service such as a computer, a cellphone or a digital tablet.</p>

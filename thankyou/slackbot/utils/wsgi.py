@@ -4,6 +4,7 @@ from slack_bolt.adapter.flask import SlackRequestHandler
 from thankyou.slackbot.utils.app import app
 from thankyou.slackbot.utils.pages.installbutton import build_default_install_page_html
 from thankyou.slackbot.utils.pages.privacy import privacy_page_html
+from thankyou.slackbot.utils.pages.termsofservice import terms_of_service
 
 
 def create_flask_app(slack_app_):
@@ -34,6 +35,13 @@ def create_flask_app(slack_app_):
         return Response(
             status=200,
             response=privacy_page_html
+        )
+
+    @flask_app.route("/slack/tos", methods=["GET"])
+    def tos():
+        return Response(
+            status=200,
+            response=terms_of_service
         )
 
     return flask_app
