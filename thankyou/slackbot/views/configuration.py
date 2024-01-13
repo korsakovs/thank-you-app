@@ -135,7 +135,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             checkbox_action_block(
                 element_action_id="home_page_configuration_enable_weekly_thank_you_limit_value_changed",
                 checkbox_value="enable_weekly_thank_you_limit",
-                checkbox_label="Enable a weekly limit on the number of thank you messages that one user can send.",
+                checkbox_label="Enable a weekly limit on the number of thanks that one user can send.",
                 enabled=enable_weekly_thank_you_limit
             ),
             *([] if not enable_weekly_thank_you_limit else [SectionBlock(
