@@ -60,7 +60,21 @@ services:
       - merci-bot
     restart: always
 
-  pgadmin:
+  merci-pgadmin:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+
+  merci-pgadmin-nginx:
+    container_name: merci-pgadmin-nginx
+    image: pgadmin-nginx
+    build:
+      context: ..
+      dockerfile: docker/pgadmin-nginx/pgadmin-nginx.Dockerfile
+    # expose:
+    #   - "5433"
+    depends_on:
+      - merci-pgadmin
+    restart: always
+    networks:
+      - wwf_network

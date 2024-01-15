@@ -6,6 +6,7 @@ from thankyou.dao import dao
 from thankyou.slackbot.blocks.thank_you import thank_you_message_blocks
 from thankyou.slackbot.handlers.common import already_invited_to_a_channel
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
+from thankyou.slackbot.utils.employee import get_or_create_employee_by_slack_user_id
 from thankyou.slackbot.utils.privatemetadata import retrieve_thank_you_message_from_body
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view
 
@@ -13,6 +14,7 @@ from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view
 def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient, logger):
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
+    employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
     thank_you_message = retrieve_thank_you_message_from_body(body)
     dao.create_thank_you_message(thank_you_message)
@@ -101,6 +103,7 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
             current_user_slack_id=user_id,
-            enable_leaderboard=company.enable_leaderboard
+            enable_leaderboard=company.enable_leaderboard,
+            show_welcome_message=not employee.closed_welcome_message
         )
     )

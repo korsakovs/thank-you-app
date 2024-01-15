@@ -2,7 +2,7 @@ from datetime import date
 from typing import List, Optional, Tuple
 
 from slack_sdk.models.blocks import ButtonElement, ActionsBlock, SectionBlock, HeaderBlock, DividerBlock, TextObject, \
-    ContextBlock
+    ContextBlock, Block, ConfirmObject
 
 from thankyou.core.models import ThankYouMessage, ThankYouType, Slack_User_ID_Type
 from thankyou.slackbot.blocks.thank_you import thank_you_message_blocks
@@ -26,6 +26,11 @@ def home_page_actions_block(selected: str = "my_updates") -> ActionsBlock:
             action_id="home_page_my_thank_you_button_clicked"
         ),
         ButtonElement(
+            text="Help",
+            style="primary" if selected == "help" else None,
+            action_id="home_page_help_button_clicked"
+        ),
+        ButtonElement(
             text="Configuration",
             style="primary" if selected == "configuration" else None,
             action_id="home_page_configuration_button_clicked"
@@ -33,6 +38,41 @@ def home_page_actions_block(selected: str = "my_updates") -> ActionsBlock:
     ]
 
     return ActionsBlock(elements=elements)
+
+
+def home_page_welcome_blocks() -> List[Block]:
+    return [
+        HeaderBlock(text="Welcome to the Merci! application"),
+        SectionBlock(
+            text="Recognizing and appreciating your team is a cornerstone of a motivated workforce. "
+                 "The Merci! Slack application provides a seamless way for you and your colleagues to express "
+                 "gratitude and foster a positive workplace culture."
+        ),
+        SectionBlock(
+            text="Have you already tried sending a thank you message? If not, click on the \"Say Thank you!\" button "
+                 "and send a couple of warm words to your colleague(s)!"
+        ),
+        SectionBlock(
+            text=TextObject(
+                type="mrkdwn",
+                text="In case you want your message to appear in a a specific team channel, open this channel and "
+                     "simpy send a `/merci` command"
+            ),
+        ),
+        ActionsBlock(
+            elements=[
+                ButtonElement(
+                    text="Hide this message",
+                    action_id="home_page_hide_welcome_message_button_clicked",
+                    confirm=ConfirmObject(
+                        title="Are you sure?",
+                        text="Are you sure you want to hide this text? "
+                             "If you need help, you can check the \"Help\" tab"
+                    )
+                )
+            ]
+        ),
+    ]
 
 
 def home_page_show_leaders_button_block() -> ActionsBlock:

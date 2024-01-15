@@ -58,7 +58,7 @@ services:
     volumes:
       - "merci_bot_volume:/nginx_sockets"
 
-  pgadmin:
+  merci-pgadmin:
     container_name: merci-pgadmin
     depends_on:
       - merci-postgres
@@ -67,8 +67,8 @@ services:
       PGADMIN_DEFAULT_EMAIL: test@gmail.com
       PGADMIN_DEFAULT_PASSWORD: postgres
       PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "5433:80"
+    # ports:
+    #   - "5433:80"
     networks:
       - wwf_network
 

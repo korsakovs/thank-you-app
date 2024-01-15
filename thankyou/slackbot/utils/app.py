@@ -25,7 +25,8 @@ from thankyou.slackbot.handlers.configuration import home_page_configuration_but
     home_page_configuration_enable_private_messages_value_changed_action_handler
 from thankyou.slackbot.handlers.homepage import app_home_opened_action_handler, \
     home_page_company_thank_you_button_clicked_action_handler, home_page_my_thank_you_button_clicked_action_handler, \
-    home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler
+    home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler, \
+    home_page_hide_welcome_message_button_clicked_action_handler, home_page_help_button_clicked_action_handler
 from thankyou.slackbot.handlers.shortcuts import say_thank_you_global_shortcut_action_handler, \
     say_thank_you_message_shortcut_action_handler
 from thankyou.slackbot.handlers.slashcommands import merci_slash_command_action_handler
@@ -98,6 +99,12 @@ def _home_page_say_thank_you_button_clicked_action_handler(ack, client, body, lo
     home_page_say_thank_you_button_clicked_action_handler(body, client, logger)
 
 
+@app.action("home_page_hide_welcome_message_button_clicked")
+def _home_page_hide_welcome_message_button_clicked_action_handler(ack, client, body, logger):
+    ack()
+    home_page_hide_welcome_message_button_clicked_action_handler(body, client, logger)
+
+
 @app.action("thank_you_dialog_send_privately_action")
 def _thank_you_dialog_send_privately_action_handler(ack):
     ack()
@@ -107,6 +114,12 @@ def _thank_you_dialog_send_privately_action_handler(ack):
 def _thank_you_dialog_save_button_clicked_action_handler(ack, client, body, logger):
     ack()
     thank_you_dialog_save_button_clicked_action_handler(body, client, logger)
+
+
+@app.action("home_page_help_button_clicked")
+def _home_page_help_button_clicked_action_handler(ack, client, body, logger):
+    ack()
+    home_page_help_button_clicked_action_handler(body, client, logger)
 
 
 @app.action("home_page_configuration_button_clicked")

@@ -5,14 +5,14 @@ from datetime import datetime
 from typing import List, Optional, Generator, Tuple
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, desc, \
-    and_, func, Integer, Enum, false
+    and_, func, Integer, Enum, false, UniqueConstraint
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import registry, relationship, sessionmaker, Session
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
-    ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings
+    ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings, UUID_Type, Employee
 from thankyou.dao.interface import Dao
 
 
@@ -23,6 +23,7 @@ class SQLAlchemyDao(Dao, ABC):
     _THANK_YOU_TYPES_TABLE = "thank_you_types"
     _THANK_YOU_RECEIVERS_TABLE = "thank_you_receivers"
     _THANK_YOU_MESSAGE_IMAGES = "thank_you_message_images"
+    _EMPLOYEES_TABLE = "employees"
 
     @abstractmethod
     def _create_engine(self) -> Engine:
@@ -38,10 +39,12 @@ class SQLAlchemyDao(Dao, ABC):
             return String(length)
         return StringEncryptedType(String(length), key=self.secret_key, engine=AesEngine)
 
-    def __init__(self, encryption_secret_key: str = None):
+    def __init__(self, encryption_secret_key: str = None, echo: bool = False):
         super().__init__(
             encryption_secret_key=encryption_secret_key
         )
+
+        self.echo = echo
 
         self._mapper_registry = registry()
         self._metadata_obj = MetaData()
@@ -119,6 +122,16 @@ class SQLAlchemyDao(Dao, ABC):
             Column("ordering_key", Integer, nullable=False),
         )
 
+        self._employees_table = Table(
+            self._EMPLOYEES_TABLE,
+            self._metadata_obj,
+            Column("uuid", String(256), primary_key=True, nullable=False),
+            Column("company_uuid", String(256), ForeignKey(f"{self._COMPANIES_TABLE}.uuid"), nullable=False),
+            Column("slack_user_id", String(256), nullable=False, index=True),
+            Column("closed_welcome_message", Boolean, nullable=False),
+            UniqueConstraint('company_uuid', 'slack_user_id', name='uix_employees__company__slack_user_id')
+        )
+
         self._mapper_registry.map_imperatively(CompanyAdmin, self._company_admins_table)
 
         self._mapper_registry.map_imperatively(Company, self._companies_table, properties={
@@ -142,6 +155,7 @@ class SQLAlchemyDao(Dao, ABC):
 
         self._mapper_registry.map_imperatively(ThankYouReceiver, self._thank_you_receivers_table)
         self._mapper_registry.map_imperatively(ThankYouMessageImage, self._thank_you_message_images_table)
+        self._mapper_registry.map_imperatively(Employee, self._employees_table)
 
         self._engine = self._create_engine()
         try:
@@ -374,12 +388,32 @@ class SQLAlchemyDao(Dao, ABC):
 
             return result.all()
 
+    def create_employee(self, employee: Employee):
+        self._set_obj(employee)
+
+    def read_employee(self, company_uuid: UUID_Type, uuid: UUID_Type) -> Optional[Employee]:
+        employee: Employee = self._get_obj(Employee, uuid)
+        if employee and employee.company_uuid == company_uuid:
+            return employee
+
+    def read_employee_by_slack_id(self, company_uuid: UUID_Type, slack_user_id: Slack_User_ID_Type) \
+            -> Optional[Employee]:
+        with self._get_session() as session:
+            result: List[Employee] = session.query(Employee).filter(Employee.slack_user_id == slack_user_id).all()
+        if len(result) > 1:
+            raise ValueError("There are multiple companies with the same slack_user_id value")
+        try:
+            return result[0]
+        except IndexError:
+            pass
+
     def on_app_error(self, error):
         logging.error(f"An App error occurred: {error}")
         if isinstance(error, PendingRollbackError) or isinstance(error, BrokenPipeError):
             logging.info("Rolling back the session...")
             try:
-                self._session.rollback()
+                # self._session.rollback()
+                pass
             except Exception as e:
                 logging.error(f"Can not roll back the session: {e}")
             else:

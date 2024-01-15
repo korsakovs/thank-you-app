@@ -8,6 +8,8 @@ from thankyou.dao import dao
 from thankyou.slackbot.handlers.common import get_sender_and_receiver_leaders
 from thankyou.slackbot.utils.company import get_or_create_company_by_event, get_or_create_company_by_slack_team_id, \
     get_or_create_company_by_body
+from thankyou.slackbot.utils.employee import get_or_create_employee_by_slack_user_id
+from thankyou.slackbot.views.help import home_page_help_view
 from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, home_page_my_thank_yous_view
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
@@ -25,6 +27,7 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
         company = get_or_create_company_by_slack_team_id(client.default_params["team_id"])
 
     user_id = event["user"]
+    employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
     messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
 
@@ -39,7 +42,8 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
         current_user_slack_id=user_id,
         enable_leaderboard=company.enable_leaderboard,
         slack_channel_with_all_messages=slack_channel_with_all_messages,
-        hidden_messages_num=hidden_messages_num
+        hidden_messages_num=hidden_messages_num,
+        show_welcome_message=not employee.closed_welcome_message
     )
 
     client.views_publish(
@@ -52,6 +56,7 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
+    employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
     messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
 
@@ -68,7 +73,8 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
             slack_channel_with_all_messages=slack_channel_with_all_messages,
-            hidden_messages_num=hidden_messages_num
+            hidden_messages_num=hidden_messages_num,
+            show_welcome_message=not employee.closed_welcome_message
         )
     )
 
@@ -77,6 +83,7 @@ def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
     company = get_or_create_company_by_body(body)
+    employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
     senders_receivers_stats = get_sender_and_receiver_leaders(
         company_uuid=company.uuid,
@@ -94,6 +101,7 @@ def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
             leaders_stats_from_date=senders_receivers_stats.leaders_stats_from_datetime.date(),
             leaders_stats_until_date=senders_receivers_stats.leaders_stats_until_datetime.date(),
             enable_leaderboard=company.enable_leaderboard,
+            show_welcome_message=not employee.closed_welcome_message
         )
     )
 
@@ -151,3 +159,34 @@ def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
         )
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")
+
+
+def home_page_hide_welcome_message_button_clicked_action_handler(body, client, logger):
+    company = get_or_create_company_by_body(body)
+    employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=body["user"]["id"])
+
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
+    hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid, private=False) - len(messages))
+
+    if not employee.closed_welcome_message:
+        employee.closed_welcome_message = True
+
+    client.views_publish(
+        user_id=employee.slack_user_id,
+        view=home_page_company_thank_yous_view(
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            current_user_slack_id=employee.slack_user_id,
+            enable_leaderboard=company.enable_leaderboard,
+            slack_channel_with_all_messages=company.share_messages_in_slack_channel,
+            hidden_messages_num=hidden_messages_num,
+            show_welcome_message=not employee.closed_welcome_message
+        )
+    )
+
+
+def home_page_help_button_clicked_action_handler(body, client, logger):
+    company = get_or_create_company_by_body(body)
+    client.views_publish(
+        user_id=body["user"]["id"],
+        view=home_page_help_view()
+    )

@@ -3,7 +3,8 @@ from datetime import datetime
 
 from typing import List, Optional, Tuple
 
-from thankyou.core.models import Company, ThankYouMessage, ThankYouType, Slack_User_ID_Type, CompanyAdmin
+from thankyou.core.models import Company, ThankYouMessage, ThankYouType, Slack_User_ID_Type, CompanyAdmin, Employee, \
+    UUID_Type
 
 
 class Dao(ABC):
@@ -71,5 +72,12 @@ class Dao(ABC):
     def get_thank_you_receiver_leaders(self, company_uuid: str, created_after: datetime = None,
                                        created_before: datetime = None, thank_you_type: ThankYouType = None,
                                        leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]: ...
+
+    def create_employee(self, employee: Employee): ...
+
+    def read_employee(self, company_uuid: UUID_Type, uuid: UUID_Type) -> Optional[Employee]: ...
+
+    def read_employee_by_slack_id(self, company_uuid: UUID_Type, slack_user_id: Slack_User_ID_Type) \
+        -> Optional[Employee]: ...
 
     def on_app_error(self, error): ...

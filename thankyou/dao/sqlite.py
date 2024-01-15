@@ -3,6 +3,7 @@ import sys
 
 from sqlalchemy import Engine, create_engine, NullPool
 
+from thankyou.core.config import get_env, Env
 from thankyou.dao.sqlalchemy import SQLAlchemyDao
 
 
@@ -22,4 +23,4 @@ class SQLiteDao(SQLAlchemyDao):
     def _create_engine(self) -> Engine:
         if not os.path.isdir(self._db_folder):
             os.mkdir(self._db_folder)
-        return create_engine(f"sqlite:///{self._db_file}", echo=False, poolclass=NullPool)
+        return create_engine(f"sqlite:///{self._db_file}", echo=self.echo, poolclass=NullPool)

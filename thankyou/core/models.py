@@ -104,3 +104,13 @@ class ThankYouStats:
     leader_slack_user_id: Slack_User_ID_Type
     leader_slack_messages_num: int
     total_messages_num: int
+
+
+@dataclass
+class Employee:
+    slack_user_id: Slack_User_ID_Type
+    company_uuid: UUID_Type
+
+    closed_welcome_message: bool = False
+
+    uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
