@@ -6,14 +6,16 @@ from typing import List, Optional, Generator, Tuple
 
 from sqlalchemy import Engine, MetaData, Column, Table, String, ForeignKey, Boolean, Text, DateTime, or_, desc, \
     and_, func, Integer, Enum, false, UniqueConstraint
-from sqlalchemy.exc import PendingRollbackError
-from sqlalchemy.orm import registry, relationship, sessionmaker, Session
+from sqlalchemy.orm import registry, relationship, sessionmaker, Session, scoped_session
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
     ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings, UUID_Type, Employee
 from thankyou.dao.interface import Dao
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class SQLAlchemyDao(Dao, ABC):
@@ -48,6 +50,7 @@ class SQLAlchemyDao(Dao, ABC):
 
         self._mapper_registry = registry()
         self._metadata_obj = MetaData()
+        self._scoped_session = None
 
         self._company_admins_table = Table(
             self._COMPANY_ADMINS_TABLE,
@@ -165,6 +168,13 @@ class SQLAlchemyDao(Dao, ABC):
         self._session_maker = sessionmaker(bind=self._engine)
         self._session = self._session_maker()
 
+    @property
+    def session_maker(self):
+        return self._session_maker
+
+    def set_scoped_session(self, s_session: scoped_session):
+        self._scoped_session = s_session
+
     @contextmanager
     def _get_session(self) -> Generator[Session, None, None]:
         """
@@ -172,8 +182,17 @@ class SQLAlchemyDao(Dao, ABC):
             yield session
             session.commit()
         """
-        yield self._session
-        self._session.commit()
+        if self._scoped_session:
+            try:
+                session: Session = self._scoped_session()
+                logging.debug(f"Successfully created/retrieved a session: {session}")
+            except Exception as e:
+                logging.debug(f"Can not create session using _flask_scoped_session: {e}")
+                session = self._session
+        else:
+            session = self._session
+        yield session
+        session.commit()
 
     @property
     def engine(self) -> Engine:
@@ -406,15 +425,3 @@ class SQLAlchemyDao(Dao, ABC):
             return result[0]
         except IndexError:
             pass
-
-    def on_app_error(self, error):
-        logging.error(f"An App error occurred: {error}")
-        if isinstance(error, PendingRollbackError) or isinstance(error, BrokenPipeError):
-            logging.info("Rolling back the session...")
-            try:
-                # self._session.rollback()
-                pass
-            except Exception as e:
-                logging.error(f"Can not roll back the session: {e}")
-            else:
-                logging.info("Rolled back!")

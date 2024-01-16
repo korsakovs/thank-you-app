@@ -5,7 +5,6 @@ from slack_bolt import App
 from slack_sdk import WebClient
 
 from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token
-from thankyou.dao import dao
 from thankyou.slackbot.utils.oauth import oauth_settings
 from thankyou.slackbot.handlers.configuration import home_page_configuration_button_clicked_action_handler, \
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler, \
@@ -258,9 +257,3 @@ def _say_thank_you_global_shortcut_action_handler(ack, client, body, logger):
 def _say_thank_you_message_shortcut_action_handler(ack, client, body, logger):
     ack()
     say_thank_you_message_shortcut_action_handler(body, client, logger)
-
-
-@app.error
-def app_error_handler(error, logger):
-    logger.exception(error)
-    dao.on_app_error(error)
