@@ -170,23 +170,26 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             HeaderBlock(
                 text="Attaching files"
             ),
-            checkbox_action_block(
-                element_action_id="home_page_configuration_enable_attaching_files_value_changed",
-                checkbox_value="enable_attaching_files",
-                checkbox_label="Enable attaching images to \"Thank You!\" messages",
-                enabled=enable_attaching_files
+            # checkbox_action_block(
+            #     element_action_id="home_page_configuration_enable_attaching_files_value_changed",
+            #     checkbox_value="enable_attaching_files",
+            #     checkbox_label="Enable attaching images to \"Thank You!\" messages",
+            #     enabled=enable_attaching_files
+            # ),
+            # *([] if not enable_attaching_files else [
+            #     SectionBlock(
+            #         text="How many images can be attached to one thank you message?",
+            #         accessory=StaticSelectElement(
+            #             options=[Option(value=str(num), label=str(num)) for num in max_attached_files_num_options],
+            #             initial_option=Option(value=str(max_attached_files_num),
+            #                                   label=str(max_attached_files_num)),
+            #             action_id="home_page_configuration_max_attached_files_num_value_changed"
+            #         )
+            #     ),
+            # ]),
+            SectionBlock(
+                text="This feature is temporarily disabled. We will soon enable it again. Stay tuned :)"
             ),
-            *([] if not enable_attaching_files else [
-                SectionBlock(
-                    text="How many images can be attached to one thank you message?",
-                    accessory=StaticSelectElement(
-                        options=[Option(value=str(num), label=str(num)) for num in max_attached_files_num_options],
-                        initial_option=Option(value=str(max_attached_files_num),
-                                              label=str(max_attached_files_num)),
-                        action_id="home_page_configuration_max_attached_files_num_value_changed"
-                    )
-                ),
-            ]),
             HeaderBlock(
                 text="Company values"
             ),

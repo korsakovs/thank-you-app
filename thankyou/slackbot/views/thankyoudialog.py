@@ -19,6 +19,8 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                           display_private_message_option: bool = True) -> View:
     extra_blocks = []
 
+    # DELETE ME!
+    enable_attaching_files = False
     if enable_attaching_files and max_attached_files_num > 0:
         extra_blocks.append(
             InputBlock(
