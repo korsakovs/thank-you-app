@@ -1,4 +1,6 @@
-from flask import Flask, Response, render_template, request
+import os
+
+from flask import Flask, Response, render_template, request, send_from_directory
 
 from thankyou.dao import dao
 from thankyou.utils.flask import flask_scoped_session
@@ -6,6 +8,13 @@ from thankyou.utils.flask import flask_scoped_session
 
 webapp = Flask(__name__, static_url_path='/app')
 dao.set_scoped_session(flask_scoped_session(dao.session_maker, webapp))
+
+
+@webapp.route("/app/img/favicon.ico")
+def favicon():
+    print("OK")
+    return send_from_directory(os.path.join(webapp.root_path, 'static', 'img'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @webapp.route("/app/status")
