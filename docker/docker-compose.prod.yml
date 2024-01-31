@@ -44,6 +44,10 @@ services:
     volumes:
       - /home/wwf/merci_data/sqlite:/merci-bot/sqlite_data
 
+  merci-webapp:
+    build:
+      dockerfile: docker/webapp/gunicorn.Dockerfile
+
   merci-bot-nginx:
     container_name: merci-bot-nginx
     image: merci-bot-nginx

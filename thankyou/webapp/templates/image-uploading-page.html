@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %} 222 Attach an image to your "Thank you!" message {% endblock %}
+
+{% block content %}
+<link href="{{url_for('static', filename='css/image-uploading.css')}}" rel="stylesheet">
+<div id="drop-area">
+    <div id="alert-message" class="alert alert-danger" role="alert">
+        The image was not uploaded. Please try again
+    </div>
+    <div id="success-message" class="alert alert-success" role="alert">
+        The image was successfully uploaded! Please, return to Slack to publish your "Thank you" message
+    </div>
+    <form class="my-form">
+        <p>Upload an image with the file dialog or by dragging and dropping onto the dashed region</p>
+        <input type="file" id="fileElem" accept="image/*" onchange="handleFiles(this.files)">
+        <label class="button btn btn-primary" for="fileElem">Select a file</label>
+    </form>
+    <div id="progress-area" class="progress" role="progressbar" aria-label="Success striped example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+        <div id="progress-bar" class="progress-bar progress-bar-striped bg-success progress-bar-animated" style="width: 25%"></div>
+    </div>
+</div>
+<script src="{{url_for('static', filename='js/image-uploading.js')}}"></script>
+{% endblock %}

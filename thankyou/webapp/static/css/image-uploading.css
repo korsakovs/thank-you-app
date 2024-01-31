@@ -1,0 +1,28 @@
+#drop-area {
+  border: 2px dashed #ccc;
+  border-radius: 20px;
+  width: 480px;
+  margin: 100px auto;
+  padding: 20px;
+}
+
+#drop-area.highlight {
+  border-color: purple;
+}
+
+#fileElem {
+  display: none;
+}
+
+#progress-area {
+  margin-top: 20px;
+  display: none;
+}
+
+#alert-message {
+  display: none;
+}
+
+#success-message {
+  display: none;
+}

@@ -72,6 +72,26 @@ services:
     networks:
       - wwf_network
 
+  merci-webapp:
+    container_name: merci-webapp
+    build:
+      context: ..
+      dockerfile: docker/webapp/dev.Dockerfile
+    depends_on:
+      merci-postgres:
+        condition: service_healthy
+        restart: true
+    environment:
+      THANK_YOU_DAO: POSTGRES
+      POSTGRES_HOST: merci-postgres
+      POSTGRES_DB: merci
+      DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
+    restart: always
+    networks:
+      - wwf_network
+    volumes:
+      - "merci_bot_volume:/nginx_sockets"
+
 volumes:
   merci_bot_volume:
 

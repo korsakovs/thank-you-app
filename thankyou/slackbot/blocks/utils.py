@@ -2,7 +2,7 @@ import json
 from json import JSONDecodeError
 from typing import Optional, List, Dict
 
-from thankyou.slackbot.utils.string import es
+from thankyou.slackbot.utils.stringhelpers import es
 
 
 def rich_text_block_as_markdown(text: str) -> Optional[str]:

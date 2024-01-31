@@ -7,7 +7,7 @@ from slack_sdk.models.blocks import SectionBlock, TextObject, ContextBlock, Opti
 
 from thankyou.core.models import ThankYouMessage, ThankYouType
 from thankyou.slackbot.blocks.utils import rich_text_block_as_markdown
-from thankyou.slackbot.utils.string import es
+from thankyou.slackbot.utils.stringhelpers import es
 
 
 def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[SectionBlock]:
