@@ -4,6 +4,8 @@ let progressBar = document.getElementById('progress-bar');
 let alertMessage = document.getElementById('alert-message');
 let successMessage = document.getElementById('success-message');
 
+let form = document.getElementById('my-form');
+
 let dropArea = document.getElementById('drop-area');
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
   dropArea.addEventListener(eventName, preventDefaults, false);
@@ -64,6 +66,7 @@ function uploadFile(file) {
   xhr.addEventListener('readystatechange', function(e) {
     if (xhr.readyState == 4 && xhr.status == 200) {
       // Done. Inform the user
+      resetForm();
       setTimeout(() => {
         showSuccessMessage();
         hideProgress();
@@ -71,12 +74,13 @@ function uploadFile(file) {
     }
     else if (xhr.readyState == 4 && xhr.status != 200) {
       // Error. Inform the user
+      resetForm();
       setTimeout(() => {
         showAlertMessage();
         hideProgress();
       }, 500);
     }
-  })
+  });
 
   formData.append('file', file)
   setTimeout(() => {
@@ -108,4 +112,8 @@ function showSuccessMessage() {
 
 function showAlertMessage() {
   alertMessage.setAttribute("style","display:block");
+}
+
+function resetForm() {
+  form.reset();
 }

@@ -12,7 +12,6 @@ dao.set_scoped_session(flask_scoped_session(dao.session_maker, webapp))
 
 @webapp.route("/app/img/favicon.ico")
 def favicon():
-    print("OK")
     return send_from_directory(os.path.join(webapp.root_path, 'static', 'img'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
@@ -37,6 +36,8 @@ def image_uploading_file():
     file = request.files["file"]
     if file.filename == "":
         raise Exception("File was not uploaded - name was not found")
+    file_content = file.stream.read()
+    print(len(file_content))
     return Response(status=200)
 
 
