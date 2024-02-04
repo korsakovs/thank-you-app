@@ -1,4 +1,6 @@
 import json
+import os
+from urllib.parse import urlparse
 
 from thankyou.core.models import ThankYouMessage, ThankYouReceiver, ThankYouMessageImage
 from thankyou.dao import dao
@@ -89,9 +91,15 @@ def retrieve_thank_you_message_from_body(body) -> ThankYouMessage:
                      "thank_you_dialog_receivers_action_id"]["selected_users"]]
 
     try:
-        images = [ThankYouMessageImage(url=image["url_private"], filename=image["name"], ordering_key=ordering_key)
-                  for ordering_key, image in enumerate(values["thank_you_dialog_attached_files_block"][
-                                                           "thank_you_dialog_attached_files_action_id"]["files"])]
+        image_url = values["thank_you_dialog_image_url_block"]["thank_you_dialog_image_url_action_id"]["value"]
+        filename = os.path.basename(urlparse(image_url).path)
+        images = [
+            ThankYouMessageImage(
+                url=image_url,
+                filename=filename,
+                ordering_key=0
+            )
+        ]
     except (TypeError, KeyError):
         images = []
 

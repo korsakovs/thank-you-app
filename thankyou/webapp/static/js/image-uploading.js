@@ -46,14 +46,18 @@ function handleDrop(e) {
   handleFiles(e.dataTransfer.files);
 }
 
+function getTmpMsgId() {
+  return (new URLSearchParams(window.location.search)).get('temp_msg_id');
+}
+
 function handleFiles(files) {
   hideMessages()
   initializeProgress()
-  uploadFile(files[0])
+  uploadFile(files[0], getTmpMsgId())
 }
 
-function uploadFile(file) {
-  var url = '/app/image-uploading/file'
+function uploadFile(file, temp_msg_id) {
+  var url = '/app/image-uploading/file?temp_msg_id=' + temp_msg_id
   var xhr = new XMLHttpRequest()
   var formData = new FormData()
   xhr.open('POST', url, true)

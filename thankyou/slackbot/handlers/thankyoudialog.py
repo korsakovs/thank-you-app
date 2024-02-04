@@ -23,7 +23,9 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
         try:
             client.chat_postMessage(
                 channel=thank_you_message.slash_command_slack_channel_id,
-                blocks=thank_you_message_blocks(thank_you_message)
+                blocks=thank_you_message_blocks(thank_you_message),
+                unfurl_links=False,
+                unfurl_media=False,
             )
         except SlackApiError as e:
             if e.response.data["error"] == "channel_not_found":
@@ -32,6 +34,8 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                          f"delivered to the Slack channel <#{thank_you_message.slash_command_slack_channel_id}>. "
                          f"Are you sure that the Merci! application was invited to this channel?",
                     channel=thank_you_message.author_slack_user_id,
+                    unfurl_links=False,
+                    unfurl_media=False,
                 )
             else:
                 logger.error("A thank you message was not delivered to the slack channel in which the slash command "
@@ -78,12 +82,16 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                     client.chat_postEphemeral(
                         channel=company.share_messages_in_slack_channel,
                         blocks=thank_you_message_blocks(thank_you_message),
-                        user=receiver.slack_user_id
+                        user=receiver.slack_user_id,
+                        unfurl_links=False,
+                        unfurl_media=False,
                     )
             else:
                 client.chat_postMessage(
                     channel=company.share_messages_in_slack_channel,
-                    blocks=thank_you_message_blocks(thank_you_message)
+                    blocks=thank_you_message_blocks(thank_you_message),
+                    unfurl_links=False,
+                    unfurl_media=False,
                 )
         except SlackApiError:
             pass
@@ -93,7 +101,9 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
             client.chat_postMessage(
                 text="You received a Thank You message!",
                 channel=receiver.slack_user_id,
-                blocks=thank_you_message_blocks(thank_you_message)
+                blocks=thank_you_message_blocks(thank_you_message),
+                unfurl_links=False,
+                unfurl_media=False,
             )
         except SlackApiError:
             pass

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from slack_sdk.models.blocks import InputBlock, SectionBlock, TextObject
-from slack_sdk.models.blocks.block_elements import FileInputElement
+from slack_sdk.models.blocks.block_elements import UrlInputElement
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouType, ThankYouMessage
@@ -19,18 +19,14 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                           display_private_message_option: bool = True) -> View:
     extra_blocks = []
 
-    # DELETE ME!
-    enable_attaching_files = False
-    if enable_attaching_files and max_attached_files_num > 0:
+    if enable_attaching_files:
         extra_blocks.append(
             InputBlock(
-                label="Attach an image" + ("" if max_attached_files_num == 1 else "(s)"),
-                block_id="thank_you_dialog_attached_files_block",
+                label="Add an image",
+                block_id="thank_you_dialog_image_url_block",
                 dispatch_action=True,
-                element=FileInputElement(
-                    action_id="thank_you_dialog_attached_files_action_id",
-                    filetypes=["jpg", "jpeg", "png", "gif"],
-                    max_files=max_attached_files_num,
+                element=UrlInputElement(
+                    action_id="thank_you_dialog_image_url_action_id",
                 ),
                 optional=True,
             ),

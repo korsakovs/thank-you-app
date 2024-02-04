@@ -63,7 +63,7 @@ class DaoType(Enum):
 
 
 def get_active_dao_type(default=DaoType.POSTGRES) -> DaoType:
-    logging.info("THANK_YOU_DAO ENV = " + os.getenv("THANK_YOU_DAO", ""))
+    logging.info("THANK_YOU_DAO = " + os.getenv("THANK_YOU_DAO", ""))
     try:
         return DaoType[os.getenv("THANK_YOU_DAO", "").upper().strip()]
     except KeyError:

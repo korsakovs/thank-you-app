@@ -1,8 +1,7 @@
 from typing import List
 
 from slack_sdk.models.blocks import SectionBlock, ButtonElement, HeaderBlock, ContextBlock, TextObject, \
-    ChannelSelectElement, StaticSelectElement, Option, UserMultiSelectElement, ActionsBlock, CheckboxesElement, \
-    DividerBlock
+    ChannelSelectElement, StaticSelectElement, Option, UserMultiSelectElement, ActionsBlock, DividerBlock
 from slack_sdk.models.views import View
 
 from thankyou.core.models import ThankYouType, Slack_User_ID_Type, Slack_Channel_ID_Type, LeaderbordTimeSettings
@@ -168,14 +167,14 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                 enabled=enable_rich_text_in_thank_you_messages
             ),
             HeaderBlock(
-                text="Attaching files"
+                text="Attaching images"
             ),
-            # checkbox_action_block(
-            #     element_action_id="home_page_configuration_enable_attaching_files_value_changed",
-            #     checkbox_value="enable_attaching_files",
-            #     checkbox_label="Enable attaching images to \"Thank You!\" messages",
-            #     enabled=enable_attaching_files
-            # ),
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_attaching_files_value_changed",
+                checkbox_value="enable_attaching_files",
+                checkbox_label="Enable attaching images to \"Thank You!\" messages",
+                enabled=enable_attaching_files
+            ),
             # *([] if not enable_attaching_files else [
             #     SectionBlock(
             #         text="How many images can be attached to one thank you message?",
@@ -187,9 +186,6 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             #         )
             #     ),
             # ]),
-            SectionBlock(
-                text="This feature is temporarily disabled. We will soon enable it again. Stay tuned :)"
-            ),
             HeaderBlock(
                 text="Company values"
             ),
