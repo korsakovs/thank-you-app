@@ -30,6 +30,8 @@ def rich_text_block_as_markdown(text: str) -> Optional[str]:
                         else:
                             return None
                 _result += line + "‎"
+            elif sub_element["type"] == "emoji":
+                _result += f":{sub_element['name']}:" + "‎"
             else:
                 return None
         return _result[0:-1]
