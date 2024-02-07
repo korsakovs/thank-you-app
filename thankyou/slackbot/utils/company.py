@@ -26,6 +26,7 @@ def get_or_create_company_by_slack_team_id(slack_team_id: str) -> Company:
                     weekly_thank_you_limit=5,
                     receivers_number_limit=10,
                     enable_leaderboard=True,
+                    enable_private_message_counting_in_leaderboard=False,
                     enable_company_values=True,
                     enable_rich_text_in_thank_you_messages=False,
                     enable_attaching_files=True,

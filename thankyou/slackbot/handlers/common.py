@@ -75,7 +75,7 @@ class SendersReceiversStats:
 
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
 def get_sender_and_receiver_leaders(company_uuid: str, leaderboard_time_settings: LeaderbordTimeSettings,
-                                    group_by_company_values: bool) -> SendersReceiversStats:
+                                    group_by_company_values: bool, include_private: bool) -> SendersReceiversStats:
     if leaderboard_time_settings == LeaderbordTimeSettings.LAST_30_DAYS:
         leaders_stats_from_datetime = datetime.utcnow() - timedelta(days=30)
         leaders_stats_until_datetime = datetime.utcnow()
@@ -105,12 +105,14 @@ def get_sender_and_receiver_leaders(company_uuid: str, leaderboard_time_settings
         sender_leaders.append((None, dao.get_thank_you_sender_leaders(
             company_uuid=company_uuid,
             created_after=leaders_stats_from_datetime,
-            created_before=leaders_stats_until_datetime
+            created_before=leaders_stats_until_datetime,
+            include_private=include_private
         )))
         receiver_leaders.append((None, dao.get_thank_you_receiver_leaders(
             company_uuid=company_uuid,
             created_after=leaders_stats_from_datetime,
-            created_before=leaders_stats_until_datetime
+            created_before=leaders_stats_until_datetime,
+            include_private=include_private
         )))
     else:
         for thank_you_type in dao.read_thank_you_types(company_uuid=company_uuid):
@@ -118,14 +120,16 @@ def get_sender_and_receiver_leaders(company_uuid: str, leaderboard_time_settings
                 company_uuid=company_uuid,
                 thank_you_type=thank_you_type,
                 created_after=leaders_stats_from_datetime,
-                created_before=leaders_stats_until_datetime
+                created_before=leaders_stats_until_datetime,
+                include_private=include_private
             )
             sender_leaders.append((thank_you_type, type_leaders))
             type_leaders = dao.get_thank_you_receiver_leaders(
                 company_uuid=company_uuid,
                 thank_you_type=thank_you_type,
                 created_after=leaders_stats_from_datetime,
-                created_before=leaders_stats_until_datetime
+                created_before=leaders_stats_until_datetime,
+                include_private=include_private
             )
             receiver_leaders.append((thank_you_type, type_leaders))
     return SendersReceiversStats(
@@ -157,6 +161,7 @@ def publish_configuration_view(client, company: Company, user_id: str):
             enable_attaching_files=company.enable_attaching_files,
             max_attached_files_num=company.max_attached_files_num,
             enable_private_messages=company.enable_private_messages,
+            enable_private_message_counting_in_leaderboard=company.enable_private_message_counting_in_leaderboard
         )
 
     client.views_publish(

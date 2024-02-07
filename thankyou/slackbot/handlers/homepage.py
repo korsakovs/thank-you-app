@@ -88,7 +88,8 @@ def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
     senders_receivers_stats = get_sender_and_receiver_leaders(
         company_uuid=company.uuid,
         leaderboard_time_settings=company.leaderbord_time_settings,
-        group_by_company_values=company.enable_company_values
+        group_by_company_values=company.enable_company_values,
+        include_private=company.enable_private_message_counting_in_leaderboard
     )
 
     client.views_publish(
@@ -139,10 +140,6 @@ def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
     else:
         num_of_messages_a_user_can_send = None
 
-    display_private_message_option = (company.enable_sharing_in_a_slack_channel
-                                      and bool(company.share_messages_in_slack_channel)
-                                      and company.enable_private_messages)
-
     try:
         client.views_open(
             trigger_id=body["trigger_id"],
@@ -154,7 +151,7 @@ def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
                 num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
-                display_private_message_option=display_private_message_option,
+                display_private_message_option=company.enable_private_messages,
             ),
         )
     except Exception as e:

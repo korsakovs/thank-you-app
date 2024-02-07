@@ -73,6 +73,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("weekly_thank_you_limit", Integer, nullable=False),
             Column("receivers_number_limit", Integer, nullable=False),
             Column("enable_leaderboard", Boolean, nullable=False),
+            Column("enable_private_message_counting_in_leaderboard", Boolean, nullable=False),
             Column("enable_company_values", Boolean, nullable=False),
             Column("enable_rich_text_in_thank_you_messages", Boolean, nullable=False),
             Column("enable_attaching_files", Boolean, nullable=False),
@@ -359,7 +360,8 @@ class SQLAlchemyDao(Dao, ABC):
 
     def get_thank_you_sender_leaders(self, company_uuid: str, created_after: datetime = None,
                                      created_before: datetime = None, thank_you_type: ThankYouType = None,
-                                     leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]:
+                                     leaders_num: int = 3, include_private: bool = False) \
+            -> List[Tuple[Slack_User_ID_Type, int]]:
         with self._get_session() as session:
             result = session.query(ThankYouMessage.author_slack_user_id, func.count())
             result = result.filter(ThankYouMessage.deleted == False)
@@ -374,7 +376,8 @@ class SQLAlchemyDao(Dao, ABC):
             if thank_you_type:
                 result = result.filter(ThankYouMessage.type == thank_you_type)
 
-            result = result.filter(ThankYouMessage.is_private == false())
+            if not include_private:
+                result = result.filter(ThankYouMessage.is_private == false())
 
             result = result.group_by(ThankYouMessage.author_slack_user_id)
             result = result.order_by(func.count().desc())
@@ -384,7 +387,8 @@ class SQLAlchemyDao(Dao, ABC):
 
     def get_thank_you_receiver_leaders(self, company_uuid: str, created_after: datetime = None,
                                        created_before: datetime = None, thank_you_type: ThankYouType = None,
-                                       leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]:
+                                       leaders_num: int = 3, include_private: bool = False) \
+            -> List[Tuple[Slack_User_ID_Type, int]]:
         with self._get_session() as session:
             result = session.query(ThankYouReceiver.slack_user_id, func.count()).join(ThankYouMessage)
             result = result.filter(ThankYouMessage.deleted == False)
@@ -399,7 +403,8 @@ class SQLAlchemyDao(Dao, ABC):
             if thank_you_type:
                 result = result.filter(ThankYouMessage.type == thank_you_type)
 
-            result = result.filter(ThankYouMessage.is_private == false())
+            if not include_private:
+                result = result.filter(ThankYouMessage.is_private == false())
 
             result = result.group_by(ThankYouReceiver.slack_user_id)
             result = result.order_by(func.count().desc())

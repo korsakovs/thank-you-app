@@ -45,6 +45,7 @@ class Company:
     weekly_thank_you_limit: int
     receivers_number_limit: int
     enable_leaderboard: bool
+    enable_private_message_counting_in_leaderboard: bool
     enable_company_values: bool
     enable_rich_text_in_thank_you_messages: bool
     enable_attaching_files: bool

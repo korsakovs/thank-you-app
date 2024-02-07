@@ -21,7 +21,8 @@ from thankyou.slackbot.handlers.configuration import home_page_configuration_but
     home_page_configuration_max_attached_files_num_value_changed_action_handler, \
     home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler, \
     home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler, \
-    home_page_configuration_enable_private_messages_value_changed_action_handler
+    home_page_configuration_enable_private_messages_value_changed_action_handler, \
+    handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler
 from thankyou.slackbot.handlers.homepage import app_home_opened_action_handler, \
     home_page_company_thank_you_button_clicked_action_handler, home_page_my_thank_you_button_clicked_action_handler, \
     home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler, \
@@ -161,6 +162,12 @@ def _home_page_configuration_enable_leaderboard_value_changed_action_handler(ack
 def _home_page_configuration_stats_time_period_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_stats_time_period_value_changed_action_handler(body, client, logger)
+
+
+@app.action("home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed")
+def _handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler(ack, client, body, logger):
+    ack()
+    handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler(client, body, logger)
 
 
 @app.action("home_page_configuration_max_number_of_thank_you_receivers_value_changed")

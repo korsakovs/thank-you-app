@@ -44,7 +44,8 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                        weekly_thank_you_limit: int,
                        enable_rich_text_in_thank_you_messages: bool, enable_company_values: bool,
                        enable_leaderboard: bool, max_thank_you_receivers_num: int, enable_attaching_files: bool,
-                       enable_private_messages: bool, max_attached_files_num: int):
+                       enable_private_messages: bool, max_attached_files_num: int,
+                       enable_private_message_counting_in_leaderboard: bool):
     stats_time_period_to_use_options = []
     stats_time_period_to_use_selected_option = None
     for enum, option in (
@@ -102,13 +103,13 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                         action_id="home_page_configuration_notification_slack_channel_value_changed"
                     )
                 ),
-                checkbox_action_block(
-                    element_action_id="home_page_configuration_enable_private_messages_value_changed",
-                    checkbox_value="enable_private_messages",
-                    checkbox_label="Allow users to send messages privately",
-                    enabled=enable_private_messages
-                )
             ]),
+            checkbox_action_block(
+                element_action_id="home_page_configuration_enable_private_messages_value_changed",
+                checkbox_value="enable_private_messages",
+                checkbox_label="Allow users to send messages privately",
+                enabled=enable_private_messages
+            ),
             HeaderBlock(
                 text="Leaderboards Settings"
             ),
@@ -126,6 +127,13 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                         initial_option=stats_time_period_to_use_selected_option,
                         action_id="home_page_configuration_stats_time_period_value_changed"
                     )
+                ),
+                checkbox_action_block(
+                    element_action_id=
+                    "home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed",
+                    checkbox_value="enable_private_message_counting_in_leaderboard",
+                    checkbox_label="Count private messages when counting the leaderboard",
+                    enabled=enable_private_message_counting_in_leaderboard
                 ),
             ]),
             HeaderBlock(

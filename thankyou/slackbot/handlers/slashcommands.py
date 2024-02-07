@@ -30,10 +30,6 @@ def merci_slash_command_action_handler(body, client, logger):
     else:
         num_of_messages_a_user_can_send = None
 
-    display_private_message_option = (company.enable_sharing_in_a_slack_channel
-                                      and bool(company.share_messages_in_slack_channel)
-                                      and company.enable_private_messages)
-
     try:
         client.views_open(
             trigger_id=body["trigger_id"],
@@ -46,7 +42,7 @@ def merci_slash_command_action_handler(body, client, logger):
                 max_attached_files_num=company.max_attached_files_num,
                 num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
                 slash_command_slack_channel_id=channel_id,
-                display_private_message_option=display_private_message_option,
+                display_private_message_option=company.enable_private_messages,
             ),
         )
     except Exception as e:

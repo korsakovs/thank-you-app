@@ -21,12 +21,22 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
 
     if thank_you_message.slash_command_slack_channel_id:
         try:
-            client.chat_postMessage(
-                channel=thank_you_message.slash_command_slack_channel_id,
-                blocks=thank_you_message_blocks(thank_you_message),
-                unfurl_links=False,
-                unfurl_media=False,
-            )
+            if thank_you_message.is_private:
+                for receiver in thank_you_message.receivers:
+                    client.chat_postEphemeral(
+                        user=receiver.slack_user_id,
+                        channel=thank_you_message.slash_command_slack_channel_id,
+                        blocks=thank_you_message_blocks(thank_you_message),
+                        unfurl_links=False,
+                        unfurl_media=False,
+                    )
+            else:
+                client.chat_postMessage(
+                    channel=thank_you_message.slash_command_slack_channel_id,
+                    blocks=thank_you_message_blocks(thank_you_message),
+                    unfurl_links=False,
+                    unfurl_media=False,
+                )
         except SlackApiError as e:
             if e.response.data["error"] == "channel_not_found":
                 client.chat_postMessage(

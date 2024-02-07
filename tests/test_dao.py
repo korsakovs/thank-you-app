@@ -25,6 +25,7 @@ def non_existing_company(non_existing_company_slack_team_id) -> Company:
         weekly_thank_you_limit=5,
         receivers_number_limit=5,
         enable_leaderboard=True,
+        enable_private_message_counting_in_leaderboard=False,
         enable_company_values=True,
         enable_rich_text_in_thank_you_messages=True,
         enable_attaching_files=True,

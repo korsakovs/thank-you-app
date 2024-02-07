@@ -70,12 +70,14 @@ class Dao(ABC):
     @abstractmethod
     def get_thank_you_sender_leaders(self, company_uuid: str, created_after: datetime = None,
                                      created_before: datetime = None, thank_you_type: ThankYouType = None,
-                                     leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]: ...
+                                     leaders_num: int = 3, include_private: bool = False) \
+            -> List[Tuple[Slack_User_ID_Type, int]]: ...
 
     @abstractmethod
     def get_thank_you_receiver_leaders(self, company_uuid: str, created_after: datetime = None,
                                        created_before: datetime = None, thank_you_type: ThankYouType = None,
-                                       leaders_num: int = 3) -> List[Tuple[Slack_User_ID_Type, int]]: ...
+                                       leaders_num: int = 3, include_private: bool = False) \
+            -> List[Tuple[Slack_User_ID_Type, int]]: ...
 
     def create_employee(self, employee: Employee): ...
 

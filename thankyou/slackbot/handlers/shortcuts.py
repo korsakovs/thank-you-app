@@ -23,10 +23,6 @@ def say_thank_you_global_shortcut_action_handler(body, client, logger):
     else:
         num_of_messages_a_user_can_send = None
 
-    display_private_message_option = (company.enable_sharing_in_a_slack_channel
-                                      and bool(company.share_messages_in_slack_channel)
-                                      and company.enable_private_messages)
-
     try:
         client.views_open(
             trigger_id=body["trigger_id"],
@@ -38,7 +34,7 @@ def say_thank_you_global_shortcut_action_handler(body, client, logger):
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
                 num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
-                display_private_message_option=display_private_message_option,
+                display_private_message_option=company.enable_private_messages,
             ),
         )
     except Exception as e:
@@ -63,10 +59,6 @@ def say_thank_you_message_shortcut_action_handler(body, client, logger):
     else:
         num_of_messages_a_user_can_send = None
 
-    display_private_message_option = (company.enable_sharing_in_a_slack_channel
-                                      and bool(company.share_messages_in_slack_channel)
-                                      and company.enable_private_messages)
-
     try:
         client.views_open(
             trigger_id=body["trigger_id"],
@@ -78,7 +70,7 @@ def say_thank_you_message_shortcut_action_handler(body, client, logger):
                 enable_attaching_files=company.enable_attaching_files,
                 max_attached_files_num=company.max_attached_files_num,
                 num_of_messages_a_user_can_send=num_of_messages_a_user_can_send,
-                display_private_message_option=display_private_message_option,
+                display_private_message_option=company.enable_private_messages,
             ),
         )
     except Exception as e:

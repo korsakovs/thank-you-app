@@ -135,6 +135,27 @@ def home_page_configuration_stats_time_period_value_changed_action_handler(body,
     )
 
 
+def handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler(client, body, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    new_enable_private_message_counting_in_leaderboard = (
+            "enable_private_message_counting_in_leaderboard"
+            in [option["value"] for option in body["actions"][0]["selected_options"]]
+    )
+
+    if company.enable_private_message_counting_in_leaderboard != new_enable_private_message_counting_in_leaderboard:
+        # ORM_WARNING: the following statement works because we use SQL Alchemy
+        company.enable_private_message_counting_in_leaderboard = new_enable_private_message_counting_in_leaderboard
+
+    publish_configuration_view(
+        client=client,
+        company=company,
+        user_id=user_id
+    )
+
+
 def home_page_configuration_max_number_of_thank_you_receivers_value_changed_action_handler(body, client, logger):
     logger.info(body)
     user_id = body["user"]["id"]
