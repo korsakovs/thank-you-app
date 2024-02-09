@@ -21,6 +21,11 @@ services:
       POSTGRES_DB: merci
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MERCI_ENV: ${MERCI_ENV}
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-postgres-backup"
+      logging_env: ${MERCI_ENV:-unknown}
     volumes:
       - /home/wwf/merci_data/postgres_backup:/backup
     command: >
@@ -54,6 +59,12 @@ services:
     build:
       context: ..
       dockerfile: docker/nginx/nginx.Dockerfile
+    environment:
+      MERCI_ENV: ${MERCI_ENV}
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-bot-nginx"
+      logging_env: ${MERCI_ENV:-unknown}
     expose:
       - "80"
     networks:
@@ -77,6 +88,12 @@ services:
       dockerfile: docker/pgadmin-nginx/pgadmin-nginx.Dockerfile
     # expose:
     #   - "5433"
+    environment:
+      MERCI_ENV: ${MERCI_ENV}
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-pgadmin-nginx"
+      logging_env: ${MERCI_ENV:-unknown}
     depends_on:
       - merci-pgadmin
     restart: always

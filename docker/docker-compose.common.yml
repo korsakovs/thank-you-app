@@ -16,6 +16,7 @@ services:
       SLACK_APP_POSTGRES_USERNAME: merci_app
       SLACK_APP_POSTGRES_PASSWORD: merci_app
       PGDATA: /var/lib/postgresql/data/pgdata
+      MERCI_ENV: ${MERCI_ENV}
     # ports:
     #   - "5432:5432"
     healthcheck:
@@ -24,6 +25,10 @@ services:
       timeout: 5s
       retries: 10
       start_period: 3s
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-postgres"
+      logging_env: ${MERCI_ENV:-unknown}
     restart: always
     deploy:
       resources:
@@ -52,6 +57,11 @@ services:
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
       DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
+      MERCI_ENV: ${MERCI_ENV}
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-bot"
+      logging_env: ${MERCI_ENV:-unknown}
     restart: always
     networks:
       - wwf_network
@@ -67,8 +77,13 @@ services:
       PGADMIN_DEFAULT_EMAIL: test@gmail.com
       PGADMIN_DEFAULT_PASSWORD: postgres
       PGADMIN_CONFIG_SERVER_MODE: "False"
+      MERCI_ENV: ${MERCI_ENV}
     # ports:
     #   - "5433:80"
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-pgadmin"
+      logging_env: ${MERCI_ENV:-unknown}
     networks:
       - wwf_network
 
@@ -86,11 +101,34 @@ services:
       POSTGRES_HOST: merci-postgres
       POSTGRES_DB: merci
       DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
+      MERCI_ENV: ${MERCI_ENV}
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-webapp"
+      logging_env: ${MERCI_ENV:-unknown}
     restart: always
     networks:
       - wwf_network
     volumes:
       - "merci_bot_volume:/nginx_sockets"
+
+  merci-grafana-promtail:
+    container_name: merci-grafana-promtail
+    build:
+      context: ..
+      dockerfile: docker/promtail/promtail.Dockerfile
+    environment:
+      MERCI_LOKI_LOG_INGESTION_TOKEN: ${MERCI_LOKI_LOG_INGESTION_TOKEN}
+      MERCI_ENV: ${MERCI_ENV}
+    command: -config.file=/etc/promtail/config.yaml -config.expand-env=true
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-grafana-promtail"
+      logging_env: ${MERCI_ENV:-unknown}
+
 
 volumes:
   merci_bot_volume:
