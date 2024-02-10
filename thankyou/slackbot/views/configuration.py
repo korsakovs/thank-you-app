@@ -63,8 +63,6 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
     max_thank_you_receivers_options = sorted(list(set(list(range(1, 11)) + [max_thank_you_receivers_num])))
     max_attached_files_num_options = sorted(list(set(list(range(1, 11)) + [max_attached_files_num])))
 
-    # https://www.buymeacoffee.com/korsakovs
-
     return View(
         type="home",
         title="Configuration",
