@@ -19,17 +19,30 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
     thank_you_message = retrieve_thank_you_message_from_body(body)
     dao.create_thank_you_message(thank_you_message)
 
+    should_send_directly_to_user = False
+    could_not_sent_ephemeral_messages_to = []
+
     if thank_you_message.slash_command_slack_channel_id:
         try:
             if thank_you_message.is_private:
-                for receiver in thank_you_message.receivers:
-                    client.chat_postEphemeral(
-                        user=receiver.slack_user_id,
-                        channel=thank_you_message.slash_command_slack_channel_id,
-                        blocks=thank_you_message_blocks(thank_you_message),
-                        unfurl_links=False,
-                        unfurl_media=False,
-                    )
+                for receiver in set([r.slack_user_id for r in thank_you_message.receivers]
+                                    + [thank_you_message.author_slack_user_id]):
+                    try:
+                        client.chat_postEphemeral(
+                            user=receiver,
+                            channel=thank_you_message.slash_command_slack_channel_id,
+                            blocks=thank_you_message_blocks(thank_you_message),
+                            unfurl_links=False,
+                            unfurl_media=False,
+                        )
+                    except SlackApiError as err:
+                        response: SlackResponse = err.response
+                        data: dict = response.data
+                        if not data["ok"] and data["error"] == "user_not_in_channel":
+                            could_not_sent_ephemeral_messages_to.append(receiver)
+                        else:
+                            raise
+
             else:
                 client.chat_postMessage(
                     channel=thank_you_message.slash_command_slack_channel_id,
@@ -39,19 +52,25 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                 )
         except SlackApiError as e:
             if e.response.data["error"] == "channel_not_found":
-                client.chat_postMessage(
-                    text=f"Your thank you message was successfully sent to your colleague(s). However, it could not be "
-                         f"delivered to the Slack channel <#{thank_you_message.slash_command_slack_channel_id}>. "
-                         f"Are you sure that the Merci! application was invited to this channel?",
-                    channel=thank_you_message.author_slack_user_id,
-                    unfurl_links=False,
-                    unfurl_media=False,
-                )
+                should_send_directly_to_user = True
+                try:
+                    client.chat_postMessage(
+                        text=f"Your thank you message could not be "
+                             f"delivered to the Slack channel <#{thank_you_message.slash_command_slack_channel_id}>. "
+                             f"Are you sure that the Merci! application was invited to this channel? "
+                             f"We will deliver your message directly to the receivers",
+                        channel=thank_you_message.author_slack_user_id,
+                        unfurl_links=False,
+                        unfurl_media=False,
+                    )
+                except SlackApiError as e2:
+                    logger.error("Couldn't inform a user about the fact that their message had not been delivered to "
+                                 f"a slack channel there they typed a /merci command. Error: {e2}")
             else:
                 logger.error("A thank you message was not delivered to the slack channel in which the slash command "
                              f"was typed. Channel: {thank_you_message.slash_command_slack_channel_id}. Error: {e}")
 
-    if company.share_messages_in_slack_channel:
+    elif company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
         def invite_users():
             slack_user_ids = [_receiver.slack_user_id for _receiver in thank_you_message.receivers
                               if not already_invited_to_a_channel(
@@ -67,8 +86,9 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                     users=slack_user_ids,
                     force=True
                 )
-            except SlackApiError:
-                pass
+            except SlackApiError as e:
+                logger.warning(f"Can not invite users {slack_user_ids} to a slack channel "
+                               f"{company.share_messages_in_slack_channel}. Error: {e}")
 
         try:
             invite_users()
@@ -82,20 +102,31 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                     )
                     invite_users()
                 except SlackApiError as err2:
-                    logger.err(err2)
+                    logger.error(f"Could not join the {company.share_messages_in_slack_channel} slack channel. "
+                                 f"Or couldn't invite users to it: {err2}")
             else:
-                raise
+                logger.warning(f"Could not invite users to the {company.share_messages_in_slack_channel} "
+                               f"slack channel. Error: {err}")
 
         try:
             if thank_you_message.is_private:
-                for receiver in thank_you_message.receivers:
-                    client.chat_postEphemeral(
-                        channel=company.share_messages_in_slack_channel,
-                        blocks=thank_you_message_blocks(thank_you_message),
-                        user=receiver.slack_user_id,
-                        unfurl_links=False,
-                        unfurl_media=False,
-                    )
+                for receiver in set([r.slack_user_id for r in thank_you_message.receivers]
+                                    + [thank_you_message.author_slack_user_id]):
+                    try:
+                        client.chat_postEphemeral(
+                            channel=company.share_messages_in_slack_channel,
+                            blocks=thank_you_message_blocks(thank_you_message),
+                            user=receiver,
+                            unfurl_links=False,
+                            unfurl_media=False,
+                        )
+                    except SlackApiError as err:
+                        response: SlackResponse = err.response
+                        data: dict = response.data
+                        if not data["ok"] and data["error"] == "user_not_in_channel":
+                            could_not_sent_ephemeral_messages_to.append(receiver)
+                        else:
+                            raise
             else:
                 client.chat_postMessage(
                     channel=company.share_messages_in_slack_channel,
@@ -103,20 +134,26 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                     unfurl_links=False,
                     unfurl_media=False,
                 )
-        except SlackApiError:
-            pass
+        except SlackApiError as e:
+            logger.error(f"Can not deliver a thank you message to a slack channel "
+                         f"{company.share_messages_in_slack_channel}. Error: {e}")
 
-    for receiver in thank_you_message.receivers:
-        try:
-            client.chat_postMessage(
-                text="You received a Thank You message!",
-                channel=receiver.slack_user_id,
-                blocks=thank_you_message_blocks(thank_you_message),
-                unfurl_links=False,
-                unfurl_media=False,
-            )
-        except SlackApiError:
-            pass
+    else:
+        should_send_directly_to_user = True
+
+    if should_send_directly_to_user or could_not_sent_ephemeral_messages_to:
+        slack_ids = set([r.slack_user_id for r in thank_you_message.receivers] + could_not_sent_ephemeral_messages_to)
+        for receiver in slack_ids:
+            try:
+                client.chat_postMessage(
+                    text="You received a Thank You message!",
+                    channel=receiver,
+                    blocks=thank_you_message_blocks(thank_you_message),
+                    unfurl_links=False,
+                    unfurl_media=False,
+                )
+            except SlackApiError as e:
+                logger.error(f"Can not sent a thank you message directly to user {receiver}. Error: {e}")
 
     client.views_publish(
         user_id=user_id,
