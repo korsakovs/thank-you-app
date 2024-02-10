@@ -63,6 +63,8 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
     max_thank_you_receivers_options = sorted(list(set(list(range(1, 11)) + [max_thank_you_receivers_num])))
     max_attached_files_num_options = sorted(list(set(list(range(1, 11)) + [max_attached_files_num])))
 
+    # https://www.buymeacoffee.com/korsakovs
+
     return View(
         type="home",
         title="Configuration",
@@ -74,6 +76,15 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             ContextBlock(
                 elements=[TextObject(text="This page is only accessible by Slack Workspace Admins and other people "
                                           "they have granted access to",
+                                     type="mrkdwn")]
+            ),
+            HeaderBlock(
+                text="Buy me a coffee"
+            ),
+            ContextBlock(
+                elements=[TextObject(text="As of today, The Merci! application is offered free of charge. "
+                                          "Please, consider supporting authors of the application by "
+                                          "<https://www.buymeacoffee.com/korsakovs|buying them> a coffee! Thank you :)",
                                      type="mrkdwn")]
             ),
             HeaderBlock(
