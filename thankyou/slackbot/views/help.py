@@ -28,7 +28,7 @@ def home_page_help_view():
             ContextBlock(
                 elements=[TextObject(text="As of today, The Merci! application is offered free of charge. "
                                           "Please, consider supporting authors of the application by "
-                                          "<https://korsakov.pro/buymeacoffee|buying them> a coffee! Thank you :)",
+                                          "<https://merci.emgbook.com/buymeacoffee|buying them> a coffee! Thank you :)",
                                      type="mrkdwn")]
             ),
         ]

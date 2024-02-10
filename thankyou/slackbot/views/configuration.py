@@ -82,7 +82,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             ContextBlock(
                 elements=[TextObject(text="As of today, The Merci! application is offered free of charge. "
                                           "Please, consider supporting authors of the application by "
-                                          "<https://korsakov.pro/buymeacoffee|buying them> a coffee! Thank you :)",
+                                          "<https://merci.emgbook.com/buymeacoffee|buying them> a coffee! Thank you :)",
                                      type="mrkdwn")]
             ),
             HeaderBlock(
