@@ -22,14 +22,14 @@ def home_page_help_view():
                          "* <https://merci.emgbook.com/contactus|Contact Us> - in case you want to reach out to us"
                 )
             ),
-            HeaderBlock(
-                text="Buy me a coffee"
-            ),
-            ContextBlock(
-                elements=[TextObject(text="As of today, The Merci! application is offered free of charge. "
-                                          "Please, consider supporting authors of the application by "
-                                          "<https://merci.emgbook.com/buymeacoffee|buying them> a coffee! Thank you :)",
-                                     type="mrkdwn")]
-            ),
+            # HeaderBlock(
+            #     text="Buy me a coffee"
+            # ),
+            # ContextBlock(
+            #     elements=[TextObject(text="As of today, The Merci! application is offered free of charge. "
+            #                               "Please, consider supporting authors of the application by "
+            #                               "<https://merci.emgbook.com/buymeacoffee|buying them> a coffee! Thank you :)",
+            #                          type="mrkdwn")]
+            # ),
         ]
     )
