@@ -97,6 +97,10 @@ def get_sender_and_receiver_leaders(company_uuid: str, leaderboard_time_settings
                                         - timedelta(days=datetime.utcnow().weekday()))
         leaders_stats_from_datetime = leaders_stats_until_datetime - timedelta(weeks=1)
         leaders_stats_until_datetime = leaders_stats_until_datetime - timedelta(microseconds=1)
+    elif leaderboard_time_settings == LeaderbordTimeSettings.CURRENT_FULL_WEEK:
+        leaders_stats_from_datetime = (datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                                       - timedelta(days=datetime.utcnow().weekday()))
+        leaders_stats_until_datetime = leaders_stats_from_datetime + timedelta(days=7) - timedelta(microseconds=1)
     else:
         raise ValueError(f"Unknown leaderboard time settings: {leaderboard_time_settings}")
     sender_leaders = []

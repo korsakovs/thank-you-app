@@ -30,6 +30,7 @@ class LeaderbordTimeSettings(Enum):
     LAST_FULL_MONTH = 3
     LAST_7_DAYS = 4
     LAST_FULL_WEEK = 5
+    CURRENT_FULL_WEEK = 6
 
 
 @dataclass

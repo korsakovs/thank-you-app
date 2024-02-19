@@ -1,6 +1,12 @@
 import logging
+import time
+from enum import Enum
+from functools import wraps
 from threading import Lock
+from typing import Callable
 
+from prometheus_client import Histogram
+from prometheus_client.utils import INF
 from slack_bolt import App
 from slack_sdk import WebClient
 
@@ -70,197 +76,244 @@ def is_socket_mode() -> bool:
     return _IS_SOCKET_MODE
 
 
-@app.event("app_home_opened")
+slack_handler_metric = Histogram(
+    name='slack_handler_metric_histogram',
+    documentation='Time spent processing request',
+    labelnames=["merci_handler", "merci_handler_type"],
+    buckets=(.1, .2, .5, .75, 1.0, 2.0, 5.0, 10.0, INF)
+)
+
+
+class EventType(Enum):
+    Event = "event"
+    Action = "action"
+    View = "view"
+    Command = "command"
+    Shortcut = "shortcut"
+
+
+def app_event(event_type: EventType, name: str):
+    def decorator(func: Callable):
+        metric_wrapper = slack_handler_metric.labels(func.__name__, event_type.value)
+
+        if event_type == EventType.Event:
+            app_wrapper = app.event
+        elif event_type == EventType.Action:
+            app_wrapper = app.action
+        elif event_type == EventType.View:
+            app_wrapper = app.view
+        elif event_type == EventType.Command:
+            app_wrapper = app.command
+        elif event_type == EventType.Shortcut:
+            app_wrapper = app.shortcut
+        else:
+            raise ValueError(f"Unknown EventType: {event_type}")
+
+        @app_wrapper(name)
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            now = time.time()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                logger.info(f"Sending metrics for {func.__name__}")
+                metric_wrapper.observe(time.time() - now)
+
+        return wrapper
+    return decorator
+
+
+@app_event(EventType.Event, "app_home_opened")
 def _app_home_opened_action_handler(client: WebClient, event, logger):
     app_home_opened_action_handler(client, event, logger)
 
 
-@app.action("home_page_company_thank_you_button_clicked")
+@app_event(EventType.Action, "home_page_company_thank_you_button_clicked")
 def _home_page_company_thank_you_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_company_thank_you_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_show_leaders_button_clicked")
+@app_event(EventType.Action, "home_page_show_leaders_button_clicked")
 def _home_page_show_leaders_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_show_leaders_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_my_thank_you_button_clicked")
+@app_event(EventType.Action, "home_page_my_thank_you_button_clicked")
 def _home_page_my_thank_you_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_my_thank_you_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_say_thank_you_button_clicked")
+@app_event(EventType.Action, "home_page_say_thank_you_button_clicked")
 def _home_page_say_thank_you_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_say_thank_you_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_hide_welcome_message_button_clicked")
+@app_event(EventType.Action, "home_page_hide_welcome_message_button_clicked")
 def _home_page_hide_welcome_message_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_hide_welcome_message_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("thank_you_dialog_send_privately_action")
+@app_event(EventType.Action, "thank_you_dialog_send_privately_action")
 def _thank_you_dialog_send_privately_action_handler(ack):
     ack()
 
 
-@app.view("thank_you_dialog_save_button_clicked")
+@app_event(EventType.View, "thank_you_dialog_save_button_clicked")
 def _thank_you_dialog_save_button_clicked_action_handler(ack, client, body, logger):
     ack()
     thank_you_dialog_save_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_help_button_clicked")
+@app_event(EventType.Action, "home_page_help_button_clicked")
 def _home_page_help_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_help_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_button_clicked")
+@app_event(EventType.Action, "home_page_configuration_button_clicked")
 def _home_page_configuration_button_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_admin_slack_user_ids_value_changed")
+@app_event(EventType.Action, "home_page_configuration_admin_slack_user_ids_value_changed")
 def _home_page_configuration_admin_slack_user_ids_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_sharing_in_a_slack_channel_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_sharing_in_a_slack_channel_value_changed")
 def _home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_notification_slack_channel_value_changed")
+@app_event(EventType.Action, "home_page_configuration_notification_slack_channel_value_changed")
 def _home_page_configuration_notification_slack_channel_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_notification_slack_channel_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_private_messages_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_private_messages_value_changed")
 def _home_page_configuration_enable_private_messages_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_private_messages_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_leaderboard_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_leaderboard_value_changed")
 def _home_page_configuration_enable_leaderboard_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_leaderboard_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_stats_time_period_value_changed")
+@app_event(EventType.Action, "home_page_configuration_stats_time_period_value_changed")
 def _home_page_configuration_stats_time_period_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_stats_time_period_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed")
 def _handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler(ack, client, body, logger):
     ack()
     handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler(client, body, logger)
 
 
-@app.action("home_page_configuration_max_number_of_thank_you_receivers_value_changed")
+@app_event(EventType.Action, "home_page_configuration_max_number_of_thank_you_receivers_value_changed")
 def _home_page_configuration_max_number_of_thank_you_receivers_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_max_number_of_thank_you_receivers_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_weekly_thank_you_limit_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_weekly_thank_you_limit_value_changed")
 def _home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_max_number_of_messages_per_week_value_changed")
+@app_event(EventType.Action, "home_page_configuration_max_number_of_messages_per_week_value_changed")
 def _home_page_configuration_max_number_of_messages_per_week_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_max_number_of_messages_per_week_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_edit_company_value_clicked")
+@app_event(EventType.Action, "home_page_configuration_edit_company_value_clicked")
 def _home_page_configuration_edit_company_value_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_edit_company_value_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_add_new_company_value_clicked")
+@app_event(EventType.Action, "home_page_configuration_add_new_company_value_clicked")
 def _home_page_configuration_add_new_company_value_clicked_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_add_new_company_value_clicked_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed")
 def _home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_rich_text_in_thank_you_messages_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_attaching_files_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_attaching_files_value_changed")
 def _home_page_configuration_enable_attaching_files_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_attaching_files_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_max_attached_files_num_value_changed")
+@app_event(EventType.Action, "home_page_configuration_max_attached_files_num_value_changed")
 def _home_page_configuration_max_attached_files_num_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_max_attached_files_num_value_changed_action_handler(body, client, logger)
 
 
-@app.action("home_page_configuration_enable_company_values_value_changed")
+@app_event(EventType.Action, "home_page_configuration_enable_company_values_value_changed")
 def _home_page_configuration_enable_company_values_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_enable_company_values_value_changed_action_handler(body, client, logger)
 
 
-@app.view("thank_you_type_dialog_save_button_clicked")
+@app_event(EventType.View, "thank_you_type_dialog_save_button_clicked")
 def _thank_you_type_dialog_save_button_clicked_action_handler(ack, client, body, logger):
     ack()
     thank_you_type_dialog_save_button_clicked_action_handler(body, client, logger)
 
 
-@app.action("thank_you_type_dialog_delete_value_button_clicked")
+@app_event(EventType.Action, "thank_you_type_dialog_delete_value_button_clicked")
 def _thank_you_type_dialog_delete_value_button_clicked_action_handler(ack, client, body, logger):
     ack()
     thank_you_type_dialog_delete_value_button_clicked_action_handler(body, client, logger)
 
 
-@app.view("thank_you_type_deletion_dialog_confirm_deletion_button_clicked")
+@app_event(EventType.View, "thank_you_type_deletion_dialog_confirm_deletion_button_clicked")
 def _thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handler(ack, client, body, logger):
     ack()
     thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handler(body, client, logger)
 
 
-@app.command("/merci")
+@app_event(EventType.Command, "/merci")
 def _merci_slash_command_action_handler(ack, client, body, logger):
     ack()
     merci_slash_command_action_handler(body, client, logger)
 
 
-@app.command("/merci_dev")
+@app_event(EventType.Command, "/merci_dev")
 def _merci_slash_command_action_handler(ack, client, body, logger):
     ack()
     merci_slash_command_action_handler(body, client, logger)
 
 
-@app.shortcut("say_thank_you_global_shortcut")
+@app_event(EventType.Shortcut, "say_thank_you_global_shortcut")
 def _say_thank_you_global_shortcut_action_handler(ack, client, body, logger):
     ack()
     say_thank_you_global_shortcut_action_handler(body, client, logger)
 
 
-@app.shortcut("say_thank_you_message_shortcut")
+@app_event(EventType.Shortcut, "say_thank_you_message_shortcut")
 def _say_thank_you_message_shortcut_action_handler(ack, client, body, logger):
     ack()
     say_thank_you_message_shortcut_action_handler(body, client, logger)

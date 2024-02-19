@@ -54,6 +54,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
             (LeaderbordTimeSettings.LAST_FULL_MONTH, Option(value="LAST_FULL_MONTH", label="Last full month")),
             (LeaderbordTimeSettings.LAST_7_DAYS, Option(value="LAST_7_DAYS", label="Last 7 days")),
             (LeaderbordTimeSettings.LAST_FULL_WEEK, Option(value="LAST_FULL_WEEK", label="Last full week")),
+            (LeaderbordTimeSettings.CURRENT_FULL_WEEK, Option(value="CURRENT_FULL_WEEK", label="Current full week")),
     ):
         stats_time_period_to_use_options.append(option)
         if enum == leaderbord_time_settings:

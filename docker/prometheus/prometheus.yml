@@ -1,0 +1,23 @@
+# my global config
+global:
+  scrape_interval:     60s # Set the scrape interval to every 60 seconds
+  evaluation_interval: 60s # Evaluate rules every 60 seconds
+
+scrape_configs:
+  - job_name: merci-slackbot-scraper
+    static_configs:
+    - targets: ['merci-bot-nginx:3000']
+  # - job_name: merci-slackbot-scraper-dev
+  #   static_configs:
+  #   - targets: ['merci-bot']
+  - job_name: docker-scraper
+      # metrics_path defaults to '/metrics'
+      # scheme defaults to 'http'.
+    static_configs:
+      - targets: ["host.docker.internal:9323"]
+
+remote_write:
+  - url: https://prometheus-prod-24-prod-eu-west-2.grafana.net/api/prom/push
+    basic_auth:
+      username: 1415440
+      password: glc_eyJvIjoiMTA0OTI1NyIsIm4iOiJzdGFjay04NTIxNjEtaW50ZWdyYXRpb24tbWVyY2lhcHBfcHJvbV90b2tlbiIsImsiOiI5VlBwYWk2MzBkNGs1NUs5OG1oaHZBYzQiLCJtIjp7InIiOiJwcm9kLWV1LXdlc3QtMiJ9fQ==

@@ -129,6 +129,21 @@ services:
       logging_jobname: "merci-grafana-promtail"
       logging_env: ${MERCI_ENV:-unknown}
 
+  merci-prometheus:
+    container_name: merci-prometheus
+    depends_on:
+      - merci-bot
+    build:
+      context: ..
+      dockerfile: docker/prometheus/prometheus.Dockerfile
+    labels:
+      logging: "promtail"
+      logging_jobname: "merci-prometheus"
+      logging_env: ${MERCI_ENV:-unknown}
+    restart: always
+    networks:
+      - wwf_network
+
 
 volumes:
   merci_bot_volume:

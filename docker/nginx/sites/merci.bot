@@ -2,6 +2,18 @@ server {
   listen 3000;
   server_name merci.emgbook.com;
 
+  location /metrics {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP ip_address;
+
+    client_body_buffer_size 32k;
+
+    access_log    off;
+    log_not_found off;
+
+    proxy_pass http://unix:/nginx_sockets/merci_bot.sock;
+  }
+
   location /slack/ {
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP ip_address;

@@ -1,5 +1,7 @@
 from flask import Flask, request, Response
+from prometheus_client import make_wsgi_app, start_http_server
 from slack_bolt.adapter.flask import SlackRequestHandler
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from thankyou.dao import dao
 from thankyou.slackbot.utils.app import app
@@ -14,6 +16,10 @@ def create_flask_app(slack_app_):
     slack_handler = SlackRequestHandler(slack_app_)
 
     dao.set_scoped_session(flask_scoped_session(dao.session_maker, flask_app))
+
+    flask_app.wsgi_app = DispatcherMiddleware(flask_app.wsgi_app, {
+        '/metrics': make_wsgi_app()
+    })
 
     @flask_app.route("/slack/events", methods=["POST"])
     def slack_events():
