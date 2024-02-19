@@ -40,6 +40,6 @@ jobs:
       - run: docker context create remote --docker "host=ssh://${{ secrets.WWF_SSH_USERNAME }}@${{ secrets.WWF_SERVER }}"
       - run: docker --context remote compose -f docker/docker-compose.common.yml -f docker/docker-compose.prod.yml build
       - run: docker --context remote compose -f docker/docker-compose.common.yml -f docker/docker-compose.prod.yml up -d --force-recreate
-      - run: docker --context remote image prune -a -f
       - run: docker --context remote container prune -f
+      - run: docker --context remote image prune -a -f
       - run: docker --context remote volume prune -a -f
