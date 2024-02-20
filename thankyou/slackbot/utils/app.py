@@ -80,7 +80,7 @@ slack_handler_metric = Histogram(
     name='slack_handler_metric_histogram',
     documentation='Time spent processing request',
     labelnames=["merci_handler", "merci_handler_type"],
-    buckets=(.1, .2, .5, .75, 1.0, 2.0, 5.0, 10.0, INF)
+    # buckets=(.1, .2, .5, .75, 1.0, 2.0, 5.0, 10.0, INF)
 )
 
 
@@ -296,6 +296,12 @@ def _thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handl
 
 
 @app_event(EventType.Command, "/merci")
+def _merci_slash_command_action_handler(ack, client, body, logger):
+    ack()
+    merci_slash_command_action_handler(body, client, logger)
+
+
+@app_event(EventType.Command, "/thanks")
 def _merci_slash_command_action_handler(ack, client, body, logger):
     ack()
     merci_slash_command_action_handler(body, client, logger)

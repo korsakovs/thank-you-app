@@ -9,11 +9,14 @@ def merci_slash_command_action_handler(body, client, logger):
     company = get_or_create_company_by_body(body)
     user_id = body["user_id"]
 
+    logger.debug(f"Received a new slash command. Channel ID: {body.get('channel_id')} Body: {body}")
     try:
         channel_id = body["channel_id"]
         if channel_id[0] != "C":
-            channel_id = None
+            logger.warning(f"The channel id received as a result of sending a slash command is weird: {channel_id}")
+            # channel_id = None
     except (TypeError, KeyError):
+        logger.warning("Could not find channel id in the message body received as a result of sending a slash command")
         channel_id = None
 
     if company.enable_weekly_thank_you_limit:

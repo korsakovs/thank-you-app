@@ -65,7 +65,7 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                     )
                 except SlackApiError as e2:
                     logger.error("Couldn't inform a user about the fact that their message had not been delivered to "
-                                 f"a slack channel there they typed a /merci command. Error: {e2}")
+                                 f"a slack channel there they typed a /thanks or /merci command. Error: {e2}")
             else:
                 logger.error("A thank you message was not delivered to the slack channel in which the slash command "
                              f"was typed. Channel: {thank_you_message.slash_command_slack_channel_id}. Error: {e}")

@@ -56,7 +56,7 @@ def home_page_welcome_blocks() -> List[Block]:
             text=TextObject(
                 type="mrkdwn",
                 text="In case you want your message to appear in a a specific team channel, open this channel and "
-                     "simpy send a `/merci` command"
+                     "simpy send a `/thanks` or `/merci` command"
             ),
         ),
         ActionsBlock(
