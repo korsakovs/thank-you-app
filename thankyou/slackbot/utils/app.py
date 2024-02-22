@@ -6,7 +6,6 @@ from threading import Lock
 from typing import Callable
 
 from prometheus_client import Histogram
-from prometheus_client.utils import INF
 from slack_bolt import App
 from slack_sdk import WebClient
 
@@ -80,7 +79,6 @@ slack_handler_metric = Histogram(
     name='slack_handler_metric_histogram',
     documentation='Time spent processing request',
     labelnames=["merci_handler", "merci_handler_type"],
-    # buckets=(.1, .2, .5, .75, 1.0, 2.0, 5.0, 10.0, INF)
 )
 
 
@@ -116,7 +114,7 @@ def app_event(event_type: EventType, name: str):
             try:
                 return func(*args, **kwargs)
             finally:
-                logger.info(f"Sending metrics for {func.__name__}")
+                # logger.info(f"Sending metrics for {func.__name__}")
                 metric_wrapper.observe(time.time() - now)
 
         return wrapper

@@ -58,6 +58,7 @@ services:
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
       DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
       MERCI_ENV: ${MERCI_ENV}
+      PROMETHEUS_MULTIPROC_DIR: /multiprocprometheus
     labels:
       logging: "promtail"
       logging_jobname: "merci-bot"
