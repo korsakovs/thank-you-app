@@ -5,7 +5,7 @@ from threading import Lock
 from timeit import default_timer as timer
 from typing import Callable
 
-from prometheus_client import Histogram
+from prometheus_client import Histogram, Counter as PrometheusCounter
 from slack_bolt import App
 from slack_sdk import WebClient
 
@@ -83,6 +83,17 @@ slack_handler_metric = Histogram(
     labelnames=["merci_handler", "merci_handler_type"],
 )
 
+events_counter = PrometheusCounter(
+    name='slack_handler_number_of_events',
+    documentation='The total number of requests received',
+)
+
+
+errors_counter = PrometheusCounter(
+    name='slack_handler_number_of_errors',
+    documentation='The total number of errors happened while processing requests',
+)
+
 
 class EventType(Enum):
     Event = "event"
@@ -115,8 +126,12 @@ def app_event(event_type: EventType, name: str):
             start = timer()
             try:
                 return func(*args, **kwargs)
+            except Exception:
+                errors_counter.inc(1)
+                raise
             finally:
                 # logger.info(f"Sending metrics for {func.__name__}")
+                events_counter.inc(1)
                 metric_wrapper.observe(timer() - start)
 
         return wrapper
