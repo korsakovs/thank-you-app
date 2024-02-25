@@ -1,5 +1,7 @@
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+from slack_sdk.models.blocks import SectionBlock
+from slack_sdk.models.views import View
 from slack_sdk.web import SlackResponse
 
 from thankyou.dao import dao
@@ -177,3 +179,32 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
             show_welcome_message=not employee.closed_welcome_message
         )
     )
+
+    try:
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view=View(
+                title="Done!",
+                type="modal",
+                blocks=[
+                    SectionBlock(
+                        text="Your thank you message was successfully sent! The receivers were successfully notified."
+                             "Thank you!"
+                    )
+                ]
+            )
+        )
+    except SlackApiError as e:
+        if e.response["error"] != "expired_trigger_id":
+            logger.warning(f"Could not notify user {user_id} (Company id = {company.uuid}) about the fact that their "
+                           f"thank you message was sent - can't open a dialog view: {e}")
+        try:
+            client.chat_postMessage(
+                channel=user_id,
+                text="Your thank you message was successfully sent! The receivers were successfully notified. "
+                     "Thank you!"
+            )
+        except SlackApiError as e:
+            logger.error(f"Could not notify user {user_id} (Company id = {company.uuid}) about the fact that their "
+                         f"thank you message was sent - can't send a private message: {e}")
+
