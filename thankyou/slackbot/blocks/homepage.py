@@ -164,7 +164,11 @@ def thank_you_list_blocks(thank_you_messages: List[ThankYouMessage], current_use
             result.append(DividerBlock())
 
         result.extend(
-            thank_you_message_blocks(thank_you_message)
+            thank_you_message_blocks(
+                thank_you_message,
+                show_say_thank_you_button=current_user_slack_id in [
+                    r.slack_user_id for r in thank_you_message.receivers]
+            )
         )
         result.append(DividerBlock())
     return result

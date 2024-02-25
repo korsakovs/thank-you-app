@@ -117,6 +117,7 @@ def home_page_my_thank_you_button_clicked_action_handler(body, client, logger):
         view=home_page_my_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
                                                            last_n=20),
+            current_user_slack_id=user_id
         )
     )
 
@@ -182,7 +183,6 @@ def home_page_hide_welcome_message_button_clicked_action_handler(body, client, l
 
 
 def home_page_help_button_clicked_action_handler(body, client, logger):
-    company = get_or_create_company_by_body(body)
     client.views_publish(
         user_id=body["user"]["id"],
         view=home_page_help_view()

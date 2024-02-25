@@ -3,14 +3,18 @@ from typing import List
 
 from slack_sdk.models.blocks import SectionBlock, TextObject, ContextBlock, Option, \
     StaticSelectElement, InputBlock, PlainTextInputElement, UserMultiSelectElement, ImageElement, \
-    RichTextInputElement, RichTextBlock
+    RichTextInputElement, RichTextBlock, ActionsBlock, ButtonElement
 
 from thankyou.core.models import ThankYouMessage, ThankYouType
 from thankyou.slackbot.blocks.utils import rich_text_block_as_markdown
 from thankyou.slackbot.utils.stringhelpers import es
 
 
-def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[SectionBlock]:
+def thank_you_message_blocks(
+        thank_you_message: ThankYouMessage,
+        show_say_thank_you_button: bool = False
+        ) -> List[SectionBlock]:
+
     result = []
     title = ""
     if thank_you_message.type:
@@ -81,6 +85,17 @@ def thank_you_message_blocks(thank_you_message: ThankYouMessage) -> List[Section
                     alt_text=images[0].filename
                 )
             ))
+
+    if show_say_thank_you_button:
+        result.append(ActionsBlock(
+            elements=[
+                ButtonElement(
+                    text="Say thanks!",
+                    action_id="thank_you_message_say_thanks_button_clicked",
+                    value=thank_you_message.uuid
+                )
+            ]
+        ))
 
     published_by_text = ""
     if thank_you_message.author_slack_user_id:

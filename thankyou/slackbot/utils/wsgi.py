@@ -23,12 +23,14 @@ def create_flask_app(slack_app_):
         data = generate_latest(registry)
         return Response(data, mimetype=CONTENT_TYPE_LATEST)
 
+    """
     @flask_app.route("/slack/metrics")
     def slack_metrics():
         registry = CollectorRegistry()
         multiprocess.MultiProcessCollector(registry)
         data = generate_latest(registry)
         return Response(data, mimetype=CONTENT_TYPE_LATEST)
+    """
 
     @flask_app.route("/slack/events", methods=["POST"])
     def slack_events():

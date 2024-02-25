@@ -9,7 +9,10 @@ from thankyou.slackbot.blocks.homepage import home_page_actions_block, thank_you
     home_page_show_leaders_button_block, home_page_hidden_messages_warn_block, home_page_welcome_blocks
 
 
-def home_page_my_thank_yous_view(thank_you_messages: List[ThankYouMessage]):
+def home_page_my_thank_yous_view(
+        thank_you_messages: List[ThankYouMessage],
+        current_user_slack_id: str = None
+):
     return View(
         type="home",
         title="Welcome to Chirik Bot!",
@@ -21,7 +24,7 @@ def home_page_my_thank_yous_view(thank_you_messages: List[ThankYouMessage]):
                      "Why don't you send your first message right now? Just click the \"Send Thank you!\" "
                      "button and write a few kind words to your colleague(s)"
             )]),
-            *thank_you_list_blocks(thank_you_messages)
+            *thank_you_list_blocks(thank_you_messages, current_user_slack_id=current_user_slack_id)
         ]
     )
 

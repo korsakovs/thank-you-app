@@ -31,7 +31,11 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                         client.chat_postEphemeral(
                             user=receiver,
                             channel=thank_you_message.slash_command_slack_channel_id,
-                            blocks=thank_you_message_blocks(thank_you_message),
+                            blocks=thank_you_message_blocks(
+                                thank_you_message,
+                                show_say_thank_you_button=user_id in [
+                                    r.slack_user_id for r in thank_you_message.receivers]
+                            ),
                             unfurl_links=False,
                             unfurl_media=False,
                         )
@@ -89,6 +93,7 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
             except SlackApiError as e:
                 logger.warning(f"Can not invite users {slack_user_ids} to a slack channel "
                                f"{company.share_messages_in_slack_channel}. Error: {e}")
+                raise
 
         try:
             invite_users()
@@ -115,7 +120,11 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                     try:
                         client.chat_postEphemeral(
                             channel=company.share_messages_in_slack_channel,
-                            blocks=thank_you_message_blocks(thank_you_message),
+                            blocks=thank_you_message_blocks(
+                                thank_you_message,
+                                show_say_thank_you_button=user_id in [
+                                    r.slack_user_id for r in thank_you_message.receivers]
+                            ),
                             user=receiver,
                             unfurl_links=False,
                             unfurl_media=False,
@@ -148,7 +157,11 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                 client.chat_postMessage(
                     text="You received a Thank You message!",
                     channel=receiver,
-                    blocks=thank_you_message_blocks(thank_you_message),
+                    blocks=thank_you_message_blocks(
+                        thank_you_message,
+                        show_say_thank_you_button=user_id in [
+                            r.slack_user_id for r in thank_you_message.receivers]
+                    ),
                     unfurl_links=False,
                     unfurl_media=False,
                 )
