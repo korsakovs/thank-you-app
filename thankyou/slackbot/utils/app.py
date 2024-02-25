@@ -1,8 +1,8 @@
 import logging
-import time
 from enum import Enum
 from functools import wraps
 from threading import Lock
+from timeit import default_timer as timer
 from typing import Callable
 
 from prometheus_client import Histogram
@@ -110,12 +110,12 @@ def app_event(event_type: EventType, name: str):
         @app_wrapper(name)
         @wraps(func)
         def wrapper(*args, **kwargs):
-            now = time.time()
+            start = timer()
             try:
                 return func(*args, **kwargs)
             finally:
                 # logger.info(f"Sending metrics for {func.__name__}")
-                metric_wrapper.observe(time.time() - now)
+                metric_wrapper.observe(timer() - start)
 
         return wrapper
     return decorator
