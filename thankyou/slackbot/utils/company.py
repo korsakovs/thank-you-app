@@ -8,6 +8,11 @@ CREATE_COMPANY_LOCK = Lock()
 
 
 def get_or_create_company_by_slack_team_id(slack_team_id: str) -> Company:
+    """Retrieves a company from a database or creates a new one if such company does not exist
+
+    :param slack_team_id: string - a slack team ID of a company
+    :return: a `Company` class object
+    """
     companies = dao.read_companies(slack_team_id=slack_team_id)
     try:
         return companies[0]
