@@ -14,6 +14,9 @@ from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, 
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
 
+NUMBER_OF_MESSAGES_TO_SHOW = 10
+
+
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
 def messages_sent_num(company_uuid: str, interval: timedelta = timedelta(days=30), private: Optional[bool] = False):
     return dao.read_thank_you_messages_num(company_uuid=company_uuid, created_after=datetime.utcnow() - interval,
@@ -29,7 +32,7 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
     user_id = event["user"]
     employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
-    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW, private=False)
 
     slack_channel_with_all_messages = None
     if company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
@@ -58,7 +61,7 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
     company = get_or_create_company_by_body(body)
     employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
-    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW, private=False)
 
     slack_channel_with_all_messages = None
     if company.enable_sharing_in_a_slack_channel and company.share_messages_in_slack_channel:
@@ -69,7 +72,8 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
     client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
-            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
+                                                           private=False),
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
             slack_channel_with_all_messages=slack_channel_with_all_messages,
@@ -95,7 +99,8 @@ def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
     client.views_publish(
         user_id=user_id,
         view=home_page_company_thank_yous_view(
-            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
+                                                           private=False),
             current_user_slack_id=user_id,
             sender_leaders=senders_receivers_stats.sender_leaders,
             receiver_leaders=senders_receivers_stats.receiver_leaders,
@@ -116,7 +121,7 @@ def home_page_my_thank_you_button_clicked_action_handler(body, client, logger):
         user_id=user_id,
         view=home_page_my_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
-                                                           last_n=20),
+                                                           last_n=NUMBER_OF_MESSAGES_TO_SHOW),
             current_user_slack_id=user_id
         )
     )
@@ -163,7 +168,8 @@ def home_page_hide_welcome_message_button_clicked_action_handler(body, client, l
     company = get_or_create_company_by_body(body)
     employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=body["user"]["id"])
 
-    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False)
+    messages = dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
+                                           private=False)
     hidden_messages_num = max(0, messages_sent_num(company_uuid=company.uuid, private=False) - len(messages))
 
     if not employee.closed_welcome_message:
@@ -172,7 +178,8 @@ def home_page_hide_welcome_message_button_clicked_action_handler(body, client, l
     client.views_publish(
         user_id=employee.slack_user_id,
         view=home_page_company_thank_yous_view(
-            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
+                                                           private=False),
             current_user_slack_id=employee.slack_user_id,
             enable_leaderboard=company.enable_leaderboard,
             slack_channel_with_all_messages=company.share_messages_in_slack_channel,
