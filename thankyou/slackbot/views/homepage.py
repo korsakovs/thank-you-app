@@ -9,22 +9,30 @@ from thankyou.slackbot.blocks.homepage import home_page_actions_block, thank_you
     home_page_show_leaders_button_block, home_page_hidden_messages_warn_block, home_page_welcome_blocks
 
 
+MAX_BLOCKS_IN_A_VIEW = 100
+
+
 def home_page_my_thank_yous_view(
         thank_you_messages: List[ThankYouMessage],
         current_user_slack_id: str = None
 ):
+    blocks = [
+        home_page_actions_block(selected="my_thank_yous"),
+        DividerBlock(),
+        *([] if thank_you_messages else [SectionBlock(
+            text="It seems you haven't sent or received a thank you message yet :( "
+                 "Why don't you send your first message right now? Just click the \"Send Thank you!\" "
+                 "button and write a few kind words to your colleague(s)"
+        )])
+    ]
+
     return View(
         type="home",
         title="Welcome to Chirik Bot!",
         blocks=[
-            home_page_actions_block(selected="my_thank_yous"),
-            DividerBlock(),
-            *([] if thank_you_messages else [SectionBlock(
-                text="It seems you haven't sent or received a thank you message yet :( "
-                     "Why don't you send your first message right now? Just click the \"Send Thank you!\" "
-                     "button and write a few kind words to your colleague(s)"
-            )]),
-            *thank_you_list_blocks(thank_you_messages, current_user_slack_id=current_user_slack_id)
+            *blocks,
+            *thank_you_list_blocks(thank_you_messages, current_user_slack_id=current_user_slack_id,
+                                   blocks_num_limit=MAX_BLOCKS_IN_A_VIEW - len(blocks))
         ]
     )
 
@@ -53,17 +61,23 @@ def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
         slack_channel_with_all_messages=slack_channel_with_all_messages,
         hidden_messages_num=hidden_messages_num
     )
+
+    blocks = [
+        home_page_actions_block(selected="company_thank_yous"),
+        DividerBlock(),
+        *([] if not show_welcome_message else [*home_page_welcome_blocks(), DividerBlock()]),
+        *leaders_blocks,
+        *([] if not hidden_messages_block else [hidden_messages_block])
+    ]
+
     return View(
         type="home",
         title="Say Thank You :)",
         blocks=[
-            home_page_actions_block(selected="company_thank_yous"),
-            DividerBlock(),
-            *([] if not show_welcome_message else [*home_page_welcome_blocks(), DividerBlock()]),
-            *leaders_blocks,
-            *([] if not hidden_messages_block else [hidden_messages_block]),
+            *blocks,
             *thank_you_list_blocks(thank_you_messages,
                                    current_user_slack_id=current_user_slack_id,
-                                   accessory_action_id="company_thank_yous_message_menu_button_clicked")
+                                   accessory_action_id="company_thank_yous_message_menu_button_clicked",
+                                   blocks_num_limit=MAX_BLOCKS_IN_A_VIEW - len(blocks))
         ]
     )

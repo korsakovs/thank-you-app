@@ -152,23 +152,32 @@ def home_page_hidden_messages_warn_block(slack_channel_with_all_messages: str = 
 
 
 def thank_you_list_blocks(thank_you_messages: List[ThankYouMessage], current_user_slack_id: str = None,
-                          accessory_action_id: str = None) -> List[SectionBlock]:
+                          accessory_action_id: str = None, blocks_num_limit: int = None) -> List[SectionBlock]:
     result = []
     last_date: Optional[date] = None
     for thank_you_message in thank_you_messages:
+        blocks_to_append = []
+
         if last_date is None or thank_you_message.created_at.date() != last_date:
             last_date = thank_you_message.created_at.date()
-            result.append(HeaderBlock(
+            blocks_to_append.append(HeaderBlock(
                 text=last_date.strftime("%A, %B %-d")
             ))
-            result.append(DividerBlock())
+            blocks_to_append.append(DividerBlock())
 
-        result.extend(
+        blocks_to_append.extend(
             thank_you_message_blocks(
                 thank_you_message,
                 show_say_thank_you_button=current_user_slack_id in [
                     r.slack_user_id for r in thank_you_message.receivers]
             )
         )
-        result.append(DividerBlock())
+
+        blocks_to_append.append(DividerBlock())
+
+        if blocks_num_limit is not None and len(result) + len(blocks_to_append) > blocks_num_limit:
+            break
+
+        result.extend(blocks_to_append)
+
     return result

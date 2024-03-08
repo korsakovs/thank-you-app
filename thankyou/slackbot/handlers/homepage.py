@@ -14,7 +14,7 @@ from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view, 
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
 
-NUMBER_OF_MESSAGES_TO_SHOW = 10
+NUMBER_OF_MESSAGES_TO_SHOW = 20
 
 
 @cached(cache=TTLCache(maxsize=1024, ttl=60))
