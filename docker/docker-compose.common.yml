@@ -90,6 +90,7 @@ services:
 
   merci-webapp:
     container_name: merci-webapp
+    image: merci-webapp
     build:
       context: ..
       dockerfile: docker/webapp/dev.Dockerfile
@@ -112,39 +113,6 @@ services:
       - wwf_network
     volumes:
       - "merci_bot_volume:/nginx_sockets"
-
-  merci-grafana-promtail:
-    container_name: merci-grafana-promtail
-    build:
-      context: ..
-      dockerfile: docker/promtail/promtail.Dockerfile
-    environment:
-      MERCI_LOKI_LOG_INGESTION_TOKEN: ${MERCI_LOKI_LOG_INGESTION_TOKEN}
-      MERCI_ENV: ${MERCI_ENV}
-    command: -config.file=/etc/promtail/config.yaml -config.expand-env=true
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    labels:
-      logging: "promtail"
-      logging_jobname: "merci-grafana-promtail"
-      logging_env: ${MERCI_ENV:-unknown}
-
-  merci-prometheus:
-    container_name: merci-prometheus
-    depends_on:
-      - merci-bot
-    build:
-      context: ..
-      dockerfile: docker/prometheus/prometheus.Dockerfile
-    labels:
-      logging: "promtail"
-      logging_jobname: "merci-prometheus"
-      logging_env: ${MERCI_ENV:-unknown}
-    restart: always
-    networks:
-      - wwf_network
-
 
 volumes:
   merci_bot_volume:
