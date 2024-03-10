@@ -11,7 +11,8 @@ from slack_sdk import WebClient
 
 from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token
 from thankyou.slackbot.handlers.thankyoumessage import thank_you_message_say_thanks_button_clicked_handler, \
-    thanks_back_dialog_send_button_clicked_handler
+    thanks_back_dialog_send_button_clicked_handler, thank_you_message_overflow_menu_clicked_handler, \
+    thank_you_deletion_dialog_delete_button_clicked
 from thankyou.slackbot.utils.oauth import oauth_settings
 from thankyou.slackbot.handlers.configuration import home_page_configuration_button_clicked_action_handler, \
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler, \
@@ -314,6 +315,18 @@ def _thank_you_type_deletion_dialog_confirm_deletion_button_clicked_action_handl
 def _thank_you_message_say_thanks_button_clicked_handler(ack, client, body, logger):
     ack()
     thank_you_message_say_thanks_button_clicked_handler(body, client, logger)
+
+
+@app_event(EventType.Action, "thank_you_message_overflow_menu_clicked")
+def _thank_you_message_overflow_menu_clicked_handler(ack, client, body, logger):
+    ack()
+    thank_you_message_overflow_menu_clicked_handler(client, body, logger)
+
+
+@app_event(EventType.View, "thank_you_deletion_dialog_delete_button_clicked")
+def _thank_you_deletion_dialog_delete_button_clicked(ack, client, body, logger):
+    ack()
+    thank_you_deletion_dialog_delete_button_clicked(client, body, logger)
 
 
 @app_event(EventType.View, "thanks_back_dialog_send_button_clicked")

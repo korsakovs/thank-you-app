@@ -1,3 +1,4 @@
+import validators
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.models.blocks import SectionBlock
@@ -7,6 +8,7 @@ from thankyou.dao import dao
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 from thankyou.slackbot.views.thanksbackdialog import thanks_back_dialog_view
+from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
 
 def thank_you_message_say_thanks_button_clicked_handler(body, client, logger):
@@ -85,3 +87,114 @@ def thanks_back_dialog_send_button_clicked_handler(body, client: WebClient, logg
         except SlackApiError as e:
             logger.error(f"Could not notify user {user_id} (Company id = {company.uuid}) about the fact that their "
                          f"thank you back message was sent - can't send a private message: {e}")
+
+
+def thank_you_message_overflow_menu_clicked_handler(client, body, logger):
+    company = get_or_create_company_by_body(body)
+    user_id = body["user"]["id"]
+
+    action, message_id = str(body["actions"][0]["selected_option"]["value"]).split(":", 1)
+    message = dao.read_thank_you_message(company.uuid, message_id)
+
+    if not message:
+        logger.error(f"Could not find a message {message_id} for company {company.uuid}")
+        return
+
+    can_edit = (user_id == message.author_slack_user_id) \
+        or (user_id in [admin.slack_user_id for admin in company.admins])
+    can_delete = (user_id == message.author_slack_user_id) \
+        or (user_id in [admin.slack_user_id for admin in company.admins])
+
+    if action == "edit":
+        if can_edit:
+            if message.images:
+                if not validators.url(message.sorted_images[0].url):
+                    for image in message.images:
+                        dao.delete_thank_you_image(image)
+                    message.images = []
+            try:
+                client.views_open(trigger_id=body["trigger_id"], view=thank_you_dialog_view(
+                    state=message,
+                    thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
+                    enable_rich_text=company.enable_rich_text_in_thank_you_messages,
+                    enable_company_values=company.enable_company_values,
+                    max_receivers_num=company.receivers_number_limit,
+                    enable_attaching_files=company.enable_attaching_files,
+                    max_attached_files_num=company.max_attached_files_num,
+                    display_private_message_option=company.enable_private_messages,
+                ))
+            except Exception as e:
+                logger.error(f"Error publishing home tab: {e}")
+        else:
+            client.views_open(
+                trigger_id=body["trigger_id"],
+                view=View(
+                    type="modal",
+                    title="Permission denied",
+                    blocks=[
+                        SectionBlock(
+                            text=f"You cannot edit this message. Only the author and administrators can do it."
+                        )
+                    ]
+                ),
+            )
+    elif action == "delete":
+        if can_delete:
+            client.views_open(
+                trigger_id=body["trigger_id"],
+                view=View(
+                    type="modal",
+                    callback_id="thank_you_deletion_dialog_delete_button_clicked",
+                    title="Are you sure?",
+                    submit="Delete",
+                    close="Cancel",
+                    private_metadata=PrivateMetadata(thank_you_message_uuid=message.uuid).as_str(),
+                    blocks=[
+                        SectionBlock(
+                            text=f"Are you sure you want to delete this message? This operation can not be undone"
+                        )
+                    ]
+                ),
+            )
+        else:
+            client.views_open(
+                trigger_id=body["trigger_id"],
+                view=View(
+                    type="modal",
+                    title="Permission denied",
+                    blocks=[
+                        SectionBlock(
+                            text=f"You cannot delete this message. Only the author and administrators can do it."
+                        )
+                    ]
+                ),
+            )
+    else:
+        logger.error(f"Unknown message action: {action}")
+
+
+def thank_you_deletion_dialog_delete_button_clicked(client, body, logger):
+    company = get_or_create_company_by_body(body)
+    user_id = body["user"]["id"]
+
+    message_uuid = PrivateMetadata.from_str(body["view"]["private_metadata"]).thank_you_message_uuid
+    message = dao.read_thank_you_message(company_uuid=company.uuid, thank_you_message_uuid=message_uuid)
+
+    if not message:
+        logger.error(f"Can not find message {message_uuid} from company {company.uuid}")
+        return
+
+    dao.delete_thank_you_message(thank_you_message_uuid=message_uuid)
+
+    client.views_open(
+        trigger_id=body["trigger_id"],
+        view=View(
+            type="modal",
+            title="Deleted",
+            blocks=[
+                SectionBlock(
+                    text=f"The message ws successfully deleted"
+                )
+            ]
+        ),
+    )

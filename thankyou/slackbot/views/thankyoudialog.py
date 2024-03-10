@@ -19,7 +19,10 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                           display_private_message_option: bool = True) -> View:
     extra_blocks = []
 
-    if enable_attaching_files:
+    if enable_attaching_files or (state and state.images):
+        initial_value = None
+        if state and state.images:
+            initial_value = state.sorted_images[0].url
         extra_blocks.append(
             InputBlock(
                 label="Add an image",
@@ -27,12 +30,13 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                 dispatch_action=True,
                 element=UrlInputElement(
                     action_id="thank_you_dialog_image_url_action_id",
+                    initial_value=initial_value
                 ),
                 optional=True,
             ),
         )
 
-    if num_of_messages_a_user_can_send is not None and num_of_messages_a_user_can_send <= 0:
+    if not state and (num_of_messages_a_user_can_send is not None and num_of_messages_a_user_can_send <= 0):
         submit = None
         blocks = [
             SectionBlock(
@@ -40,7 +44,7 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             )
         ]
     else:
-        submit = "Say!"
+        submit = "Say!" if not state else "Save"
         blocks = [
             *([] if not slash_command_slack_channel_id else [
                 SectionBlock(text=TextObject(
@@ -49,7 +53,7 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
                     type="mrkdwn"
                 ))
             ]),
-            *([] if num_of_messages_a_user_can_send is None or num_of_messages_a_user_can_send > 3 else [
+            *([] if (num_of_messages_a_user_can_send is None or num_of_messages_a_user_can_send > 3 or state) else [
                 SectionBlock(
                     text=f"You can send {num_of_messages_a_user_can_send} more thank you(s) this week."
                 )
@@ -62,15 +66,17 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             ]),
             thank_you_receivers_block(block_id="thank_you_dialog_receivers_block",
                                       action_id="thank_you_dialog_receivers_action_id",
-                                      max_selected_items=max_receivers_num),
+                                      max_selected_items=max_receivers_num,
+                                      initial_receivers=None if not state else state.receivers),
             # thank_you_link_block(initial_value=None if state is None else state.link,
             #                      block_id=STATUS_UPDATE_LINK_BLOCK,
             #                      action_id=STATUS_UPDATE_MODAL_STATUS_UPDATE_LINK_ACTION_ID),
             thank_you_text_block(initial_value=None if state is None else state.text,
+                                 initial_is_rich_text=None if not state else state.is_rich_text,
                                  block_id="thank_you_dialog_text_block",
                                  action_id="thank_you_dialog_text_action_id",
                                  enable_rich_text=enable_rich_text),
-            *([] if not display_private_message_option else [
+            *([] if not display_private_message_option or state else [
                 checkbox_action_block(
                     block_id="thank_you_dialog_is_private_block",
                     element_action_id="thank_you_dialog_send_privately_action",

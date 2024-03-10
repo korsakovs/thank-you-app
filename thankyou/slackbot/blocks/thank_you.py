@@ -3,9 +3,9 @@ from typing import List
 
 from slack_sdk.models.blocks import SectionBlock, TextObject, ContextBlock, Option, \
     StaticSelectElement, InputBlock, PlainTextInputElement, UserMultiSelectElement, ImageElement, \
-    RichTextInputElement, RichTextBlock, ActionsBlock, ButtonElement
+    RichTextInputElement, RichTextBlock, ActionsBlock, ButtonElement, ConfirmObject, OverflowMenuElement
 
-from thankyou.core.models import ThankYouMessage, ThankYouType
+from thankyou.core.models import ThankYouMessage, ThankYouType, ThankYouReceiver
 from thankyou.slackbot.blocks.utils import rich_text_block_as_markdown
 from thankyou.slackbot.utils.stringhelpers import es
 
@@ -33,22 +33,26 @@ def thank_you_message_blocks(
             is_rich_text = False
             text = markdown_text
 
-    if title:
-        title_accessory = None
-        if is_rich_text and thank_you_message.images:
-            image = sorted(thank_you_message.images, key=lambda i: i.ordering_key)[0]
-            title_accessory = ImageElement(
-                image_url=image.url,
-                alt_text=image.filename
-            )
-        result.append(SectionBlock(
-            text=TextObject(
-                type="mrkdwn",
-                text=title,
-                # emoji=True
-            ),
-            accessory=title_accessory
-        ))
+    result.append(SectionBlock(
+        text=TextObject(
+            type="mrkdwn",
+            text=title,
+            # emoji=True
+        ),
+        accessory=OverflowMenuElement(
+            action_id="thank_you_message_overflow_menu_clicked",
+            options=[
+                Option(
+                    value=f"edit:{thank_you_message.uuid}",
+                    label="Edit...",
+                ),
+                Option(
+                    value=f"delete:{thank_you_message.uuid}",
+                    label="Delete...",
+                ),
+            ]
+        )
+    ))
 
     if is_rich_text:
         result.append(RichTextBlock(
@@ -59,8 +63,12 @@ def thank_you_message_blocks(
             result.append(SectionBlock(
                 text=TextObject(
                     type="mrkdwn",
-                    text="---\n" + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
+                    text="---\n" + "\n".join([f"<{image.url}|{image.filename or image.url[0:32]}>" for image in images])
                 ),
+                accessory=ImageElement(
+                    image_url=images[0].url,
+                    alt_text=images[0].filename or images[0].url[0:32]
+                )
             ))
     else:
         if not thank_you_message.images:
@@ -82,20 +90,20 @@ def thank_you_message_blocks(
                 ),
                 accessory=ImageElement(
                     image_url=images[0].url,
-                    alt_text=images[0].filename
+                    alt_text=images[0].filename or images[0].url[0:32]
                 )
             ))
 
+    buttons = []
     if show_say_thank_you_button:
-        result.append(ActionsBlock(
-            elements=[
-                ButtonElement(
-                    text="Say thanks!",
-                    action_id="thank_you_message_say_thanks_button_clicked",
-                    value=thank_you_message.uuid
-                )
-            ]
+        buttons.append(ButtonElement(
+            text="Say thanks!",
+            action_id="thank_you_message_say_thanks_button_clicked",
+            value=thank_you_message.uuid
         ))
+
+    if buttons:
+        result.append(ActionsBlock(elements=buttons))
 
     published_by_text = ""
     if thank_you_message.author_slack_user_id:
@@ -143,25 +151,26 @@ def thank_you_type_block(thank_you_types: List[ThankYouType],
 
 
 def thank_you_receivers_block(label: str = "Who do you want to thank?", block_id: str = None, action_id: str = None,
-                              max_selected_items: int = 10) -> InputBlock:
+                              max_selected_items: int = 10, initial_receivers: List[ThankYouReceiver] = None) \
+        -> InputBlock:
     return InputBlock(
         block_id=block_id,
         label=label,
         optional=False,
         element=UserMultiSelectElement(
             action_id=action_id,
-            initial_users=None,
-            max_selected_items=max_selected_items
+            initial_users=None if initial_receivers is None else [r.slack_user_id for r in initial_receivers],
+            max_selected_items=max_selected_items,
         )
     )
 
 
-def thank_you_text_block(label: str = "Add a message", initial_value: str = None, block_id: str = None,
-                         action_id: str = None, enable_rich_text: bool = False) -> InputBlock:
-    if enable_rich_text:
+def thank_you_text_block(label: str = "Add a message", initial_is_rich_text: bool = None, initial_value: str = None,
+                         block_id: str = None, action_id: str = None, enable_rich_text: bool = False) -> InputBlock:
+    if (enable_rich_text and initial_is_rich_text is None) or initial_is_rich_text:
         element = RichTextInputElement(
             action_id=action_id,
-            initial_value=initial_value,
+            initial_value=None if initial_value is None else json.loads(initial_value),
             focus_on_load=True
         )
     else:

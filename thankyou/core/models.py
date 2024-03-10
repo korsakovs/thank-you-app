@@ -99,6 +99,12 @@ class ThankYouMessage:
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = field(default_factory=datetime.utcnow)
 
+    @property
+    def sorted_images(self) -> Optional[List[ThankYouMessageImage]]:
+        if not self.images:
+            return None
+        return sorted(self.images, key=lambda i: i.ordering_key)
+
 
 @dataclass
 class ThankYouStats:

@@ -296,14 +296,11 @@ class SQLAlchemyDao(Dao, ABC):
 
             return result.count()
 
-    def delete_thank_you_message(self, company_uuid: str, thank_you_message_uuid: str):
+    def delete_thank_you_message(self, thank_you_message_uuid: str):
         with self._get_session() as session:
-            session.quert(ThankYouMessage).join(Company).filter(
-                and_(ThankYouMessage.uuid == thank_you_message_uuid, Company.uuid == company_uuid)).update(
-                {
-                    ThankYouMessage.deleted: True
-                },
-                synchronize_session=False)
+            session.query(ThankYouMessage).filter(ThankYouMessage.uuid == thank_you_message_uuid).update({
+                ThankYouMessage.deleted: True
+            }, synchronize_session=False)
 
     def create_company(self, company: Company):
         self._set_obj(company)
@@ -357,6 +354,14 @@ class SQLAlchemyDao(Dao, ABC):
             ))).update({
                 ThankYouType.deleted: True
             }, synchronize_session=False)
+
+    def delete_thank_you_receiver(self, receiver: ThankYouReceiver):
+        with self._get_session() as session:
+            session.delete(receiver)
+
+    def delete_thank_you_image(self, image: ThankYouMessageImage):
+        with self._get_session() as session:
+            session.delete(image)
 
     def get_thank_you_sender_leaders(self, company_uuid: str, created_after: datetime = None,
                                      created_before: datetime = None, thank_you_type: ThankYouType = None,
