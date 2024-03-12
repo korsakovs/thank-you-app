@@ -6,7 +6,9 @@ from slack_sdk.models.views import View
 
 from thankyou.dao import dao
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
+from thankyou.slackbot.utils.employee import get_or_create_employee_by_slack_user_id
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
+from thankyou.slackbot.views.homepage import home_page_company_thank_yous_view
 from thankyou.slackbot.views.thanksbackdialog import thanks_back_dialog_view
 from thankyou.slackbot.views.thankyoudialog import thank_you_dialog_view
 
@@ -173,9 +175,10 @@ def thank_you_message_overflow_menu_clicked_handler(client, body, logger):
         logger.error(f"Unknown message action: {action}")
 
 
-def thank_you_deletion_dialog_delete_button_clicked(client, body, logger):
+def thank_you_deletion_dialog_delete_button_clicked(client: WebClient, body, logger):
     company = get_or_create_company_by_body(body)
     user_id = body["user"]["id"]
+    employee = get_or_create_employee_by_slack_user_id(company_uuid=company.uuid, slack_user_id=user_id)
 
     message_uuid = PrivateMetadata.from_str(body["view"]["private_metadata"]).thank_you_message_uuid
     message = dao.read_thank_you_message(company_uuid=company.uuid, thank_you_message_uuid=message_uuid)
@@ -184,7 +187,43 @@ def thank_you_deletion_dialog_delete_button_clicked(client, body, logger):
         logger.error(f"Can not find message {message_uuid} from company {company.uuid}")
         return
 
-    dao.delete_thank_you_message(thank_you_message_uuid=message_uuid)
+    if message.deleted:
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view=View(
+                type="modal",
+                title="Deleted",
+                blocks=[
+                    SectionBlock(text="The message you're trying to delete doesn't exist. Maybe you've already "
+                                      "deleted it?")
+                ]
+            ),
+        )
+        return
+
+    try:
+        for slack_delivery in message.slack_deliveries:
+            if not slack_delivery.deleted:
+                try:
+                    client.chat_delete(
+                        channel=slack_delivery.slack_channel_id,
+                        ts=slack_delivery.message_ts,
+                    )
+                except SlackApiError as api_error:
+                    if api_error.response["error"] != "message_not_found":
+                        raise
+                slack_delivery.deleted = True
+        dao.delete_thank_you_message(thank_you_message_uuid=message_uuid)
+    except Exception as e:
+        logger.error(f"Could not delete a message {message.uuid} for company {company.uuid}: {e}")
+        deleted = False
+    else:
+        deleted = True
+
+    if deleted:
+        text = "The message was successfully deleted"
+    else:
+        text = "The message was not deleted due to an internal error. Please, try again later"
 
     client.views_open(
         trigger_id=body["trigger_id"],
@@ -192,9 +231,17 @@ def thank_you_deletion_dialog_delete_button_clicked(client, body, logger):
             type="modal",
             title="Deleted",
             blocks=[
-                SectionBlock(
-                    text=f"The message ws successfully deleted"
-                )
+                SectionBlock(text=text)
             ]
         ),
+    )
+
+    client.views_publish(
+        user_id=user_id,
+        view=home_page_company_thank_yous_view(
+            thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            current_user_slack_id=user_id,
+            enable_leaderboard=company.enable_leaderboard,
+            show_welcome_message=not employee.closed_welcome_message
+        )
     )

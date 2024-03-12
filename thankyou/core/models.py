@@ -79,6 +79,17 @@ class ThankYouMessageImage:
 
 
 @dataclass
+class ThankYouMessageSlackDelivery:
+    thank_you_message_uuid: UUID_Type
+    slack_channel_id: str
+    message_ts: str
+    is_direct_message: bool
+    is_ephemeral_message: bool
+    deleted: bool = False
+    uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
+
+
+@dataclass
 class ThankYouMessage:
     text: str
     company: Company
@@ -95,6 +106,7 @@ class ThankYouMessage:
 
     receivers: List[ThankYouReceiver] = field(default_factory=list)
     images: List[ThankYouMessageImage] = field(default_factory=list)
+    slack_deliveries: List[ThankYouMessageSlackDelivery] = field(default_factory=list)
 
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = field(default_factory=datetime.utcnow)

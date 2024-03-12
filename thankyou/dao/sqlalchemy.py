@@ -11,7 +11,8 @@ from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from thankyou.core.models import ThankYouType, Company, ThankYouMessage, ThankYouReceiver, \
-    ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings, UUID_Type, Employee
+    ThankYouMessageImage, Slack_User_ID_Type, CompanyAdmin, LeaderbordTimeSettings, UUID_Type, Employee, \
+    ThankYouMessageSlackDelivery
 from thankyou.dao.interface import Dao
 
 
@@ -25,6 +26,7 @@ class SQLAlchemyDao(Dao, ABC):
     _THANK_YOU_TYPES_TABLE = "thank_you_types"
     _THANK_YOU_RECEIVERS_TABLE = "thank_you_receivers"
     _THANK_YOU_MESSAGE_IMAGES = "thank_you_message_images"
+    _THANK_YOU_MESSAGE_SLACK_DELIVERIES = "thank_you_message_slack_deliveries"
     _EMPLOYEES_TABLE = "employees"
 
     @abstractmethod
@@ -126,6 +128,19 @@ class SQLAlchemyDao(Dao, ABC):
             Column("ordering_key", Integer, nullable=False),
         )
 
+        self._thank_you_message_slack_deliveries_table = Table(
+            self._THANK_YOU_MESSAGE_SLACK_DELIVERIES,
+            self._metadata_obj,
+            Column("uuid", String(256), primary_key=True, nullable=False),
+            Column("thank_you_message_uuid", String(256), ForeignKey(f"{self._THANK_YOU_MESSAGES_TABLE}.uuid"),
+                   nullable=False, index=True),
+            Column("slack_channel_id", String(256), nullable=False),
+            Column("message_ts", String(256), nullable=False),
+            Column("deleted", Boolean, nullable=False),
+            Column("is_direct_message", Boolean, nullable=False),
+            Column("is_ephemeral_message", Boolean, nullable=False),
+        )
+
         self._employees_table = Table(
             self._EMPLOYEES_TABLE,
             self._metadata_obj,
@@ -154,11 +169,14 @@ class SQLAlchemyDao(Dao, ABC):
                 "type": relationship(ThankYouType),
                 "receivers": relationship(ThankYouReceiver),
                 "images": relationship(ThankYouMessageImage),
+                "slack_deliveries": relationship(ThankYouMessageSlackDelivery)
             }
         )
 
         self._mapper_registry.map_imperatively(ThankYouReceiver, self._thank_you_receivers_table)
         self._mapper_registry.map_imperatively(ThankYouMessageImage, self._thank_you_message_images_table)
+        self._mapper_registry.map_imperatively(ThankYouMessageSlackDelivery,
+                                               self._thank_you_message_slack_deliveries_table)
         self._mapper_registry.map_imperatively(Employee, self._employees_table)
 
         self._engine = self._create_engine()
@@ -301,6 +319,9 @@ class SQLAlchemyDao(Dao, ABC):
             session.query(ThankYouMessage).filter(ThankYouMessage.uuid == thank_you_message_uuid).update({
                 ThankYouMessage.deleted: True
             }, synchronize_session=False)
+
+    def create_thank_you_message_slack_delivery(self, thank_you_message_slack_delivery: ThankYouMessageSlackDelivery):
+        self._set_obj(thank_you_message_slack_delivery)
 
     def create_company(self, company: Company):
         self._set_obj(company)
