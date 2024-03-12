@@ -52,9 +52,16 @@ class Company:
     enable_attaching_files: bool
     enable_private_messages: bool
     max_attached_files_num: int
+    custom_merci_app_name: str = None
 
     uuid: UUID_Type = field(default_factory=lambda: str(uuid.uuid4()))
     deleted: bool = False
+
+    @property
+    def merci_app_name(self) -> str:
+        if self.custom_merci_app_name and self.custom_merci_app_name.strip():
+            return self.custom_merci_app_name.strip()
+        return "Merci!"
 
 
 @dataclass

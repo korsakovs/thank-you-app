@@ -123,7 +123,8 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
                             text=f"Your thank you message could not be "
                                  f"delivered to the Slack channel "
                                  f"<#{thank_you_message.slash_command_slack_channel_id}>. "
-                                 f"Are you sure that the Merci! application was invited to this channel? "
+                                 f"Are you sure that the {company.merci_app_name} application was invited "
+                                 f"to this channel? "
                                  f"We will deliver your message directly to the receivers",
                             channel=thank_you_message.author_slack_user_id,
                             unfurl_links=False,
@@ -263,6 +264,7 @@ def thank_you_dialog_save_button_clicked_action_handler(body, client: WebClient,
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            app_name=company.merci_app_name,
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
             show_welcome_message=not employee.closed_welcome_message

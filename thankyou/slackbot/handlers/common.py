@@ -148,7 +148,8 @@ def publish_configuration_view(client, company: Company, user_id: str):
     is_admin = is_user_an_admin(client=client, company_admins=company.admins, slack_user_id=user_id)
 
     if not is_admin:
-        view = configuration_no_access_view(admin_slack_ids=[admin.slack_user_id for admin in company.admins])
+        view = configuration_no_access_view(app_name=company.merci_app_name,
+                                            admin_slack_ids=[admin.slack_user_id for admin in company.admins])
     else:
         view = configuration_view(
             thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
@@ -165,7 +166,8 @@ def publish_configuration_view(client, company: Company, user_id: str):
             enable_attaching_files=company.enable_attaching_files,
             max_attached_files_num=company.max_attached_files_num,
             enable_private_messages=company.enable_private_messages,
-            enable_private_message_counting_in_leaderboard=company.enable_private_message_counting_in_leaderboard
+            enable_private_message_counting_in_leaderboard=company.enable_private_message_counting_in_leaderboard,
+            app_name=company.merci_app_name
         )
 
     client.views_publish(

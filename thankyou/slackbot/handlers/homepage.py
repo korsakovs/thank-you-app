@@ -42,6 +42,7 @@ def app_home_opened_action_handler(client: WebClient, event, logger):
 
     view = home_page_company_thank_yous_view(
         thank_you_messages=messages,
+        app_name=company.merci_app_name,
         current_user_slack_id=user_id,
         enable_leaderboard=company.enable_leaderboard,
         slack_channel_with_all_messages=slack_channel_with_all_messages,
@@ -74,6 +75,7 @@ def home_page_company_thank_you_button_clicked_action_handler(body, client, logg
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
                                                            private=False),
+            app_name=company.merci_app_name,
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
             slack_channel_with_all_messages=slack_channel_with_all_messages,
@@ -101,6 +103,7 @@ def home_page_show_leaders_button_clicked_action_handler(body, client, logger):
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
                                                            private=False),
+            app_name=company.merci_app_name,
             current_user_slack_id=user_id,
             sender_leaders=senders_receivers_stats.sender_leaders,
             receiver_leaders=senders_receivers_stats.receiver_leaders,
@@ -150,6 +153,7 @@ def home_page_say_thank_you_button_clicked_action_handler(body, client, logger):
         client.views_open(
             trigger_id=body["trigger_id"],
             view=thank_you_dialog_view(
+                app_name=company.merci_app_name,
                 thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
                 enable_rich_text=company.enable_rich_text_in_thank_you_messages,
                 enable_company_values=company.enable_company_values,
@@ -180,6 +184,7 @@ def home_page_hide_welcome_message_button_clicked_action_handler(body, client, l
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=NUMBER_OF_MESSAGES_TO_SHOW,
                                                            private=False),
+            app_name=company.merci_app_name,
             current_user_slack_id=employee.slack_user_id,
             enable_leaderboard=company.enable_leaderboard,
             slack_channel_with_all_messages=company.share_messages_in_slack_channel,

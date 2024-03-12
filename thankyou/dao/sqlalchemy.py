@@ -81,6 +81,7 @@ class SQLAlchemyDao(Dao, ABC):
             Column("enable_attaching_files", Boolean, nullable=False),
             Column("enable_private_messages", Boolean, nullable=False),
             Column("max_attached_files_num", Integer, nullable=False),
+            Column("custom_merci_app_name", String(256), nullable=True),
         )
 
         self._thank_you_types_table = Table(

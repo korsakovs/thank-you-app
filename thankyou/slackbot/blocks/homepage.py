@@ -40,12 +40,12 @@ def home_page_actions_block(selected: str = "my_updates") -> ActionsBlock:
     return ActionsBlock(elements=elements)
 
 
-def home_page_welcome_blocks() -> List[Block]:
+def home_page_welcome_blocks(app_name: str) -> List[Block]:
     return [
-        HeaderBlock(text="Welcome to the Merci! application"),
+        HeaderBlock(text=f"Welcome to the {app_name} application"),
         SectionBlock(
             text="Recognizing and appreciating your team is a cornerstone of a motivated workforce. "
-                 "The Merci! Slack application provides a seamless way for you and your colleagues to express "
+                 f"The {app_name} Slack application provides a seamless way for you and your colleagues to express "
                  "gratitude and foster a positive workplace culture."
         ),
         SectionBlock(
@@ -123,8 +123,8 @@ def home_page_leaders_block(sender_leaders: List[Tuple[ThankYouType, List[Tuple[
     ])
 
 
-def home_page_hidden_messages_warn_block(slack_channel_with_all_messages: str = None, hidden_messages_num: int = None) \
-        -> Optional[ContextBlock]:
+def home_page_hidden_messages_warn_block(app_name: str, slack_channel_with_all_messages: str = None,
+                                         hidden_messages_num: int = None) -> Optional[ContextBlock]:
     if slack_channel_with_all_messages:
         if hidden_messages_num and hidden_messages_num > 0:
             text = (f"Only the latest messages are shown below. To read all the Thank You messages, "
@@ -135,7 +135,7 @@ def home_page_hidden_messages_warn_block(slack_channel_with_all_messages: str = 
     else:
         if hidden_messages_num and hidden_messages_num > 0:
             text = (f"Only the latest messages are shown below. To read all the Thank You messages, "
-                    f"please ask your Slack administrator to configure the Merci! application, so the all "
+                    f"please ask your Slack administrator to configure the {app_name} application, so the all "
                     f"Thank You messages are forwarded to a public slack channel.")
         else:
             text = None

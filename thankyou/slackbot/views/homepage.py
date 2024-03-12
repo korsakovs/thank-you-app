@@ -37,7 +37,7 @@ def home_page_my_thank_yous_view(
     )
 
 
-def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
+def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage], app_name: str,
                                       sender_leaders: List[Tuple[ThankYouType, List[Tuple[Slack_User_ID_Type, int]]]]
                                       = None,
                                       receiver_leaders: List[Tuple[ThankYouType, List[Tuple[Slack_User_ID_Type, int]]]]
@@ -58,6 +58,7 @@ def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
     elif enable_leaderboard:
         leaders_blocks.append(home_page_show_leaders_button_block())
     hidden_messages_block = home_page_hidden_messages_warn_block(
+        app_name=app_name,
         slack_channel_with_all_messages=slack_channel_with_all_messages,
         hidden_messages_num=hidden_messages_num
     )
@@ -65,7 +66,7 @@ def home_page_company_thank_yous_view(thank_you_messages: List[ThankYouMessage],
     blocks = [
         home_page_actions_block(selected="company_thank_yous"),
         DividerBlock(),
-        *([] if not show_welcome_message else [*home_page_welcome_blocks(), DividerBlock()]),
+        *([] if not show_welcome_message else [*home_page_welcome_blocks(app_name), DividerBlock()]),
         *leaders_blocks,
         *([] if not hidden_messages_block else [hidden_messages_block])
     ]

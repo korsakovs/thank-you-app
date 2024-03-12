@@ -10,7 +10,7 @@ from thankyou.slackbot.blocks.thank_you import thank_you_type_block, thank_you_t
 from thankyou.slackbot.utils.privatemetadata import PrivateMetadata
 
 
-def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMessage = None,
+def thank_you_dialog_view(app_name: str, thank_you_types: List[ThankYouType], state: ThankYouMessage = None,
                           enable_rich_text: bool = False, enable_company_values: bool = True,
                           max_receivers_num: int = 10, enable_attaching_files: bool = True,
                           max_attached_files_num: int = 10,
@@ -49,7 +49,8 @@ def thank_you_dialog_view(thank_you_types: List[ThankYouType], state: ThankYouMe
             *([] if not slash_command_slack_channel_id else [
                 SectionBlock(text=TextObject(
                     text=f"This Thank you message will be posted in <#{slash_command_slack_channel_id}> slack channel. "
-                         f"*Do not forget to invite Merci! application to this channel if this channel is private!*",
+                         f"*Do not forget to invite {app_name} application to this channel if this channel "
+                         f"is private!*",
                     type="mrkdwn"
                 ))
             ]),

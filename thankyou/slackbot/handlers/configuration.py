@@ -2,6 +2,7 @@ from thankyou.core.models import CompanyAdmin, LeaderbordTimeSettings
 from thankyou.dao import dao
 from thankyou.slackbot.handlers.common import publish_configuration_view
 from thankyou.slackbot.utils.company import get_or_create_company_by_body
+from thankyou.slackbot.views.appnamedialog import app_name_dialog
 from thankyou.slackbot.views.thankyoutypedialog import thank_you_type_dialog
 
 
@@ -32,6 +33,36 @@ def home_page_configuration_admin_slack_user_ids_value_changed_action_handler(bo
         dao.create_company_admin(admin)
 
     company = dao.read_company(company_uuid=company.uuid)
+
+    publish_configuration_view(
+        client=client,
+        company=company,
+        user_id=user_id
+    )
+
+
+def home_page_configuration_edit_app_name_button_clicked_handler(body, client, logger):
+    logger.info(body)
+    company = get_or_create_company_by_body(body)
+
+    client.views_open(
+        trigger_id=body["trigger_id"],
+        view=app_name_dialog(app_name=company.merci_app_name)
+    )
+
+
+def edit_merci_app_name_dialog_save_button_clicked_handler(body, client, logger):
+    logger.info(body)
+    user_id = body["user"]["id"]
+    company = get_or_create_company_by_body(body)
+
+    new_company_name: str = body["view"]["state"]["values"]["edit_merci_app_name_dialog_app_name_block"][
+        "edit_merci_app_name_dialog_app_name_action"]["value"]
+
+    if new_company_name.strip():
+        company.custom_merci_app_name = new_company_name.strip()
+    else:
+        company.custom_merci_app_name = None
 
     publish_configuration_view(
         client=client,

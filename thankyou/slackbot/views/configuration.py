@@ -9,7 +9,7 @@ from thankyou.slackbot.blocks.common import checkbox_action_block
 from thankyou.slackbot.blocks.homepage import home_page_actions_block
 
 
-def configuration_no_access_view(admin_slack_ids: List[str] = None):
+def configuration_no_access_view(app_name: str, admin_slack_ids: List[str] = None):
     admins_str = ""
     if admin_slack_ids:
         admins_str = (" You can also ask " + ", ".join(f"<@{admin_slack_id}>" for admin_slack_id in admin_slack_ids)
@@ -31,7 +31,7 @@ def configuration_no_access_view(admin_slack_ids: List[str] = None):
             DividerBlock(),
             SectionBlock(
                 text="Unfortunately, you don't have access to the app configuration. Are you sure you need "
-                     "to configure the \"Merci!\" application? If so, ask you Slack admins to add you "
+                     f"to configure the \"{app_name}\" application? If so, ask you Slack admins to add you "
                      "to the list of administrators." + admins_str
             ),
         ],
@@ -45,7 +45,7 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                        enable_rich_text_in_thank_you_messages: bool, enable_company_values: bool,
                        enable_leaderboard: bool, max_thank_you_receivers_num: int, enable_attaching_files: bool,
                        enable_private_messages: bool, max_attached_files_num: int,
-                       enable_private_message_counting_in_leaderboard: bool):
+                       enable_private_message_counting_in_leaderboard: bool, app_name: str):
     stats_time_period_to_use_options = []
     stats_time_period_to_use_selected_option = None
     for enum, option in (
@@ -94,6 +94,16 @@ def configuration_view(admin_slack_user_ids: List[Slack_User_ID_Type], enable_sh
                 accessory=UserMultiSelectElement(
                     initial_users=admin_slack_user_ids,
                     action_id="home_page_configuration_admin_slack_user_ids_value_changed"
+                )
+            ),
+            HeaderBlock(
+                text="Custom App name"
+            ),
+            SectionBlock(
+                text=f"Current Slack App name: {app_name}",
+                accessory=ButtonElement(
+                    text="Edit...",
+                    action_id="home_page_configuration_edit_app_name_button_clicked"
                 )
             ),
             HeaderBlock(

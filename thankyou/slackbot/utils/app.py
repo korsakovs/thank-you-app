@@ -30,7 +30,8 @@ from thankyou.slackbot.handlers.configuration import home_page_configuration_but
     home_page_configuration_enable_weekly_thank_you_limit_value_changed_action_handler, \
     home_page_configuration_enable_sharing_in_a_slack_channel_value_changed_action_handler, \
     home_page_configuration_enable_private_messages_value_changed_action_handler, \
-    handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler
+    handle_home_page_configuration_enable_private_message_counting_in_leaderboard_value_changed_action_handler, \
+    home_page_configuration_edit_app_name_button_clicked_handler, edit_merci_app_name_dialog_save_button_clicked_handler
 from thankyou.slackbot.handlers.homepage import app_home_opened_action_handler, \
     home_page_company_thank_you_button_clicked_action_handler, home_page_my_thank_you_button_clicked_action_handler, \
     home_page_say_thank_you_button_clicked_action_handler, home_page_show_leaders_button_clicked_action_handler, \
@@ -201,6 +202,18 @@ def _home_page_configuration_button_clicked_action_handler(ack, client, body, lo
 def _home_page_configuration_admin_slack_user_ids_value_changed_action_handler(ack, client, body, logger):
     ack()
     home_page_configuration_admin_slack_user_ids_value_changed_action_handler(body, client, logger)
+
+
+@app_event(EventType.Action, "home_page_configuration_edit_app_name_button_clicked")
+def _home_page_configuration_edit_app_name_button_clicked_handler(ack, client, body, logger):
+    ack()
+    home_page_configuration_edit_app_name_button_clicked_handler(body, client, logger)
+
+
+@app_event(EventType.View, "edit_merci_app_name_dialog_save_button_clicked")
+def _edit_merci_app_name_dialog_save_button_clicked_handler(ack, client, body, logger):
+    ack()
+    edit_merci_app_name_dialog_save_button_clicked_handler(body, client, logger)
 
 
 @app_event(EventType.Action, "home_page_configuration_enable_sharing_in_a_slack_channel_value_changed")

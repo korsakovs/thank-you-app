@@ -27,6 +27,7 @@ def say_thank_you_global_shortcut_action_handler(body, client, logger):
         client.views_open(
             trigger_id=body["trigger_id"],
             view=thank_you_dialog_view(
+                app_name=company.merci_app_name,
                 thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
                 enable_rich_text=company.enable_rich_text_in_thank_you_messages,
                 enable_company_values=company.enable_company_values,
@@ -63,6 +64,7 @@ def say_thank_you_message_shortcut_action_handler(body, client, logger):
         client.views_open(
             trigger_id=body["trigger_id"],
             view=thank_you_dialog_view(
+                app_name=company.merci_app_name,
                 thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
                 enable_rich_text=company.enable_rich_text_in_thank_you_messages,
                 enable_company_values=company.enable_company_values,

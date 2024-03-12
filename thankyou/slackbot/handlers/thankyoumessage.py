@@ -116,6 +116,7 @@ def thank_you_message_overflow_menu_clicked_handler(client, body, logger):
                     message.images = []
             try:
                 client.views_open(trigger_id=body["trigger_id"], view=thank_you_dialog_view(
+                    app_name=company.merci_app_name,
                     state=message,
                     thank_you_types=dao.read_thank_you_types(company_uuid=company.uuid),
                     enable_rich_text=company.enable_rich_text_in_thank_you_messages,
@@ -240,6 +241,7 @@ def thank_you_deletion_dialog_delete_button_clicked(client: WebClient, body, log
         user_id=user_id,
         view=home_page_company_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, last_n=20, private=False),
+            app_name=company.merci_app_name,
             current_user_slack_id=user_id,
             enable_leaderboard=company.enable_leaderboard,
             show_welcome_message=not employee.closed_welcome_message
