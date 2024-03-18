@@ -243,7 +243,13 @@ class SQLAlchemyDao(Dao, ABC):
         result = session.query(ThankYouMessage).join(Company)
         if receiver_slack_user_id:
             result = result.join(ThankYouReceiver)
-            result = result.filter(ThankYouReceiver.slack_user_id == receiver_slack_user_id)
+            if author_slack_user_id:
+                result = result.filter(or_(ThankYouReceiver.slack_user_id == receiver_slack_user_id,
+                                           ThankYouMessage.author_slack_user_id == author_slack_user_id))
+            else:
+                result = result.filter(ThankYouReceiver.slack_user_id == receiver_slack_user_id)
+        elif author_slack_user_id:
+            result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
 
         result = result.filter(Company.uuid == company_uuid)
 
@@ -261,9 +267,6 @@ class SQLAlchemyDao(Dao, ABC):
 
         if private is not None:
             result = result.filter(ThankYouMessage.is_private == private)
-
-        if author_slack_user_id is not None:
-            result = result.filter(ThankYouMessage.author_slack_user_id == author_slack_user_id)
 
         # noinspection PyTypeChecker
         result = result.order_by(desc(ThankYouMessage.created_at))
