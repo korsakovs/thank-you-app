@@ -1,6 +1,7 @@
 import json
 from typing import List
 
+import validators
 from slack_sdk.models.blocks import SectionBlock, TextObject, ContextBlock, Option, \
     StaticSelectElement, InputBlock, PlainTextInputElement, UserMultiSelectElement, ImageElement, \
     RichTextInputElement, RichTextBlock, ActionsBlock, ButtonElement, ConfirmObject, OverflowMenuElement
@@ -33,6 +34,16 @@ def thank_you_message_blocks(
             is_rich_text = False
             text = markdown_text
 
+    has_image = False
+    image_url = None
+    image_alt_text = None
+    if thank_you_message.images:
+        _images = sorted(thank_you_message.images, key=lambda i: i.ordering_key)
+        if _images[0].url.strip() and validators.url(_images[0].url):
+            has_image = True
+            image_url = _images[0].url.strip()
+            image_alt_text = "image: " + (_images[0].filename or _images[0].url[0:32] or " ").strip()
+
     result.append(SectionBlock(
         text=TextObject(
             type="mrkdwn",
@@ -50,6 +61,10 @@ def thank_you_message_blocks(
                     value=f"delete:{thank_you_message.uuid}",
                     label="Delete...",
                 ),
+                Option(
+                    value=f"thank_back:{thank_you_message.uuid}",
+                    label="Thank back...",
+                ),
             ]
         )
     ))
@@ -60,18 +75,19 @@ def thank_you_message_blocks(
         ))
         if thank_you_message.images:
             images = sorted(thank_you_message.images, key=lambda i: i.ordering_key)
-            result.append(SectionBlock(
-                text=TextObject(
-                    type="mrkdwn",
-                    text="---\n" + "\n".join([f"<{image.url}|{image.filename or image.url[0:32]}>" for image in images])
-                ),
-                accessory=ImageElement(
-                    image_url=images[0].url,
-                    alt_text=images[0].filename or images[0].url[0:32]
-                )
-            ))
+            if has_image:
+                result.append(SectionBlock(
+                    text=TextObject(
+                        type="mrkdwn",
+                        text="---\n" + "\n".join([f"<{image.url}|{image.filename or image.url[0:32]}>" for image in images])
+                    ),
+                    accessory=ImageElement(
+                        image_url=image_url,
+                        alt_text=image_alt_text
+                    )
+                ))
     else:
-        if not thank_you_message.images:
+        if not has_image:
             result.append(SectionBlock(
                 text=TextObject(
                     type="mrkdwn",
@@ -89,8 +105,8 @@ def thank_you_message_blocks(
                          + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
                 ),
                 accessory=ImageElement(
-                    image_url=images[0].url,
-                    alt_text=images[0].filename or images[0].url[0:32]
+                    image_url=image_url,
+                    alt_text=image_alt_text
                 )
             ))
 
@@ -107,7 +123,11 @@ def thank_you_message_blocks(
 
     published_by_text = ""
     if thank_you_message.author_slack_user_id:
-        published_by_text += f"_This Thank You message was sent by <@{es(thank_you_message.author_slack_user_id)}>_"
+        privately = ""
+        if thank_you_message.is_private:
+            privately = " *privately*"
+        published_by_text += (f"_This Thank You message was sent{privately} "
+                              f"by <@{es(thank_you_message.author_slack_user_id)}>_")
 
     if published_by_text:
         result.append(ContextBlock(

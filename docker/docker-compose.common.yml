@@ -16,7 +16,7 @@ services:
       SLACK_APP_POSTGRES_USERNAME: merci_app
       SLACK_APP_POSTGRES_PASSWORD: merci_app
       PGDATA: /var/lib/postgresql/data/pgdata
-      MERCI_ENV: ${MERCI_ENV}
+      MERCI_ENV: ${MERCI_ENV:-unknown}
     # ports:
     #   - "5432:5432"
     healthcheck:
@@ -57,7 +57,7 @@ services:
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_APP_TOKEN: ${SLACK_APP_TOKEN}
       DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
-      MERCI_ENV: ${MERCI_ENV}
+      MERCI_ENV: ${MERCI_ENV:-unknown}
       PROMETHEUS_MULTIPROC_DIR: /multiprocprometheus
     labels:
       logging: "promtail"
@@ -78,7 +78,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: test@gmail.com
       PGADMIN_DEFAULT_PASSWORD: postgres
       PGADMIN_CONFIG_SERVER_MODE: "False"
-      MERCI_ENV: ${MERCI_ENV}
+      MERCI_ENV: ${MERCI_ENV:-unknown}
     # ports:
     #   - "5433:80"
     labels:
@@ -103,7 +103,7 @@ services:
       POSTGRES_HOST: merci-postgres
       POSTGRES_DB: merci
       DATABASE_ENCRYPTION_SECRET_KEY: ${DATABASE_ENCRYPTION_SECRET_KEY}
-      MERCI_ENV: ${MERCI_ENV}
+      MERCI_ENV: ${MERCI_ENV:-unknown}
     labels:
       logging: "promtail"
       logging_jobname: "merci-webapp"

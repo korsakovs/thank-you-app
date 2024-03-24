@@ -82,7 +82,8 @@ def thank_you_dialog_view(app_name: str, thank_you_types: List[ThankYouType], st
                     block_id="thank_you_dialog_is_private_block",
                     element_action_id="thank_you_dialog_send_privately_action",
                     checkbox_value="is_private",
-                    checkbox_label="Send this message privately",
+                    checkbox_label="Send this message privately "
+                                   "(only you and receivers will see it)",
                     enabled=False if not state else state.is_private
                 ),
             ]),

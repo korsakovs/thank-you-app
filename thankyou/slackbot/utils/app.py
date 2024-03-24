@@ -9,7 +9,7 @@ from prometheus_client import Histogram, Counter as PrometheusCounter
 from slack_bolt import App
 from slack_sdk import WebClient
 
-from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token
+from thankyou.core.config import slack_bot_token, slack_signing_secret, slack_app_token, get_env
 from thankyou.slackbot.handlers.thankyoumessage import thank_you_message_say_thanks_button_clicked_handler, \
     thanks_back_dialog_send_button_clicked_handler, thank_you_message_overflow_menu_clicked_handler, \
     thank_you_deletion_dialog_delete_button_clicked
@@ -82,7 +82,7 @@ def is_socket_mode() -> bool:
 slack_handler_metric = Histogram(
     name='slack_handler_metric_histogram',
     documentation='Time spent processing request',
-    labelnames=["merci_handler", "merci_handler_type"],
+    labelnames=["merci_handler", "merci_handler_type", "environment"],
 )
 
 events_counter = PrometheusCounter(
@@ -107,7 +107,7 @@ class EventType(Enum):
 
 def app_event(event_type: EventType, name: str):
     def decorator(func: Callable):
-        metric_wrapper = slack_handler_metric.labels(func.__name__, event_type.value)
+        metric_wrapper = slack_handler_metric.labels(func.__name__, event_type.value, get_env().name.lower())
 
         if event_type == EventType.Event:
             app_wrapper = app.event

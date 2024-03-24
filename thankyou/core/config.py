@@ -52,7 +52,7 @@ class Env(Enum):
 
 def get_env(default=Env.DEV) -> Env:
     try:
-        return Env[os.getenv("THANK_YOU_ENV", "").upper().strip()]
+        return Env[os.getenv("MERCI_ENV", "").upper().strip()]
     except KeyError:
         return default
 

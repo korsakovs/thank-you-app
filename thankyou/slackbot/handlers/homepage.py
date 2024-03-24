@@ -124,7 +124,8 @@ def home_page_my_thank_you_button_clicked_action_handler(body, client, logger):
         user_id=user_id,
         view=home_page_my_thank_yous_view(
             thank_you_messages=dao.read_thank_you_messages(company_uuid=company.uuid, author_slack_user_id=user_id,
-                                                           last_n=NUMBER_OF_MESSAGES_TO_SHOW),
+                                                           last_n=NUMBER_OF_MESSAGES_TO_SHOW,
+                                                           receiver_slack_user_id=user_id),
             current_user_slack_id=user_id
         )
     )

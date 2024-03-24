@@ -106,6 +106,7 @@ def thank_you_message_overflow_menu_clicked_handler(client, body, logger):
         or (user_id in [admin.slack_user_id for admin in company.admins])
     can_delete = (user_id == message.author_slack_user_id) \
         or (user_id in [admin.slack_user_id for admin in company.admins])
+    can_thank_back = user_id in (r.slack_user_id for r in message.receivers)
 
     if action == "edit":
         if can_edit:
@@ -168,6 +169,28 @@ def thank_you_message_overflow_menu_clicked_handler(client, body, logger):
                     blocks=[
                         SectionBlock(
                             text=f"You cannot delete this message. Only the author and administrators can do it."
+                        )
+                    ]
+                ),
+            )
+    elif action == "thank_back":
+        if can_thank_back:
+            client.views_open(
+                trigger_id=body["trigger_id"],
+                view=thanks_back_dialog_view(
+                    thank_you_message_uuid=message.uuid,
+                    author_slack_user_id=message.author_slack_user_id
+                )
+            )
+        else:
+            client.views_open(
+                trigger_id=body["trigger_id"],
+                view=View(
+                    type="modal",
+                    title="Permission denied",
+                    blocks=[
+                        SectionBlock(
+                            text=f"You cannot thank back, as you are not a receiver of this message..."
                         )
                     ]
                 ),
