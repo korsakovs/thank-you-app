@@ -59,6 +59,7 @@ def test_thank_you_message_insertion(existing_company):
         type=dao.read_thank_you_types(company_uuid=existing_company.uuid)[0],
         company=existing_company,
         is_rich_text=False,
+        is_private=False
     )
     dao.create_thank_you_message(thank_you_message)
     assert thank_you_message.uuid in [su.uuid for su in dao.read_thank_you_messages(
