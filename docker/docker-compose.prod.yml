@@ -106,7 +106,7 @@ services:
       context: ..
       dockerfile: docker/promtail/promtail.Dockerfile
     environment:
-      MERCI_LOKI_LOG_INGESTION_TOKEN: ${MERCI_LOKI_LOG_INGESTION_TOKEN}
+      GRAFANA_COM_API_TOKEN: ${PROD_GRAFANA_COM_API_TOKEN}
       MERCI_ENV: ${MERCI_ENV}
     command: -config.file=/etc/promtail/config.yaml -config.expand-env=true
     volumes:
@@ -123,6 +123,8 @@ services:
       - merci-bot
     build:
       context: ..
+      args:
+        GRAFANA_COM_API_TOKEN: ${PROD_GRAFANA_COM_API_TOKEN}
       dockerfile: docker/prometheus/prometheus.Dockerfile
     labels:
       logging: "promtail"

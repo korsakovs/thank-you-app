@@ -81,10 +81,11 @@ def thank_you_message_blocks(
                         type="mrkdwn",
                         text="---\n" + "\n".join([f"<{image.url}|{image.filename or image.url[0:32]}>" for image in images])
                     ),
-                    accessory=ImageElement(
-                        image_url=image_url,
-                        alt_text=image_alt_text
-                    )
+                    # accessory=ImageElement(
+                    #     image_url=image_url,
+                    #     alt_text=image_alt_text,
+                    #     slack_file=None
+                    # )
                 ))
     else:
         if not has_image:
@@ -104,10 +105,11 @@ def thank_you_message_blocks(
                     text=text + "\n---\n"
                          + "\n".join([f"<{image.url}|{image.filename}>" for image in images])
                 ),
-                accessory=ImageElement(
-                    image_url=image_url,
-                    alt_text=image_alt_text
-                )
+                # accessory=ImageElement(
+                #     image_url=image_url,
+                #     alt_text=image_alt_text,
+                #     slack_file=None
+                # )
             ))
 
     buttons = []
