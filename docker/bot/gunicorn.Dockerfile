@@ -6,8 +6,8 @@ RUN pip install -r requirements.txt
 RUN mkdir -p /multiprocprometheus
 CMD ["gunicorn", \
         "--worker-class=sync", \
-        "--worker-connections=100", \
-        "--workers", "10", \
+        "--worker-connections=5", \
+        "--workers", "5", \
         "--bind", "unix:/nginx_sockets/merci_bot.sock", \
         "--config=thankyou/slackbot/utils/gunicorn_conf.py", \
     "thankyou.slackbot.utils.wsgi:slack_app()"]
